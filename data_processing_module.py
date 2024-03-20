@@ -6,6 +6,19 @@ from log_config import setup_logging
 setup_logging()
 
 def determine_rewards(contract_number, housekeeper_data):
+    """
+    根据合同序号和管家数据计算奖励类型和名称。
+    参数：
+    contract_number - 合同序号
+    housekeeper_data - 管家相关数据，包括合同数量、总金额和已获得的奖励
+
+    整体逻辑：
+    1. 初始化奖励类型和名称列表
+    2. 根据合同序号计算“幸运数字”奖励
+    3. 如果管家合同数量满足条件，计算“节节高”奖励
+    4. 根据管家合同数量和总金额计算下一级奖励所需的金额差
+    5. 返回奖励类型、奖励名称和下一级奖励所需的金额差
+    """
     reward_types = []
     reward_names = []
     next_reward_gap = ""  # 下一级奖励所需金额差
@@ -52,16 +65,18 @@ def determine_rewards(contract_number, housekeeper_data):
             reward_types.append("节节高")
             reward_names.append("优秀奖")
             housekeeper_data['awarded'].append('优秀奖')
-
+            
         if not next_reward:
-            if '优秀奖' in housekeeper_data['awarded'] and  amount < 100000 and  not set(["精英奖", "达标奖"]).intersection(housekeeper_data['awarded']):
+            if '优秀奖' in housekeeper_data['awarded'] and  amount < 100000 and  not set(["精英奖"]).intersection(housekeeper_data['awarded']):
                 next_reward = "精英奖"
             elif '达标奖' in housekeeper_data['awarded'] and  amount < 60000 and  not set(["精英奖", "优秀奖"]).intersection(housekeeper_data['awarded']):
                 next_reward = "优秀奖"
+            elif '精英奖' in housekeeper_data['awarded'] and  amount < 60000 and  not set(["精英奖"]).intersection(housekeeper_data['awarded']):
+                next_reward = "精英奖"
 
         # 计算距离下一级奖励所需的金额差
-        if next_reward:
-            if next_reward == "达标奖":
+        if next_reward: 
+            if next_reward == "达标奖":               
                 next_reward_gap = f"距离{next_reward}还需{40000 - amount}元"
             elif next_reward == "优秀奖":
                 next_reward_gap = f"距离{next_reward}还需{60000 - amount}元"
@@ -74,41 +89,73 @@ def determine_rewards(contract_number, housekeeper_data):
     return ', '.join(reward_types), ', '.join(reward_names), next_reward_gap
 
 def process_data(contract_data, existing_contract_ids, housekeeper_award_lists):
+    """
+    处理合同数据的主要函数。
+    参数：
+    contract_data - 待处理的合同数据列表，这是全量的合同数据
+    existing_contract_ids - 本地获奖统计表中已存在的合同ID集合，用于检测重复合同，重复的合同不进行获奖统计
+    housekeeper_award_lists - 本地获奖统计表彰管家获奖情况数据，用于奖励核对
 
+    整体逻辑：
+    1. 初始化获奖统计数据列表和合同计数器
+    2. 遍历合同数据，对每个合同进行处理
+    3. 检查合同ID是否已经经过获奖统计过，如果重复则跳过处理
+    4. 根据合同序号和管家数据计算奖励
+    5. 构建获奖统计数据记录并添加到获奖统计数据列表中
+    6. 更新已存在的合同ID集合
+    7. 返回处理后的性能数据列表
+    """
     logging.info(f"Starting data processing with {len(existing_contract_ids)} existing contract IDs.")
 
-    logging.info(f"Existing contract IDs: {existing_contract_ids}")
-    # Log individual elements of existing_contract_ids for debugging
-    for id in existing_contract_ids:
-        logging.info(f"Individual element in existing_contract_ids: {id}")
+    logging.debug(f"Existing contract IDs: {existing_contract_ids}")
 
+    # 初始化性能数据列表
     performance_data = []
+    # 初始化合同计数器，从已存在的合同ID数量开始
     contract_count_in_activity = len(existing_contract_ids) + 1
+    # 初始化管家合同数据字典
     housekeeper_contracts = {}
 
-    for contract in contract_data:
-        contract_id = str(contract['合同ID(_id)'])  # 明确转换为字符串
-        logging.info(f"Processing contract ID: {contract_id}")
+    # 初始化已处理的合同ID集合
+    processed_contract_ids = set()
 
+    # 遍历合同数据
+    logging.info("Starting to process contract data...")
+    for contract in contract_data:
+        # 获取合同ID并转换为字符串
+        contract_id = str(contract['合同ID(_id)'])
+        # 检查合同ID是否已处理过
+        if contract_id in processed_contract_ids:
+            logging.debug(f"Skipping duplicate contract ID: {contract_id}")
+            continue
+        logging.debug(f"Processing contract ID: {contract_id}")
+
+        # 获取管家信息
         housekeeper = contract['管家(serviceHousekeeper)']
+        # 如果管家信息不存在，则初始化管家数据
         if housekeeper not in housekeeper_contracts:
-            housekeeper_award=[]
+            housekeeper_award = []
             if housekeeper in housekeeper_award_lists:
-                housekeeper_award=housekeeper_award_lists[housekeeper]
+                housekeeper_award = housekeeper_award_lists[housekeeper]
             housekeeper_contracts[housekeeper] = {'count': 0, 'total_amount': 0, 'awarded': housekeeper_award}
 
+        # 更新管家合同数量和总金额
         housekeeper_contracts[housekeeper]['count'] += 1
         housekeeper_contracts[housekeeper]['total_amount'] += float(contract['合同金额(adjustRefundMoney)'])
-        # Debug log for calculation process
-        logging.info(f"Housekeeper {housekeeper} count: {housekeeper_contracts[housekeeper]['count']}")
-        logging.info(f"Housekeeper {housekeeper} total amount: {housekeeper_contracts[housekeeper]['total_amount']}")
+        # 记录计算过程日志
+        logging.debug(f"Housekeeper {housekeeper} count: {housekeeper_contracts[housekeeper]['count']}")
+        logging.debug(f"Housekeeper {housekeeper} total amount: {housekeeper_contracts[housekeeper]['total_amount']}")
 
+        # 添加合同ID到已处理集合
+        processed_contract_ids.add(contract_id)
+
+        # 计算奖励类型和名称
         reward_types, reward_names, next_reward_gap = determine_rewards(contract_count_in_activity, housekeeper_contracts[housekeeper])
         
         if contract_id in existing_contract_ids:
-            logging.info(f"Skipping existing contract ID: {contract_id}")
+            # 如果合同ID已经存在于已处理的合同ID集合中，则跳过此合同的处理
+            logging.debug(f"Skipping existing contract ID: {contract_id}")
             continue
-
 
         # Debug log for rewards calculation result
         logging.info(f"Reward types for contract {contract_id}: {reward_types}")
@@ -116,7 +163,7 @@ def process_data(contract_data, existing_contract_ids, housekeeper_award_lists):
 
         active_status = 1 if reward_types else 0  # 激活状态基于是否有奖励类型
 
-        # 构建返回数据记录
+        # 构建性能数据记录
         performance_entry = {
             '活动编号': 'BJ-001',
             '合同ID(_id)': contract_id,
@@ -149,7 +196,12 @@ def process_data(contract_data, existing_contract_ids, housekeeper_award_lists):
         logging.info(f"Added contract ID {contract_id} to existing_contract_ids.")
 
         logging.info(f"Processing contract ID: {contract_id}, Rewards: {reward_types}")
+        # 添加性能数据记录到列表中
         performance_data.append(performance_entry)
+        logging.info(f"Added performance entry for contract ID {contract_id}.")
+
+        # 更新合同计数器
         contract_count_in_activity += 1
 
+    # 返回处理后的性能数据列表
     return performance_data

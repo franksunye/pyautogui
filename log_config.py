@@ -3,7 +3,7 @@ import logging
 def setup_logging():
     # 配置根日志记录器
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
+    root_logger.setLevel(logging.DEBUG)
 
     # 移除现有的处理程序
     for handler in root_logger.handlers[:]:
@@ -11,7 +11,7 @@ def setup_logging():
 
     # 配置app.log文件处理器
     app_file_handler = logging.FileHandler('app.log')
-    app_file_handler.setLevel(logging.INFO)
+    app_file_handler.setLevel(logging.DEBUG)
     app_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(filename)s - %(funcName)s - %(message)s')
     app_file_handler.setFormatter(app_formatter)
     root_logger.addHandler(app_file_handler)
