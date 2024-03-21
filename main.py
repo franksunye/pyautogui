@@ -2,17 +2,17 @@ import schedule
 import time
 import traceback
 import logging
-from log_config import setup_logging
-from request_module import get_metabase_session, send_request
-from data_processing_module import process_data
-from file_operation_module import *
-from data_processing_module import process_data
-from notification_module import notify_awards, notify_technician_status_changes
+from modules.log_config import setup_logging
+from modules.request_module import get_metabase_session, send_request
+from modules.data_processing_module import process_data
+from modules.file_utils import *
+from modules.data_processing_module import process_data
+from modules.notification_module import notify_awards, notify_technician_status_changes
 
 # 设置日志
 setup_logging()
 
-def job():
+def check_signing_and_award_sales_incentive():
 
     logging.info('Job started')
 
@@ -45,7 +45,7 @@ def job():
     write_performance_data(performance_data_filename, processed_data, headers)
 
 
-    status_filename = 'send_status.json'
+    status_filename = 'state/send_status.json'
     notify_awards(performance_data_filename, status_filename)
 
     archive_file('ContractData.csv')
@@ -64,7 +64,7 @@ def check_technician_status():
     logging.info('Request sent to get technician status updates.')
 
     status_changes = response['data']['rows']
-    status_filename = 'technician_status_record.json'
+    status_filename = 'state/technician_status_record.json'
 
     notify_technician_status_changes(status_changes, status_filename)
 
@@ -72,7 +72,7 @@ def check_technician_status():
 
 def run_job_with_exception_handling():
 
-    # schedule.every(15).minutes.do(job)
+    # schedule.every(15).minutes.do(check_signing_and_award_sales_incentive)
     schedule.every(1).minutes.do(check_technician_status)
 
     while True:
@@ -84,20 +84,9 @@ def run_job_with_exception_handling():
             logging.error(traceback.format_exc())
             time.sleep(5)  #  等待x秒后重试
 
-# if __name__ == '__main__':
-#     logging.info('Program started')
-#     job() # Job starts immediately
-
-#     schedule.every(15).minutes.do(job)
-
-#     while True:
-#          schedule.run_pending()
-#          time.sleep(1)
-#     logging.info('Program ended')
-
 if __name__ == '__main__':
     logging.info('Program started')
 
-    # job() # Job starts immediately
+    # check_signing_and_award_sales_incentive() # Job starts immediately
     check_technician_status()
     # run_job_with_exception_handling()
