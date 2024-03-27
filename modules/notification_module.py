@@ -9,6 +9,8 @@ from modules.log_config import setup_logging
 import requests
 from modules.config import WEBHOOK_URL, PHONE_NUMBER
 from modules.file_utils import load_send_status, update_send_status, read_performance_data_from_csv, write_performance_data_to_csv
+from datetime import datetime
+
 # 配置日志
 setup_logging()
 # 使用专门的发送消息日志记录器
@@ -72,9 +74,9 @@ def notify_awards(performance_data_filename, status_filename):
         if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
             next_msg = '，恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩[庆祝][庆祝][庆祝]' if '无' in record["下一级奖项所需金额差"] else f'，{record["下一级奖项所需金额差"]}'
             msg = f'''开工大吉[爆竹][爆竹][爆竹]
-                    恭喜{record["管家(serviceHousekeeper)"]}签约合同{record["合同编号(contractdocNum)"]}并完成线上收款[烟花][烟花][烟花]
+恭喜{record["管家(serviceHousekeeper)"]}签约合同{record["合同编号(contractdocNum)"]}并完成线上收款[烟花][烟花][烟花]
 
-                    本单为本月平台累计签约第{record["活动期内第几个合同"]}单，个人累计签约第{record["管家累计单数"]}单，累计签约金额{record["管家累计金额"]}元{next_msg}'''
+本单为本月平台累计签约第{record["活动期内第几个合同"]}单，个人累计签约第{record["管家累计单数"]}单，累计签约金额{record["管家累计金额"]}元{next_msg}'''
             
             # send_wechat_message('修链(北京)运营沟通群', msg)
 
@@ -104,20 +106,24 @@ def notify_technician_status_changes(status_changes, status_filename):
     send_status = load_send_status(status_filename)
 
     for change in status_changes:
-        print(f"Current change: {change}")
-
         change_id = change[0]
         change_time = change[1]
         technician_name = change[2]
         company_name = change[3]
         update_content = change[5]
+        
+        parsed_time = datetime.strptime(change_time, "%Y-%m-%dT%H:%M:%S.%f%z")
+        simplified_time = parsed_time.strftime("%Y-%m-%d %H:%M")      
 
-        message = f"技师状态变更：\n技师姓名：{technician_name}\n公司名称：{company_name}\n更新时间：{change_time}\n更新内容：{update_content}"
+        # message = f"技师状态变更：\n技师姓名：{technician_name}\n公司名称：{company_name}\n更新时间：{change_time}\n更新内容：{update_content}"
+        message = f"您好，公司的管家：{technician_name}，在{simplified_time} {update_content} 了。"
 
         if change_id not in send_status:
             
-            # send_wechat_message('文件传输助手', message)
-            send_to_webhook(message)
+            logging.info(f"Sending message to {company_name}: {message}")           
+            # send_wechat_message(company_name, message)
+            # send_wechat_message('王爽', message)
+            # send_to_webhook(message)
             update_send_status(status_filename, change_id, '通知成功')
             
             logging.info(f"Notification sent for technician status change: {change_id}")
@@ -127,7 +133,7 @@ def send_to_webhook(message):
         'msgtype': "text",
         'text': {
             'content': message,
-            'mentioned_mobile_list': [PHONE_NUMBER],
+            # 'mentioned_mobile_list': [PHONE_NUMBER],
         },
     }
   
