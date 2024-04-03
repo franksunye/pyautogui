@@ -115,16 +115,29 @@ def notify_technician_status_changes(status_changes, status_filename):
         parsed_time = datetime.strptime(change_time, "%Y-%m-%dT%H:%M:%S.%f%z")
         simplified_time = parsed_time.strftime("%Y-%m-%d %H:%M")      
 
+        online_icon = "🟢"
+        offline_icon = "🔴"
+        
+        status = update_content[0] if update_content else ""
+
+        # 根据提取的状态决定使用哪个 Emoji
+        if status == "上线":
+            status_icon = online_icon
+        elif status == "下线":
+            status_icon = offline_icon
+        else:
+            status_icon = ""  # 如果状态不是上线或下线，不使用图标
+            
         # message = f"技师状态变更：\n技师姓名：{technician_name}\n公司名称：{company_name}\n更新时间：{change_time}\n更新内容：{update_content}"
-        message = f"您好，公司的管家：{technician_name}，在{simplified_time} {update_content} 了。"
+        message = f"您好，公司的管家：{technician_name}，在{simplified_time} {status_icon} {update_content} 了。"
 
         if change_id not in send_status:
             
             logging.info(f"Sending message to {company_name}: {message}")           
             # send_wechat_message(company_name, message)
-            # send_wechat_message('王爽', message)
+            # send_wechat_message('文件传输助手', message)
             # send_to_webhook(message)
-            update_send_status(status_filename, change_id, '通知成功')
+            # update_send_status(status_filename, change_id, '通知成功')
             
             logging.info(f"Notification sent for technician status change: {change_id}")
 
