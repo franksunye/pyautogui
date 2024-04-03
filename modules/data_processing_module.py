@@ -209,3 +209,161 @@ def process_data(contract_data, existing_contract_ids, housekeeper_award_lists):
 
     # 返回处理后的性能数据列表
     return performance_data
+
+# 初始化全局变量
+red_packet_50_sent_global = 0
+red_packet_100_sent_global = 0
+
+def process_data_shanghai(contract_data, existing_contract_ids, housekeeper_award_lists):
+    """
+    处理合同数据的主要函数。
+    参数：
+    contract_data - 待处理的合同数据列表，这是全量的合同数据
+    existing_contract_ids - 本地获奖统计表中已存在的合同ID集合，用于检测重复合同，重复的合同不进行获奖统计
+    housekeeper_award_lists - 本地获奖统计表彰管家获奖情况数据，用于奖励核对
+
+    整体逻辑：
+    1. 初始化获奖统计数据列表和合同计数器
+    2. 遍历合同数据，对每个合同进行处理
+    3. 检查合同ID是否已经经过获奖统计过，如果重复则跳过处理
+    4. 根据合同序号和管家数据计算奖励
+    5. 构建获奖统计数据记录并添加到获奖统计数据列表中
+    6. 更新已存在的合同ID集合
+    7. 返回处理后的活动台账数据列表
+    """
+    logging.info(f"SHANGHAI, Starting data processing with {len(existing_contract_ids)} existing contract IDs.")
+
+    logging.debug(f"SHANGHAI, Existing contract IDs: {existing_contract_ids}")
+
+    global red_packet_50_sent_global, red_packet_100_sent_global
+
+    # 初始化性能数据列表
+    performance_data = []
+    # 初始化合同计数器，从已存在的合同ID数量开始
+    contract_count_in_activity = len(existing_contract_ids) + 1
+    # 初始化管家合同数据字典
+    housekeeper_contracts = {}
+
+    # 初始化已处理的合同ID集合
+    processed_contract_ids = set()
+
+    # 遍历活动期间的全部合同数据，累计管家的合同数量和合同总金额
+    logging.info("SHANGHAI, Starting to process contract data：遍历活动期间的全部合同数据，累计管家的合同数量和合同总金额")
+    for contract in contract_data:
+        # 获取合同ID并转换为字符串
+        contract_id = str(contract['合同ID(_id)'])
+        # 检查合同ID是否已处理过
+        if contract_id in processed_contract_ids:
+            logging.debug(f"SHANGHAI, Skipping duplicate contract ID: {contract_id}")
+            continue
+        logging.debug(f"SHANGHAI, Processing contract ID: {contract_id}")
+
+        # 获取管家信息
+        housekeeper = contract['管家(serviceHousekeeper)']
+        # 如果管家信息不存在，则初始化管家数据
+        if housekeeper not in housekeeper_contracts:
+            housekeeper_award = []
+            if housekeeper in housekeeper_award_lists:
+                housekeeper_award = housekeeper_award_lists[housekeeper]
+            housekeeper_contracts[housekeeper] = {'count': 0, 'total_amount': 0, 'awarded': housekeeper_award}
+
+        # 更新管家合同数量和总金额
+        housekeeper_contracts[housekeeper]['count'] += 1
+        housekeeper_contracts[housekeeper]['total_amount'] += float(contract['合同金额(adjustRefundMoney)'])
+        
+        # 转换为整数（向下取整）
+        housekeeper_contracts[housekeeper]['total_amount'] = int(housekeeper_contracts[housekeeper]['total_amount'])
+        
+        # 记录计算过程日志
+        logging.debug(f"SHANGHAI, Housekeeper {housekeeper} count: {housekeeper_contracts[housekeeper]['count']}")
+        logging.debug(f"SHANGHAI, Housekeeper {housekeeper} total amount: {housekeeper_contracts[housekeeper]['total_amount']}")
+
+        # 添加合同ID到已处理集合
+        processed_contract_ids.add(contract_id)
+
+        # 计算奖励类型和名称
+        # contract_count_in_activity 活动期间内第几个合同
+        # contract['合同金额(adjustRefundMoney)'] 合同金额
+        
+        # reward_types, reward_names, next_reward_gap = determine_rewards(contract_count_in_activity, housekeeper_contracts[housekeeper])
+         # 计算奖励类型和名称
+        reward_types = []
+        reward_names = []
+        notes = "" # 红包发送进度
+
+        # 前60个合同的特殊处理
+        if contract_count_in_activity <= 60:
+            amount = float(contract['合同金额(adjustRefundMoney)'])
+            if 5000 <= amount < 8000:
+                reward_types.append("签约奖励-50")
+                reward_names.append("春暖花开")
+                # 更新红包50元已发个数
+                red_packet_50_sent_global += 1
+            elif amount >= 8000:
+                reward_types.append("签约奖励-100")
+                reward_names.append("春暖花开")
+                # 更新红包100元已发个数
+                red_packet_100_sent_global += 1
+
+        # 计算红包发送进度
+        notes = ""
+        if red_packet_50_sent_global > 0:
+            notes += f"红包50元已发{red_packet_50_sent_global}个"
+        if red_packet_100_sent_global > 0:
+            if notes: # 如果notes已经有内容，添加一个分隔符
+                notes += ", "
+            notes += f"红包100元已发{red_packet_100_sent_global}个"
+
+        if contract_id in existing_contract_ids:
+            # 如果合同ID已经存在于已处理的合同ID集合中，则跳过此合同的处理
+            logging.debug(f"SHANGHAI, Skipping existing contract ID: {contract_id}")
+            continue
+
+        # Debug log for rewards calculation result
+        logging.info(f"SHANGHAI, Reward types for contract {contract_id}: {reward_types}")
+        logging.info(f"SHANGHAI, Reward names for contract {contract_id}: {reward_names}")
+
+        active_status = 1 if reward_types else 0  # 激活状态基于是否有奖励类型
+
+        # 构建性能数据记录
+        performance_entry = {
+            '活动编号': 'SH-001',
+            '合同ID(_id)': contract_id,
+            '活动城市(province)': contract['活动城市(province)'],
+            '工单编号(serviceAppointmentNum)': contract['工单编号(serviceAppointmentNum)'],
+            'Status': contract['Status'],
+            '管家(serviceHousekeeper)': housekeeper,
+            '合同编号(contractdocNum)': contract['合同编号(contractdocNum)'],
+            '合同金额(adjustRefundMoney)': contract['合同金额(adjustRefundMoney)'],
+            '支付金额(paidAmount)': contract['支付金额(paidAmount)'],
+            '差额(difference)': contract['差额(difference)'],
+            'State': contract['State'],
+            '创建时间(createTime)': contract['创建时间(createTime)'],
+            '服务商(orgName)': contract['服务商(orgName)'],
+            '签约时间(signedDate)': contract['签约时间(signedDate)'],
+            'Doorsill': contract['Doorsill'],
+            '款项来源类型(tradeIn)': contract['款项来源类型(tradeIn)'],
+            '活动期内第几个合同': contract_count_in_activity,
+            '管家累计单数': housekeeper_contracts[housekeeper]['count'],
+            '管家累计金额': housekeeper_contracts[housekeeper]['total_amount'] ,
+            '激活奖励状态': active_status,
+            '奖励类型': ', '.join(reward_types),
+            '奖励名称': ', '.join(reward_names),
+            '是否发送通知': 'N',
+            '备注': notes,
+        }
+
+        # After processing a contract, add its ID to the existing_contract_ids set
+        existing_contract_ids.add(contract_id)
+        logging.info(f"SHANGHAI, Added contract ID {contract_id} to existing_contract_ids.")
+
+        logging.info(f"SHANGHAI, Processing contract ID: {contract_id}, Rewards: {reward_types}")
+        # 添加性能数据记录到列表中
+        performance_data.append(performance_entry)
+        logging.info(f"SHANGHAI, Added performance entry for contract ID {contract_id}.")
+
+        # 更新合同计数器
+        contract_count_in_activity += 1
+
+    # 返回处理后的性能数据列表
+    return performance_data

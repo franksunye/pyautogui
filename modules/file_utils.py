@@ -58,7 +58,6 @@ def read_contract_data(filename):
 
 def read_performance_data(filename):
         
-    logging.debug(f"Saving to file: {filename}")
     logging.debug(f"Full path: {os.path.abspath(filename)}")
     
     try:

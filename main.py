@@ -3,7 +3,7 @@ import time
 import traceback
 import logging
 from modules.log_config import setup_logging
-from jobs import check_signing_and_award_sales_incentive, check_technician_status
+from jobs import check_signing_and_award_sales_incentive, check_technician_status, check_signing_and_award_sales_incentive_shanghai
 from modules.config import JOBS
 
 # 设置日志
@@ -32,6 +32,6 @@ def run_job_with_exception_handling():
 if __name__ == '__main__':
     logging.info('Program started')
 
-    # check_signing_and_award_sales_incentive() # Job starts immediately
+    check_signing_and_award_sales_incentive_shanghai() # Job starts immediately
     # check_technician_status()
-    run_job_with_exception_handling()
+    # run_job_with_exception_handling()

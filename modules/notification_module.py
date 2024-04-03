@@ -95,6 +95,59 @@ def notify_awards(performance_data_filename, status_filename):
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
 
+def generate_award_message_shanghai(record, awards_mapping):
+    service_housekeeper = record["管家(serviceHousekeeper)"]
+    contract_number = record["合同编号(contractdocNum)"]
+    award_messages = []
+    for award in record["奖励类型"].split(', '):
+        if award in awards_mapping:
+            award_info = awards_mapping[award]
+            award_messages.append(f'达成 {award} 奖励条件，获得签约奖励 {award_info}元 [红包][红包][红包]')
+    return f'{service_housekeeper} 签约合同 {contract_number}\n\n' + '\n'.join(award_messages)
+
+def notify_awards_shanghai(performance_data_filename, status_filename):
+    """通知奖励并更新活动台账数据文件，同时跟踪发送状态"""
+    records = read_performance_data_from_csv(performance_data_filename)
+    send_status = load_send_status(status_filename)
+    updated = False
+
+    awards_mapping = {
+        '签约奖励-50': '50',
+        '签约奖励-100': '100'
+    }
+
+    for record in records:
+        contract_id = record['合同ID(_id)']
+        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
+            next_msg = record["备注"]
+            msg = f'''[玫瑰][礼物][礼物][爆竹][爆竹][爆竹][礼物][礼物]
+恭喜 {record["管家(serviceHousekeeper)"]} 成功签约，合同编号为 {record["合同编号(contractdocNum)"]} 合同金额为 {record["合同金额(adjustRefundMoney)"]}，并完成线上收款[烟花][烟花][烟花]
+
+本单为“春暖花开”活动期间累计签约第{record["活动期内第几个合同"]}单，{record["管家(serviceHousekeeper)"]}个人累计签约第{record["管家累计单数"]}单，累计签约金额{record["管家累计金额"]}元。
+
+[红包] {next_msg}'''
+            
+            logging.info(f"Constructed message: {msg}")
+            # send_wechat_message('修链(北京)运营沟通群', msg)
+            send_wechat_message('文件传输助手', msg)
+
+            if record['激活奖励状态'] == '1':
+                jiangli_msg = generate_award_message_shanghai(record, awards_mapping)
+                logging.info(f"Generated award message: {jiangli_msg}")
+                # send_wechat_message('王爽', jiangli_msg)
+                send_wechat_message('文件传输助手', jiangli_msg)
+
+            update_send_status(status_filename, contract_id, '发送成功')
+            time.sleep(3)  # 添加3秒的延迟
+
+            record['是否发送通知'] = 'Y'
+            updated = True
+            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+
+    if updated:
+        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
+        logging.info("PerformanceData.csv updated with notification status.")
+        
 def notify_technician_status_changes(status_changes, status_filename):
     """
     通知技师的状态变更信息，并更新状态记录文件。
