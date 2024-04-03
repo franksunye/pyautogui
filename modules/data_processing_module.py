@@ -142,6 +142,10 @@ def process_data(contract_data, existing_contract_ids, housekeeper_award_lists):
         # 更新管家合同数量和总金额
         housekeeper_contracts[housekeeper]['count'] += 1
         housekeeper_contracts[housekeeper]['total_amount'] += float(contract['合同金额(adjustRefundMoney)'])
+        
+        # 转换为整数（向下取整）
+        housekeeper_contracts[housekeeper]['total_amount'] = int(housekeeper_contracts[housekeeper]['total_amount'])
+        
         # 记录计算过程日志
         logging.debug(f"Housekeeper {housekeeper} count: {housekeeper_contracts[housekeeper]['count']}")
         logging.debug(f"Housekeeper {housekeeper} total amount: {housekeeper_contracts[housekeeper]['total_amount']}")
