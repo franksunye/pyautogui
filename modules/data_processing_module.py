@@ -35,18 +35,18 @@ def determine_rewards(contract_number, housekeeper_data):
     if housekeeper_data['count'] >= 6:
         amount = housekeeper_data['total_amount']
         next_reward = None
-        if amount >= 100000 and '精英奖' not in housekeeper_data['awarded']:
+        if amount >= 120000 and '精英奖' not in housekeeper_data['awarded']:
             # 精英奖
             reward_types.append("节节高")
             reward_names.append("精英奖")
             housekeeper_data['awarded'].append('精英奖')
-        elif amount >= 60000 and '优秀奖' not in housekeeper_data['awarded']:
+        elif amount >= 80000 and '优秀奖' not in housekeeper_data['awarded']:
             # 优秀奖
             next_reward = "精英奖"
             reward_types.append("节节高")
             reward_names.append("优秀奖")
             housekeeper_data['awarded'].append('优秀奖')
-        elif amount >= 40000 and '达标奖' not in housekeeper_data['awarded']:
+        elif amount >= 60000 and '达标奖' not in housekeeper_data['awarded']:
             # 达标奖
             next_reward = "优秀奖"
             reward_types.append("节节高")
@@ -57,31 +57,31 @@ def determine_rewards(contract_number, housekeeper_data):
             
             
         # 自动发放所有低级别奖项（如果之前未获得）
-        if '达标奖' not in housekeeper_data['awarded'] and amount >= 40000:
+        if '达标奖' not in housekeeper_data['awarded'] and amount >= 60000:
             reward_types.append("节节高")
             reward_names.append("达标奖")
             housekeeper_data['awarded'].append('达标奖')
-        if '优秀奖' not in housekeeper_data['awarded'] and amount >= 60000:
+        if '优秀奖' not in housekeeper_data['awarded'] and amount >= 80000:
             reward_types.append("节节高")
             reward_names.append("优秀奖")
             housekeeper_data['awarded'].append('优秀奖')
             
         if not next_reward:
-            if '优秀奖' in housekeeper_data['awarded'] and  amount < 100000 and  not set(["精英奖"]).intersection(housekeeper_data['awarded']):
+            if '优秀奖' in housekeeper_data['awarded'] and  amount < 120000 and  not set(["精英奖"]).intersection(housekeeper_data['awarded']):
                 next_reward = "精英奖"
-            elif '达标奖' in housekeeper_data['awarded'] and  amount < 60000 and  not set(["精英奖", "优秀奖"]).intersection(housekeeper_data['awarded']):
+            elif '达标奖' in housekeeper_data['awarded'] and  amount < 80000 and  not set(["精英奖", "优秀奖"]).intersection(housekeeper_data['awarded']):
                 next_reward = "优秀奖"
-            elif '精英奖' in housekeeper_data['awarded'] and  amount < 60000 and  not set(["精英奖"]).intersection(housekeeper_data['awarded']):
+            elif '精英奖' in housekeeper_data['awarded'] and  amount < 80000 and  not set(["精英奖"]).intersection(housekeeper_data['awarded']):
                 next_reward = "精英奖"
 
         # 计算距离下一级奖励所需的金额差
         if next_reward: 
             if next_reward == "达标奖":               
-                next_reward_gap = f"距离{next_reward}还需{40000 - amount}元"
-            elif next_reward == "优秀奖":
                 next_reward_gap = f"距离{next_reward}还需{60000 - amount}元"
+            elif next_reward == "优秀奖":
+                next_reward_gap = f"距离{next_reward}还需{80000 - amount}元"
             elif next_reward == "精英奖":
-                next_reward_gap = f"距离{next_reward}还需{100000 - amount}元"
+                next_reward_gap = f"距离{next_reward}还需{120000 - amount}元"
     else:
         if  not set(["精英奖", "优秀奖", "达标奖"]).intersection(housekeeper_data['awarded']):
             next_reward_gap = f"距离达成节节高奖励条件还需{6 -  housekeeper_data['count']}单"
@@ -210,9 +210,7 @@ def process_data(contract_data, existing_contract_ids, housekeeper_award_lists):
     # 返回处理后的性能数据列表
     return performance_data
 
-# 初始化全局变量
-red_packet_50_sent_global = 0
-red_packet_100_sent_global = 0
+
 
 def process_data_shanghai(contract_data, existing_contract_ids, housekeeper_award_lists):
     """
@@ -235,8 +233,10 @@ def process_data_shanghai(contract_data, existing_contract_ids, housekeeper_awar
 
     logging.debug(f"SHANGHAI, Existing contract IDs: {existing_contract_ids}")
 
-    global red_packet_50_sent_global, red_packet_100_sent_global
-
+    # 初始化全局变量
+    red_packet_50_sent = 0
+    red_packet_100_sent = 0
+    
     # 初始化性能数据列表
     performance_data = []
     # 初始化合同计数器，从已存在的合同ID数量开始
@@ -298,21 +298,21 @@ def process_data_shanghai(contract_data, existing_contract_ids, housekeeper_awar
                 reward_types.append("签约奖励-50")
                 reward_names.append("春暖花开")
                 # 更新红包50元已发个数
-                red_packet_50_sent_global += 1
+                red_packet_50_sent += 1
             elif amount >= 8000:
                 reward_types.append("签约奖励-100")
                 reward_names.append("春暖花开")
                 # 更新红包100元已发个数
-                red_packet_100_sent_global += 1
+                red_packet_100_sent += 1
 
         # 计算红包发送进度
         notes = ""
-        if red_packet_50_sent_global > 0:
-            notes += f"红包50元已发{red_packet_50_sent_global}个"
-        if red_packet_100_sent_global > 0:
+        if red_packet_50_sent > 0:
+            notes += f"红包50元已发{red_packet_50_sent}个"
+        if red_packet_100_sent > 0:
             if notes: # 如果notes已经有内容，添加一个分隔符
                 notes += ", "
-            notes += f"红包100元已发{red_packet_100_sent_global}个"
+            notes += f"红包100元已发{red_packet_100_sent}个"
 
         if contract_id in existing_contract_ids:
             # 如果合同ID已经存在于已处理的合同ID集合中，则跳过此合同的处理

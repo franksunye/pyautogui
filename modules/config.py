@@ -11,6 +11,8 @@ METABASE_SESSION = METABASE_URL + '/api/session/'
 METABASE_USERNAME = 'wangshuang@xlink.bj.cn'
 METABASE_PASSWORD = 'xlink123456'
 
+RUN_JOBS_SERIALLY_SCHEDULE = 2 # 每2分钟执行一次
+
 # 北京地区
 # 北京运营企微群机器人通讯地址
 WEBHOOK_URL = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=59cf22c5-0623-4b34-b207-0f404f13eeeb'
@@ -23,6 +25,14 @@ API_URL = METABASE_URL + "/api/card/336/query"
 TEMP_CONTRACT_DATA_FILE = 'state/ContractData.csv'
 PERFORMANCE_DATA_FILENAME = 'state/PerformanceData.csv'
 STATUS_FILENAME = 'state/send_status.json'
+
+# Pro
+WECHAT_GROUP_NAME = '修链(北京)运营沟通群'
+CAMPAIGN_CONTACT_WECHAT_NAME = '王爽'
+
+# Dev
+# WECHAT_GROUP_NAME = '文件传输助手'
+# CAMPAIGN_CONTACT_WECHAT_NAME = '文件传输助手'
 
 # 第二个任务，北京技师状态检查 JOB check_technician_status
 API_URL_TS = "http://metabase.fsgo365.cn:3000/api/card/719/query"
@@ -38,25 +48,10 @@ TEMP_CONTRACT_DATA_FILE_SHANGHAI = 'state/ContractData-SHANGHAI.csv'
 PERFORMANCE_DATA_FILENAME_SHANGHAI = 'state/PerformanceData-SHANGHAI.csv'
 STATUS_FILENAME_SHANGHAI = 'state/send_status_shanghai.json'
 
+# Pro
+WECHAT_GROUP_NAME_SHANGHAI = '满浩浩'
+CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI = '满浩浩'
 
-# 所有任务的参数定义，当前只有周期和名称
-JOBS = {
-    'check_signing_and_award_sales_incentive': {
-        'schedule': 3, # 每15分钟运行一次
-        'function': 'check_signing_and_award_sales_incentive',
-        'args': [],
-        'kwargs': {}
-    },
-    'check_technician_status': {
-        'schedule': 30, # 每30分钟运行一次
-        'function': 'check_technician_status',
-        'args': [],
-        'kwargs': {}
-    },
-    'check_signing_and_award_sales_incentive_shanghai': {
-        'schedule': 7, # 每15分钟运行一次
-        'function': 'check_signing_and_award_sales_incentive_shanghai',
-        'args': [],
-        'kwargs': {}
-    }
-}
+# Dev
+# WECHAT_GROUP_NAME_SHANGHAI = '文件传输助手'
+# CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI = '文件传输助手'

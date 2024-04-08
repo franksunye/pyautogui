@@ -16,7 +16,7 @@ def get_metabase_session():
     }
 
     data = {"username": METABASE_USERNAME, "password": METABASE_PASSWORD}
-    logging.info(f"Sending POST request to {METABASE_SESSION}")
+    logging.debug(f"Sending POST request to {METABASE_SESSION}")
     response = requests.post(METABASE_SESSION, headers=headers, json=data, timeout=30)
     return response.json()['id']
     
@@ -24,7 +24,7 @@ def send_request(session_id, api_url=None):
     if api_url is None:
         api_url = API_URL
 
-    logging.info(f"send_request called at {datetime.datetime.now()}")
+    logging.debug(f"send_request called at {datetime.datetime.now()}")
 
     try:
         # logging.info(f"Sending POST request to {API_URL} with headers {HEADERS} and cookies {COOKIES}")

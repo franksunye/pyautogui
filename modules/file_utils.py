@@ -19,13 +19,12 @@ column_names = ["合同ID(_id)", "活动城市(province)", "工单编号(service
 def save_to_csv_with_headers(data, filename='ContractData.csv'):
     # Convert data to DataFrame with specified column names
     df = pd.DataFrame(data, columns=column_names)
-    # Log the file name and path
-    logging.info(f"Saving to file: {filename}")
-    logging.info(f"Full path: {os.path.abspath(filename)}")
+    # logging.info(f"Saving to file: {filename}")
+    # logging.info(f"Full path: {os.path.abspath(filename)}")
     
     df.to_csv(filename, index=False)
 
-def archive_file(filename, archive_dir='archive'):
+def archive_file(filename, archive_dir='archive', days_to_keep=3):
     # Get current timestamp in China timezone
     china_tz = pytz.timezone('Asia/Shanghai')
     timestamp = datetime.now(china_tz).strftime('%Y%m%d%H%M')
@@ -48,6 +47,15 @@ def archive_file(filename, archive_dir='archive'):
 
     # Move file to archive directory
     shutil.move(filename, os.path.join(archive_dir, archive_file))
+    
+    # Check and delete files in the archive directory that are older than the specified number of days
+    for file in os.listdir(archive_dir):
+        file_path = os.path.join(archive_dir, file)
+        if os.path.isfile(file_path):
+            file_modified_time = datetime.fromtimestamp(os.path.getmtime(file_path))
+            if (datetime.now() - file_modified_time).days > days_to_keep:
+                os.remove(file_path)
+                logging.debug(f"Deleted old file: {file_path}")
 
 def read_contract_data(filename):
     logging.debug(f"Read contract data: {filename}")

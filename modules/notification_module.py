@@ -7,7 +7,7 @@ import time
 import pygetwindow as gw
 from modules.log_config import setup_logging
 import requests
-from modules.config import WEBHOOK_URL, PHONE_NUMBER
+from modules.config import WEBHOOK_URL, CAMPAIGN_CONTACT_WECHAT_NAME, CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI, WECHAT_GROUP_NAME,WECHAT_GROUP_NAME_SHANGHAI
 from modules.file_utils import load_send_status, update_send_status, read_performance_data_from_csv, write_performance_data_to_csv
 from datetime import datetime
 
@@ -28,7 +28,7 @@ def send_wechat_message(user, message):
         pyautogui.hotkey('ctrl', 'alt', 'w')
         time.sleep(1)
 
-    send_logger.info(f"Sending message to {user}: {message}")
+    # send_logger.info(f"Sending message to {user}: {message}")
     # 模拟查找用户的步骤
     pyautogui.hotkey('ctrl', 'f')
     pyperclip.copy(user)
@@ -62,11 +62,11 @@ def notify_awards(performance_data_filename, status_filename):
     updated = False
 
     awards_mapping = {
-        '开门红': '88',
-        '接好运': '188',
-        '达标奖': '400',
-        '优秀奖': '800',
-        '精英奖': '1200'
+        '开门红': '166',
+        '接好运': '166',
+        '达标奖': '200',
+        '优秀奖': '600',
+        '精英奖': '1600'
     }
 
     for record in records:
@@ -78,11 +78,11 @@ def notify_awards(performance_data_filename, status_filename):
 
 本单为本月平台累计签约第{record["活动期内第几个合同"]}单，个人累计签约第{record["管家累计单数"]}单，累计签约金额{record["管家累计金额"]}元{next_msg}'''
             
-            # send_wechat_message('修链(北京)运营沟通群', msg)
+            send_wechat_message(WECHAT_GROUP_NAME, msg)
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping)
-                # send_wechat_message('王爽', jiangli_msg)
+                send_wechat_message(CAMPAIGN_CONTACT_WECHAT_NAME, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             time.sleep(3)  # 添加3秒的延迟
@@ -128,14 +128,13 @@ def notify_awards_shanghai(performance_data_filename, status_filename):
 [红包] {next_msg}'''
             
             logging.info(f"Constructed message: {msg}")
-            # send_wechat_message('修链(北京)运营沟通群', msg)
-            send_wechat_message('文件传输助手', msg)
+            
+            # send_wechat_message(WECHAT_GROUP_NAME_SHANGHAI, msg)
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message_shanghai(record, awards_mapping)
                 logging.info(f"Generated award message: {jiangli_msg}")
-                # send_wechat_message('王爽', jiangli_msg)
-                send_wechat_message('文件传输助手', jiangli_msg)
+                # send_wechat_message(CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             time.sleep(3)  # 添加3秒的延迟
@@ -186,11 +185,12 @@ def notify_technician_status_changes(status_changes, status_filename):
 
         if change_id not in send_status:
             
-            logging.info(f"Sending message to {company_name}: {message}")           
-            # send_wechat_message(company_name, message)
+            send_wechat_message(company_name, message)
             # send_wechat_message('文件传输助手', message)
-            # send_to_webhook(message)
-            # update_send_status(status_filename, change_id, '通知成功')
+            
+            send_to_webhook(message)
+            
+            update_send_status(status_filename, change_id, '通知成功')
             
             logging.info(f"Notification sent for technician status change: {change_id}")
 
