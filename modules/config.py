@@ -38,7 +38,7 @@ CAMPAIGN_CONTACT_WECHAT_NAME = '王爽'
 API_URL_TS = "http://metabase.fsgo365.cn:3000/api/card/719/query"
 STATUS_FILENAME_TS = './state/technician_status_record.json'
 
-# 上海地区
+# 上海地区 2024年3月22日活动
 
 # 第三个任务，上海销售激励活动（4月）API配置
 API_URL_SHANGHAI = METABASE_URL + "/api/card/736/query"
@@ -55,3 +55,21 @@ CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI = '满浩浩'
 # Dev
 # WECHAT_GROUP_NAME_SHANGHAI = '文件传输助手'
 # CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI = '文件传输助手'
+
+# 北京地区，2024年5月活动
+
+# 第四个任务，北京销售激励活动（5月）API配置
+API_URL_BJ_MAY = METABASE_URL + "/api/card/780/query"
+
+# 北京销售激励活动 JOB signing_and_sales_incentive_ctt1mc_beijing
+TEMP_CONTRACT_DATA_FILE_BJ_MAY = 'state/ContractData-BJ-May.csv'
+PERFORMANCE_DATA_FILENAME_BJ_MAY = 'state/PerformanceData-BJ-May.csv'
+STATUS_FILENAME_BJ_MAY = 'state/send_status_bj_may.json'
+
+# Pro
+# WECHAT_GROUP_NAME = '修链(北京)运营沟通群'
+# CAMPAIGN_CONTACT_WECHAT_NAME = '王爽'
+
+# Dev
+WECHAT_GROUP_NAME_BJ_MAY = '文件传输助手'
+CAMPAIGN_CONTACT_BJ_MAY = '文件传输助手'
