@@ -13,15 +13,11 @@ from modules.log_config import setup_logging
 # 设置日志
 setup_logging()
 
-# Define column names
-column_names = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)"]
-
-def save_to_csv_with_headers(data, filename='ContractData.csv'):
-    # Convert data to DataFrame with specified column names
-    df = pd.DataFrame(data, columns=column_names)
-    # logging.info(f"Saving to file: {filename}")
-    # logging.info(f"Full path: {os.path.abspath(filename)}")
+def save_to_csv_with_headers(data, filename='ContractData.csv', columns=None):
+    if columns is None:
+        columns = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)"]
     
+    df = pd.DataFrame(data, columns=columns)   
     df.to_csv(filename, index=False)
 
 def archive_file(filename, archive_dir='archive', days_to_keep=3):

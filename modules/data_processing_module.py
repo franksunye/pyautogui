@@ -210,8 +210,6 @@ def process_data(contract_data, existing_contract_ids, housekeeper_award_lists):
     # 返回处理后的性能数据列表
     return performance_data
 
-
-
 def process_data_shanghai(contract_data, existing_contract_ids, housekeeper_award_lists, reward_type_counts):
     """
     处理合同数据的主要函数。
