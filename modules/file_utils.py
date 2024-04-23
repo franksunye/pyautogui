@@ -56,7 +56,20 @@ def archive_file(filename, archive_dir='archive', days_to_keep=3):
             if (datetime.now() - file_modified_time).days > days_to_keep:
                 os.remove(file_path)
                 logging.debug(f"Deleted old file: {file_path}")
-
+                
+def count_reward_types(file_path):
+    try:
+        data = pd.read_csv(file_path)
+        reward_type_counts = {"签约奖励-50": 0, "签约奖励-100": 0}
+        for index, row in data.iterrows():
+            reward_type = row['奖励类型']
+            if reward_type in reward_type_counts:
+                reward_type_counts[reward_type] += 1
+        return reward_type_counts # 确保函数返回了统计结果
+    except FileNotFoundError:
+        logging.error(f"文件 {file_path} 不存在。")
+        return {}
+        
 def read_contract_data(filename):
     logging.debug(f"Read contract data: {filename}")
     logging.debug(f"Full path: {os.path.abspath(filename)}")    

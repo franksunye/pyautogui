@@ -79,20 +79,25 @@ def check_signing_and_award_sales_incentive_shanghai():
 
     contract_data = read_contract_data(contract_data_filename)
 
+    # 业务台账中已经登记过的合同ID
     existing_contract_ids = read_performance_data(performance_data_filename)
 
-# 通用的逻辑获取获奖管家列表
+    # 业务台账中已经获奖的管家列表
     housekeeper_award_lists = get_housekeeper_award_list(performance_data_filename)
+    
+    # 统计业务台账中已经发放的不同类型的奖励数量
+    reward_type_counts = count_reward_types(performance_data_filename)
+    logging.info(f"SHANGHAI: Reward type counts: {reward_type_counts}")
 
-# 根据上海活动的逻辑来处理数据，需要的是单独进行“计算奖励类型和名称”的确认。
-    processed_data = process_data_shanghai(contract_data, existing_contract_ids,housekeeper_award_lists)
+    # 根据上海活动的逻辑来处理数据，需要的是单独进行“计算奖励类型和名称”的确认。
+    processed_data = process_data_shanghai(contract_data, existing_contract_ids, housekeeper_award_lists, reward_type_counts)
     logging.info('SHANGHAI: Data processed')
 
     headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '活动期内第几个合同','管家累计金额','管家累计单数','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注']
 
     write_performance_data(performance_data_filename, processed_data, headers)
 
-# 根据上海活动的逻辑来进行通知
+    # 根据上海活动的逻辑来进行通知
     notify_awards_shanghai(performance_data_filename, status_filename)
 
     archive_file(contract_data_filename)

@@ -124,8 +124,7 @@ def notify_awards_shanghai(performance_data_filename, status_filename):
 恭喜 {record["管家(serviceHousekeeper)"]} 成功签约，合同编号为 {record["合同编号(contractdocNum)"]} 合同金额为 {record["合同金额(adjustRefundMoney)"]}，并完成线上收款[烟花][烟花][烟花]
 
 本单为“春暖花开”活动期间累计签约第{record["活动期内第几个合同"]}单，{record["管家(serviceHousekeeper)"]}个人累计签约第{record["管家累计单数"]}单，累计签约金额{record["管家累计金额"]}元。
-
-[红包] {next_msg}'''
+'''
             
             logging.info(f"Constructed message: {msg}")
             
@@ -137,7 +136,7 @@ def notify_awards_shanghai(performance_data_filename, status_filename):
                 # send_wechat_message(CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
-            time.sleep(3)  # 添加3秒的延迟
+            time.sleep(1)  # 添加3秒的延迟
 
             record['是否发送通知'] = 'Y'
             updated = True
