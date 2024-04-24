@@ -1,9 +1,9 @@
 # jobs.py
 import logging
 from modules.request_module import get_metabase_session, send_request
-from modules.data_processing_module import process_data, process_data_shanghai
+from modules.data_processing_module import process_data, process_data_shanghai, process_data_ctt1mc_beijing
 from modules.file_utils import *
-from modules.notification_module import notify_awards, notify_awards_shanghai, notify_technician_status_changes
+from modules.notification_module import notify_awards, notify_awards_shanghai, notify_technician_status_changes, notify_awards_ctt1mc_beijing
 from modules.config import *
 
 # 2024年五月，过关斩将·再下一城活动 Conq & triumph, take 1 more city.
@@ -32,14 +32,15 @@ def signing_and_sales_incentive_ctt1mc_beijing():
 
     housekeeper_award_lists = get_housekeeper_award_list(performance_data_filename)
 
-    # processed_data = process_data(contract_data, existing_contract_ids,housekeeper_award_lists)
-    # logging.info('BEIJING 2024 May Conq & triumph, take 1 more city, Data processed')
+    processed_data = process_data_ctt1mc_beijing(contract_data, existing_contract_ids,housekeeper_award_lists)
 
-    headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '活动期内第几个合同','管家累计金额','管家累计单数','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '下一级奖项所需金额差']
+    logging.info('BEIJING 2024 May Conq & triumph, take 1 more city, Data processed')
 
-    # write_performance_data(performance_data_filename, processed_data, headers)
+    headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注']
 
-    # notify_awards(performance_data_filename, status_filename)
+    write_performance_data(performance_data_filename, processed_data, headers)
+
+    notify_awards_ctt1mc_beijing(performance_data_filename, status_filename)
 
     archive_file(contract_data_filename)
     logging.info('BEIJING 2024 May Conq & triumph, take 1 more city, Data archived')

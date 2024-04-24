@@ -5,6 +5,156 @@ from modules.log_config import setup_logging
 # 设置日志
 setup_logging()
 
+def determine_rewards_ctt1mc_beijing(contract_number, housekeeper_data):
+
+    reward_types = []
+    reward_names = []
+    next_reward_gap = ""  # 下一级奖励所需金额差
+
+    # 节节高奖励逻辑（需要管家合同数量大于等于6）
+    if housekeeper_data['count'] >= 6:
+        amount = housekeeper_data['total_amount']
+        next_reward = None
+        if amount >= 120000 and '精英奖' not in housekeeper_data['awarded']:
+            # 精英奖
+            reward_types.append("节节高")
+            reward_names.append("精英奖")
+            housekeeper_data['awarded'].append('精英奖')
+        elif amount >= 80000 and '优秀奖' not in housekeeper_data['awarded']:
+            # 优秀奖
+            next_reward = "精英奖"
+            reward_types.append("节节高")
+            reward_names.append("优秀奖")
+            housekeeper_data['awarded'].append('优秀奖')
+        elif amount >= 60000 and '达标奖' not in housekeeper_data['awarded']:
+            # 达标奖
+            next_reward = "优秀奖"
+            reward_types.append("节节高")
+            reward_names.append("达标奖")
+            housekeeper_data['awarded'].append('达标奖')
+        elif not set(["精英奖", "优秀奖", "达标奖"]).intersection(housekeeper_data['awarded']):
+            next_reward = "达标奖"  # 如果没有获得任何奖项，则下一个奖项是达标奖
+            
+            
+        # 自动发放所有低级别奖项（如果之前未获得）
+        if '达标奖' not in housekeeper_data['awarded'] and amount >= 60000:
+            reward_types.append("节节高")
+            reward_names.append("达标奖")
+            housekeeper_data['awarded'].append('达标奖')
+        if '优秀奖' not in housekeeper_data['awarded'] and amount >= 80000:
+            reward_types.append("节节高")
+            reward_names.append("优秀奖")
+            housekeeper_data['awarded'].append('优秀奖')
+            
+        if not next_reward:
+            if '优秀奖' in housekeeper_data['awarded'] and  amount < 120000 and  not set(["精英奖"]).intersection(housekeeper_data['awarded']):
+                next_reward = "精英奖"
+            elif '达标奖' in housekeeper_data['awarded'] and  amount < 80000 and  not set(["精英奖", "优秀奖"]).intersection(housekeeper_data['awarded']):
+                next_reward = "优秀奖"
+            elif '精英奖' in housekeeper_data['awarded'] and  amount < 80000 and  not set(["精英奖"]).intersection(housekeeper_data['awarded']):
+                next_reward = "精英奖"
+
+        # 计算距离下一级奖励所需的金额差
+        if next_reward: 
+            if next_reward == "达标奖":               
+                next_reward_gap = f"距离{next_reward}还需{60000 - amount}元"
+            elif next_reward == "优秀奖":
+                next_reward_gap = f"距离{next_reward}还需{80000 - amount}元"
+            elif next_reward == "精英奖":
+                next_reward_gap = f"距离{next_reward}还需{120000 - amount}元"
+    else:
+        if  not set(["精英奖", "优秀奖", "达标奖"]).intersection(housekeeper_data['awarded']):
+            next_reward_gap = f"距离达成节节高奖励条件还需{6 -  housekeeper_data['count']}单"
+        
+    return ', '.join(reward_types), ', '.join(reward_names), next_reward_gap
+
+def process_data_ctt1mc_beijing(contract_data, existing_contract_ids, housekeeper_award_lists):
+
+    logging.info(f"Starting data processing with {len(existing_contract_ids)} existing contract IDs.")
+
+    logging.debug(f"Existing contract IDs: {existing_contract_ids}")
+
+    performance_data = []
+    contract_count_in_activity = len(existing_contract_ids) + 1
+    housekeeper_contracts = {}
+
+    processed_contract_ids = set()
+
+    logging.info("Starting to process contract data...")
+    
+    for contract in contract_data:
+        contract_id = str(contract['合同ID(_id)'])
+        if contract_id in processed_contract_ids:
+            logging.debug(f"Skipping duplicate contract ID: {contract_id}")
+            continue
+        logging.debug(f"Processing contract ID: {contract_id}")
+
+        housekeeper = contract['管家(serviceHousekeeper)']
+        if housekeeper not in housekeeper_contracts:
+            housekeeper_award = []
+            if housekeeper in housekeeper_award_lists:
+                housekeeper_award = housekeeper_award_lists[housekeeper]
+            housekeeper_contracts[housekeeper] = {'count': 0, 'total_amount': 0, 'awarded': housekeeper_award}
+
+        housekeeper_contracts[housekeeper]['count'] += 1
+        housekeeper_contracts[housekeeper]['total_amount'] += float(contract['合同金额(adjustRefundMoney)'])
+        
+        housekeeper_contracts[housekeeper]['total_amount'] = int(housekeeper_contracts[housekeeper]['total_amount'])
+        
+        logging.debug(f"Housekeeper {housekeeper} count: {housekeeper_contracts[housekeeper]['count']}")
+        logging.debug(f"Housekeeper {housekeeper} total amount: {housekeeper_contracts[housekeeper]['total_amount']}")
+
+        processed_contract_ids.add(contract_id)
+
+        reward_types, reward_names, next_reward_gap = determine_rewards_ctt1mc_beijing(contract_count_in_activity, housekeeper_contracts[housekeeper])
+        
+        if contract_id in existing_contract_ids:
+            logging.debug(f"Skipping existing contract ID: {contract_id}")
+            continue
+
+        active_status = 1 if reward_types else 0  # 激活状态基于是否有奖励类型
+
+        performance_entry = {
+            '活动编号': 'BJ-002',
+            '合同ID(_id)': contract_id,
+            '活动城市(province)': contract['活动城市(province)'],
+            '工单编号(serviceAppointmentNum)': contract['工单编号(serviceAppointmentNum)'],
+            'Status': contract['Status'],
+            '管家(serviceHousekeeper)': housekeeper,
+            '合同编号(contractdocNum)': contract['合同编号(contractdocNum)'],
+            '合同金额(adjustRefundMoney)': contract['合同金额(adjustRefundMoney)'],
+            '支付金额(paidAmount)': contract['支付金额(paidAmount)'],
+            '差额(difference)': contract['差额(difference)'],
+            'State': contract['State'],
+            '创建时间(createTime)': contract['创建时间(createTime)'],
+            '服务商(orgName)': contract['服务商(orgName)'],
+            '签约时间(signedDate)': contract['签约时间(signedDate)'],
+            'Doorsill': contract['Doorsill'],
+            '款项来源类型(tradeIn)': contract['款项来源类型(tradeIn)'],
+            '转化率(conversion)': contract['转化率(conversion)'], # 新增字段
+            '平均客单价(average)': contract['平均客单价(average)'], # 新增字段            
+            '活动期内第几个合同': contract_count_in_activity,
+            '管家累计单数': housekeeper_contracts[housekeeper]['count'],
+            '管家累计金额': housekeeper_contracts[housekeeper]['total_amount'] ,
+            '奖金池': float(contract['合同金额(adjustRefundMoney)']) * 0.002, # 新增字段，计算奖金池           
+            '激活奖励状态': active_status,
+            '奖励类型': reward_types,
+            '奖励名称': reward_names,
+            '是否发送通知': 'N',
+            '备注': next_reward_gap if next_reward_gap else '无',  # 添加下一级奖项所需金额差信息
+        }
+
+        existing_contract_ids.add(contract_id)
+        logging.info(f"Added contract ID {contract_id} to existing_contract_ids.")
+
+        logging.info(f"Processing contract ID: {contract_id}, Rewards: {reward_types}")
+        performance_data.append(performance_entry)
+        logging.info(f"Added performance entry for contract ID {contract_id}.")
+
+        contract_count_in_activity += 1
+
+    return performance_data
+
 def determine_rewards(contract_number, housekeeper_data):
     """
     根据合同序号和管家数据计算奖励类型和名称。

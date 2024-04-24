@@ -73,3 +73,5 @@ STATUS_FILENAME_BJ_MAY = 'state/send_status_bj_may.json'
 # Dev
 WECHAT_GROUP_NAME_BJ_MAY = '文件传输助手'
 CAMPAIGN_CONTACT_BJ_MAY = '文件传输助手'
+
+WECOM_GROUP_NAME_BJ_MAY = '王爽'
