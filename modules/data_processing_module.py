@@ -57,14 +57,14 @@ def determine_rewards_ctt1mc_beijing(contract_number, housekeeper_data):
         # 计算距离下一级奖励所需的金额差
         if next_reward: 
             if next_reward == "达标奖":               
-                next_reward_gap = f"距离{next_reward}还需{60000 - amount}元"
+                next_reward_gap = f"距离 {next_reward} 还需 {60000 - amount:,} 元"
             elif next_reward == "优秀奖":
-                next_reward_gap = f"距离{next_reward}还需{80000 - amount}元"
+                next_reward_gap = f"距离 {next_reward} 还需 {80000 - amount:,} 元"
             elif next_reward == "精英奖":
-                next_reward_gap = f"距离{next_reward}还需{120000 - amount}元"
+                next_reward_gap = f"距离 {next_reward} 还需 {120000 - amount:,} 元"
     else:
         if  not set(["精英奖", "优秀奖", "达标奖"]).intersection(housekeeper_data['awarded']):
-            next_reward_gap = f"距离达成节节高奖励条件还需{6 -  housekeeper_data['count']}单"
+            next_reward_gap = f"距离达成节节高奖励条件还需 {6 -  housekeeper_data['count']} 单"
         
     return ', '.join(reward_types), ', '.join(reward_names), next_reward_gap
 
