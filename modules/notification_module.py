@@ -150,11 +150,12 @@ def notify_awards_ctt1mc_beijing(performance_data_filename, status_filename):
 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
 
 \U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {record["管家累计金额"]} 元
-\U0001F947 最高累计签约 {max_accumulated_amount} 元
-\U0001F33B 平均客单价为 {record["平均客单价(average)"]} 元
-\U0001F947 最高客单价为 {max_average_price} 元
-\U0001F33B 转化率为 {record["转化率(conversion)"]}
-\U0001F947 最高转化率为 {max_conversion_rate_formatted}
+\U0001F33B 平均客单价 {record["平均客单价(average)"]} 元
+\U0001F33B 转化率 {record["转化率(conversion)"]}
+
+\U0001F947 平台最高累计签约 {max_accumulated_amount} 元
+\U0001F947 最高客单价 {max_average_price} 元
+\U0001F947 最高转化率 {max_conversion_rate_formatted}
 
 \U0001F44A {next_msg}。
 
