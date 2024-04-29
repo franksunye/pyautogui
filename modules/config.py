@@ -11,7 +11,7 @@ METABASE_SESSION = METABASE_URL + '/api/session/'
 METABASE_USERNAME = 'wangshuang@xlink.bj.cn'
 METABASE_PASSWORD = 'xlink123456'
 
-RUN_JOBS_SERIALLY_SCHEDULE = 2 # 每2分钟执行一次
+RUN_JOBS_SERIALLY_SCHEDULE = 10 # 每2分钟执行一次
 
 # 北京地区
 # 北京运营企微群机器人通讯地址
@@ -49,17 +49,17 @@ PERFORMANCE_DATA_FILENAME_SHANGHAI = 'state/PerformanceData-SHANGHAI.csv'
 STATUS_FILENAME_SHANGHAI = 'state/send_status_shanghai.json'
 
 # Pro
-# WECHAT_GROUP_NAME_SHANGHAI = '满浩浩'
-# CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI = '满浩浩'
+WECHAT_GROUP_NAME_SHANGHAI = '雨虹防水管家红包激励群'
+CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI = '满浩浩'
 
 # Dev
-WECHAT_GROUP_NAME_SHANGHAI = '文件传输助手'
-CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI = '文件传输助手'
+# WECHAT_GROUP_NAME_SHANGHAI = '文件传输助手'
+# CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI = '文件传输助手'
 
 # 北京地区，2024年5月活动
 
 # 第四个任务，北京销售激励活动（5月）API配置
-API_URL_BJ_MAY = METABASE_URL + "/api/card/780/query"
+API_URL_BJ_MAY = METABASE_URL + "/api/card/792/query"
 
 # 北京销售激励活动 JOB signing_and_sales_incentive_ctt1mc_beijing
 TEMP_CONTRACT_DATA_FILE_BJ_MAY = 'state/ContractData-BJ-May.csv'
@@ -68,10 +68,30 @@ STATUS_FILENAME_BJ_MAY = 'state/send_status_bj_may.json'
 
 # Pro
 # WECHAT_GROUP_NAME = '修链(北京)运营沟通群'
-# CAMPAIGN_CONTACT_WECHAT_NAME = '王爽'
+# WECOM_GROUP_NAME_BJ_MAY = '（北京）修链服务运营'
+# CAMPAIGN_CONTACT_BJ_MAY = '王爽'
 
 # Dev
-WECHAT_GROUP_NAME_BJ_MAY = '文件传输助手'
+# WECHAT_GROUP_NAME_BJ_MAY = '文件传输助手'
+WECOM_GROUP_NAME_BJ_MAY = '孙埜'
 CAMPAIGN_CONTACT_BJ_MAY = '文件传输助手'
 
-WECOM_GROUP_NAME_BJ_MAY = '王爽'
+# 上海地区，2024年5月活动
+
+# 第五个任务，销售激励活动（5月）API配置
+API_URL_SH_MAY = METABASE_URL + "/api/card/798/query"
+
+# 销售激励活动 JOB signing_and_sales_incentive_ctt1mc_shanghai
+TEMP_CONTRACT_DATA_FILE_SH_MAY = 'state/ContractData-SH-May.csv'
+PERFORMANCE_DATA_FILENAME_SH_MAY = 'state/PerformanceData-SH-May.csv'
+STATUS_FILENAME_SH_MAY = 'state/send_status_sh_may.json'
+
+# Pro
+# WECHAT_GROUP_NAME_SH_MAY = '满浩浩'
+# WECOM_GROUP_NAME_SH_MAY = '（上海）运营群'
+# CAMPAIGN_CONTACT_SH_MAY = '满浩浩'
+
+# Dev
+# WECHAT_GROUP_NAME_SH_MAY = '文件传输助手'
+WECOM_GROUP_NAME_SH_MAY = '孙埜'
+CAMPAIGN_CONTACT_SH_MAY = '文件传输助手'
