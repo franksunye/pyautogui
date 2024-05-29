@@ -154,6 +154,7 @@ def process_data_ctt1mc_shanghai(contract_data, existing_contract_ids, housekeep
             '奖励名称': reward_names,
             '是否发送通知': 'N',
             '备注': next_reward_gap if next_reward_gap else '无',  # 添加下一级奖项所需金额差信息
+            '登记时间': date.today().strftime("%Y-%m-%d"),  # 新增字段
         }
 
         existing_contract_ids.add(contract_id)
