@@ -90,6 +90,7 @@ def preprocess_rate(rate):
     else:
         # 处理无效或空数据（例如，返回"N/A"或其他占位符）
         return "-"
+    
 def preprocess_amount(amount):
     # 检查金额数据是否为空或不是有效的浮点数
     if amount.strip() and amount.replace('.', '', 1).isdigit():
@@ -535,9 +536,8 @@ def post_markdown_to_webhook(message, webhook_url):
         response.raise_for_status()  # 如果响应状态码不是200，则引发异常
         logging.info(f"PostMarkdownToWebhook: Response status: {response.status_code}")
     except requests.exceptions.RequestException as e:
-        logging.error(f"PostMarkdownToWebhook: 发送到Webhook时发生错误: {e}")
-        
-        
+        logging.error(f"PostMarkdownToWebhook: 发送到Webhook时发生错误: {e}")   
+ 
 def notify_contact_timeout_changes_template_card(contact_timeout_data):
     """
     通知工单联络超时的信息，使用企业微信的template_card格式。
