@@ -15,7 +15,7 @@ RUN_JOBS_SERIALLY_SCHEDULE = 10 # 每2分钟执行一次
 
 # 北京地区
 # 北京运营企微群机器人通讯地址
-WEBHOOK_URL = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=59cf22c5-0623-4b34-b207-0f404f13eeeb'
+WEBHOOK_URL_DEFAULT = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=59cf22c5-0623-4b34-b207-0f404f13eeeb'
 PHONE_NUMBER = '15327103039'
 
 # 第一个任务，北京销售激励活动API配置
@@ -77,7 +77,6 @@ WECOM_GROUP_NAME_BJ_MAY = '孙埜'
 CAMPAIGN_CONTACT_BJ_MAY = '文件传输助手'
 
 # 上海地区，2024年5月活动
-
 # 第五个任务，销售激励活动（5月）API配置
 API_URL_SH_MAY = METABASE_URL + "/api/card/798/query"
 
@@ -95,3 +94,8 @@ STATUS_FILENAME_SH_MAY = 'state/send_status_sh_may.json'
 # WECHAT_GROUP_NAME_SH_MAY = '文件传输助手'
 WECOM_GROUP_NAME_SH_MAY = '孙埜'
 CAMPAIGN_CONTACT_SH_MAY = '文件传输助手'
+
+# 第六个任务，工单联络超时提醒
+API_URL_CONTACT_TIMEOUT = "http://metabase.fsgo365.cn:3000/api/card/980/query"
+# STATUS_FILENAME_CONTACT_TIMEOUT = './state/contact_timeout_status.json'
+WEBHOOK_URL_CONTACT_TIMEOUT = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=80ab1f45-2526-4b41-a639-c580ccde3e2f"

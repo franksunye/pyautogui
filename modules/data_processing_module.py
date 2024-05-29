@@ -1,6 +1,7 @@
 # data_processing_module.py
 import logging
 from modules.log_config import setup_logging
+from datetime import date
 
 # 设置日志
 setup_logging()
@@ -39,7 +40,6 @@ def determine_rewards_ctt1mc_shanghai(contract_number, housekeeper_data):
             housekeeper_data['awarded'].append('基础奖')            
         elif not set(["精英奖", "优秀奖", "达标奖", "基础奖"]).intersection(housekeeper_data['awarded']):
             next_reward = "基础奖"  # 如果没有获得任何奖项，则下一个奖项是基础奖
-            
             
         # 自动发放所有低级别奖项（如果之前未获得）
         if '基础奖' not in housekeeper_data['awarded'] and amount >= 30000:
@@ -304,6 +304,7 @@ def process_data_ctt1mc_beijing(contract_data, existing_contract_ids, housekeepe
             '奖励名称': reward_names,
             '是否发送通知': 'N',
             '备注': next_reward_gap if next_reward_gap else '无',  # 添加下一级奖项所需金额差信息
+            '登记时间': date.today().strftime("%Y-%m-%d"),  # 新增字段
         }
 
         existing_contract_ids.add(contract_id)

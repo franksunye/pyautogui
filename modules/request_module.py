@@ -1,4 +1,6 @@
 # request_module.py
+import os
+import json
 import requests
 import datetime
 from requests.exceptions import Timeout
@@ -9,32 +11,70 @@ from modules.log_config import setup_logging
 # 设置日志
 setup_logging()
 
+SESSION_FILE = 'metabase_session.json'
+SESSION_DURATION = 14 * 24 * 60 * 60  # 14 days in seconds
 
 def get_metabase_session():
+    logging.info("Attempting to get Metabase session.")
+    
     headers = {
         'Content-Type': 'application/json',
     }
 
     data = {"username": METABASE_USERNAME, "password": METABASE_PASSWORD}
-    logging.debug(f"Sending POST request to {METABASE_SESSION}")
+    logging.debug(f"Sending POST request to {METABASE_SESSION} with username: {METABASE_USERNAME} and password: {METABASE_PASSWORD}")
     response = requests.post(METABASE_SESSION, headers=headers, json=data, timeout=30)
-    return response.json()['id']
+    session_id = response.json()['id']
     
-def send_request(session_id, api_url=None):
-    if api_url is None:
-        api_url = API_URL
+    # Save session info to file
+    session_info = {
+        'id': session_id,
+        'timestamp': datetime.datetime.now().timestamp()
+    }
+    logging.info(f"Saving session info to file: {SESSION_FILE}")
+    with open(SESSION_FILE, 'w') as f:
+        json.dump(session_info, f)
+    
+    logging.info(f"Metabase session obtained with ID: {session_id}")
+    return session_id
 
-    logging.debug(f"send_request called at {datetime.datetime.now()}")
+def load_session():
+    logging.info("Attempting to load session from file.")
+    if os.path.exists(SESSION_FILE):
+        with open(SESSION_FILE, 'r') as f:
+            session_info = json.load(f)
+        logging.info("Session loaded successfully.")
+        return session_info
+    logging.warning("No session found in file.")
+    return None
 
+def is_session_valid(session_info):
+    logging.info("Checking session validity.")
+    if session_info is None:
+        logging.warning("Session info is None.")
+        return False
+    session_timestamp = session_info['timestamp']
+    current_timestamp = datetime.datetime.now().timestamp()
+    logging.info(f"Current timestamp: {current_timestamp}, Session timestamp: {session_timestamp}")
+    return (current_timestamp - session_timestamp) < SESSION_DURATION
+
+def get_valid_session():
+    logging.info("Getting valid session.")
+    session_info = load_session()
+    if is_session_valid(session_info):
+        logging.info("Valid session found, returning session ID.")
+        return session_info['id']
+    else:
+        logging.info("Invalid session, getting a new one.")
+        return get_metabase_session()
+
+def _send_request_with_session(session_id, api_url):
     try:
-        # logging.info(f"Sending POST request to {API_URL} with headers {HEADERS} and cookies {COOKIES}")
         header = {
             'X-Metabase-Session': session_id,
             'Content-Type': 'application/json'
         }
         response = requests.post(api_url, headers=header, timeout=30)
-        # logging.info(f"Received response with status code {response.status_code} and content {response.content}")
-
         if response.status_code == 202:
             return response.json()
         else:
@@ -46,3 +86,17 @@ def send_request(session_id, api_url=None):
     except Exception as e:
         logging.error(f"An error occurred: {e.__class__.__name__}: {str(e)}")
         return None
+
+def send_request(session_id, api_url=None):
+    if api_url is None:
+        api_url = API_URL
+    return _send_request_with_session(session_id, api_url)
+
+def send_request_with_managed_session(api_url=None):
+    if api_url is None:
+        api_url = API_URL
+
+    logging.debug(f"send_request_with_managed_session called at {datetime.datetime.now()}")
+
+    session_id = get_valid_session()
+    return _send_request_with_session(session_id, api_url)

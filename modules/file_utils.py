@@ -28,7 +28,7 @@ def archive_file(filename, archive_dir='archive', days_to_keep=3):
     # Define archive file name
     base_name = os.path.splitext(filename)[0]
     ext = os.path.splitext(filename)[1]
-    archive_file = f'{base_name}_{timestamp}{ext}'
+    archive_file_name = f'{base_name}_{timestamp}{ext}'
 
     # Create archive directory if it doesn't exist
     if not os.path.exists(archive_dir):
@@ -42,16 +42,17 @@ def archive_file(filename, archive_dir='archive', days_to_keep=3):
             os.makedirs(archive_subdir)
 
     # Move file to archive directory
-    shutil.move(filename, os.path.join(archive_dir, archive_file))
+    shutil.move(filename, os.path.join(archive_dir, archive_file_name))
     
     # Check and delete files in the archive directory that are older than the specified number of days
-    for file in os.listdir(archive_dir):
-        file_path = os.path.join(archive_dir, file)
-        if os.path.isfile(file_path):
-            file_modified_time = datetime.fromtimestamp(os.path.getmtime(file_path))
-            if (datetime.now() - file_modified_time).days > days_to_keep:
-                os.remove(file_path)
-                logging.debug(f"Deleted old file: {file_path}")
+    for root, _, files in os.walk(archive_dir):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if os.path.isfile(file_path):
+                file_modified_time = datetime.fromtimestamp(os.path.getmtime(file_path))
+                if (datetime.now() - file_modified_time).days > days_to_keep:
+                    os.remove(file_path)
+                    logging.debug(f"Deleted old file: {file_path}")
                 
 def count_reward_types(file_path):
     try:
@@ -67,16 +68,17 @@ def count_reward_types(file_path):
         return {}
         
 def read_contract_data(filename):
-    logging.debug(f"Read contract data: {filename}")
-    logging.debug(f"Full path: {os.path.abspath(filename)}")    
     with open(filename, 'r', encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
         return list(reader)
-
-def read_performance_data(filename):
-        
-    logging.debug(f"Full path: {os.path.abspath(filename)}")
     
+def get_all_records_from_csv(filename):
+    """读取性能数据文件并返回记录列表"""
+    with open(filename, mode='r', encoding='utf-8-sig', newline='') as file:
+        reader = csv.DictReader(file)
+        return list(reader)
+    
+def collect_unique_contract_ids_from_file(filename):
     try:
         existing_contract_ids = set()
         with open(filename, 'r', encoding='utf-8-sig') as file:
@@ -86,6 +88,7 @@ def read_performance_data(filename):
         return existing_contract_ids
     except FileNotFoundError:
         return set()
+    
 
 def write_performance_data(filename, data, headers):
     with open(filename, 'a', newline='', encoding='utf-8-sig') as file:  # 注意这里改为追加模式 'a'
@@ -94,12 +97,6 @@ def write_performance_data(filename, data, headers):
             writer.writeheader()
         writer.writerows(data)
         
-def read_performance_data_from_csv(filename):
-    """读取性能数据文件并返回记录列表"""
-    with open(filename, mode='r', encoding='utf-8-sig', newline='') as file:
-        reader = csv.DictReader(file)
-        return list(reader)
-
 def write_performance_data_to_csv(filename, data, fieldnames):
     """写入性能数据到文件"""
     with open(filename, mode='w', encoding='utf-8-sig', newline='') as file:
