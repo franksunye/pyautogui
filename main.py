@@ -14,7 +14,7 @@ def run_jobs_serially():
     
     # 北京7月份
     try:
-        signing_and_sales_incentive_july_beijing()
+        signing_and_sales_incentive_aug_beijing()
         time.sleep(5)
     except Exception as e:
         logging.error(f"An error occurred while running signing_and_sales_incentive_ctt1mc_beijing: {e}")
@@ -22,27 +22,11 @@ def run_jobs_serially():
    
     # 上海7月份
     try:
-        signing_and_sales_incentive_july_shanghai()
+        signing_and_sales_incentive_aug_shanghai()
         time.sleep(5)
     except Exception as e:
         logging.error(f"An error occurred while running signing_and_sales_incentive_ctt1mc_shanghai: {e}")
-        logging.error(traceback.format_exc())
-    
-    # 上海6月份    
-    try:
-        signing_and_sales_incentive_june_shanghai()
-        time.sleep(5)
-    except Exception as e:
-        logging.error(f"An error occurred while running signing_and_sales_incentive_ctt1mc_shanghai: {e}")
-        logging.error(traceback.format_exc())
-    
-    # 北京6月份    
-    try:
-        signing_and_sales_incentive_june_beijing()
-        time.sleep(5)
-    except Exception as e:
-        logging.error(f"An error occurred while running signing_and_sales_incentive_ctt1mc_shanghai: {e}")
-        logging.error(traceback.format_exc())                
+        logging.error(traceback.format_exc())          
     
     # 检查工程师状态
     try:

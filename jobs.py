@@ -6,64 +6,99 @@ from modules.file_utils import *
 from modules.notification_module import *
 from modules.config import *
 
-# 2024年7月，上海. 与6月的活动规则一致
-def signing_and_sales_incentive_july_shanghai():
-    contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_JULY
-    performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_JULY
-    status_filename = STATUS_FILENAME_SH_JULY
-    api_url = API_URL_SH_JULY
+def service_provider_weekly_report():
+    logging.info('服务商周报任务开始...')
 
-    logging.info('SHANGHAI 2024 7月 Conq & triumph, take 1 more city, Job started ...')
+    # 步骤1: 从两个Metabase数据源获取数据
+    inspection_rate_api_url = 'http://metabase.fsgo365.cn:3000/api/card/1274/query'
+    wecom_usage_api_url = 'http://metabase.fsgo365.cn:3000/api/card/1272/query'
+
+    response_inspection_rate = send_request_with_managed_session(inspection_rate_api_url)
+    print(response_inspection_rate)  # Add this line to print the response
+    
+    inspectionRateData = response_inspection_rate['data']['rows']
+
+    response_wecom_usage = send_request_with_managed_session(wecom_usage_api_url)
+    wecomUsageData = response_wecom_usage['data']['rows']
+
+    logging.info('从Metabase数据源获取数据完成')
+
+    # # 步骤2: 将两部分数据进行合并
+    # merged_data = merge_data_sources(inspectionRateData, wecomUsageData)
+    # logging.info('数据合并完成')
+    
+    # # 步骤3: 处理合并后的数据，批量生成周报
+    # weekly_reports = generate_weekly_report_for_each_supplier(merged_data)
+    # logging.info('周报生成完成')
+
+    # 步骤4: 发送周报
+    # send_status = send_reports(weekly_reports)
+    # if send_status:
+    #     logging.info('周报发送成功')
+    # else:
+    #     logging.error('周报发送失败')
+
+    # logging.info('服务商周报任务结束')
+    
+# 2024年7月，8月，上海. 与6月的活动规则一致
+def signing_and_sales_incentive_aug_shanghai():
+    contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_AUG
+    performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_AUG
+    status_filename = STATUS_FILENAME_SH_AUG
+    api_url = API_URL_SH_AUG
+
+    logging.info('SHANGHAI 2024 8月 Conq & triumph, take 1 more city, Job started ...')
     response = send_request_with_managed_session(api_url)
-    logging.info('SHANGHAI 2024 7月 Conq & triumph, take 1 more city, Request sent')
+    logging.info('SHANGHAI 2024 8月 Conq & triumph, take 1 more city, Request sent')
 
     rows = response['data']['rows']
 
     columns = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)", "转化率(conversion)", "平均客单价(average)"]
     save_to_csv_with_headers(rows,contract_data_filename,columns)
 
-    logging.info(f'SHANGHAI 2024 7月 Conq & triumph, take 1 more city, Data saved to {contract_data_filename}')
+    logging.info(f'SHANGHAI 2024 8月 Conq & triumph, take 1 more city, Data saved to {contract_data_filename}')
 
     contract_data = read_contract_data(contract_data_filename)
 
     existing_contract_ids = collect_unique_contract_ids_from_file(performance_data_filename)
 
-    housekeeper_award_lists = get_housekeeper_award_list(performance_data_filename)
+    # 获取管家奖励列表，升级唯一奖励列表
+    housekeeper_award_lists = get_unique_housekeeper_award_list(performance_data_filename)
 
-    processed_data = process_data_june_shanghai(contract_data, existing_contract_ids,housekeeper_award_lists)
+    processed_data = process_data_july_shanghai(contract_data, existing_contract_ids,housekeeper_award_lists)
 
-    logging.info('SHANGHAI 2024 7月 Conq & triumph, take 1 more city, Data processed')
+    logging.info('SHANGHAI 2024 8月 Conq & triumph, take 1 more city, Data processed')
 
     performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
 
     write_performance_data(performance_data_filename, processed_data, performance_data_headers)
 
-    notify_awards_june_shanghai(performance_data_filename, status_filename, contract_data)
+    notify_awards_july_shanghai(performance_data_filename, status_filename, contract_data)
 
     archive_file(contract_data_filename)
-    logging.info('SHANGHAI 2024 7月 Conq & triumph, take 1 more city, Data archived')
+    logging.info('SHANGHAI 2024 8月 Conq & triumph, take 1 more city, Data archived')
 
-    logging.info('SHANGHAI 2024 7月 Conq & triumph, take 1 more city, Job ended')
+    logging.info('SHANGHAI 2024 8月 Conq & triumph, take 1 more city, Job ended')
     
-# 2024年7月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高四节；合同累计考虑工单合同金额5万封顶
-def signing_and_sales_incentive_july_beijing():
-    contract_data_filename = TEMP_CONTRACT_DATA_FILE_BJ_JULY
-    performance_data_filename = PERFORMANCE_DATA_FILENAME_BJ_JULY
-    status_filename = STATUS_FILENAME_BJ_JULY
-    api_url = API_URL_BJ_JULY
+# 2024年7月，8月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高四节；合同累计考虑工单合同金额5万封顶
+def signing_and_sales_incentive_aug_beijing():
+    contract_data_filename = TEMP_CONTRACT_DATA_FILE_BJ_AUG
+    performance_data_filename = PERFORMANCE_DATA_FILENAME_BJ_AUG
+    status_filename = STATUS_FILENAME_BJ_AUG
+    api_url = API_URL_BJ_AUG
 
-    logging.info('BEIJING 2024 7月, Job started ...')
+    logging.info('BEIJING 2024 8月, Job started ...')
 
     response = send_request_with_managed_session(api_url)
  
-    logging.info('BEIJING 2024 7月, Request sent')
+    logging.info('BEIJING 2024 8月, Request sent')
 
     rows = response['data']['rows']
 
     columns = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)", "转化率(conversion)", "平均客单价(average)"]
     save_to_csv_with_headers(rows,contract_data_filename,columns)
 
-    logging.info(f'BEIJING 2024 7月, Data saved to {contract_data_filename}')
+    logging.info(f'BEIJING 2024 8月, Data saved to {contract_data_filename}')
 
     contract_data = read_contract_data(contract_data_filename)
 
@@ -72,7 +107,7 @@ def signing_and_sales_incentive_july_beijing():
     housekeeper_award_lists = get_housekeeper_award_list(performance_data_filename)
 
     processed_data = process_data_july_beijing(contract_data, existing_contract_ids,housekeeper_award_lists)
-    logging.info('BEIJING 2024 7月, Data processed')
+    logging.info('BEIJING 2024 8月, Data processed')
 
     performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
 
@@ -81,9 +116,9 @@ def signing_and_sales_incentive_july_beijing():
     notify_awards_july_beijing(performance_data_filename, status_filename)
 
     archive_file(contract_data_filename)
-    logging.info('BEIJING 2024 7月, Data archived')
+    logging.info('BEIJING 2024 8月, Data archived')
 
-    logging.info('BEIJING 2024 7月, Job ended')
+    logging.info('BEIJING 2024 8月, Job ended')
 
 # 2024年6月，上海.
 def signing_and_sales_incentive_june_shanghai():

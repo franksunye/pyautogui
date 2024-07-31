@@ -126,6 +126,33 @@ def get_housekeeper_award_list(file_path):
         return cleaned_grouped_rewards
     except FileNotFoundError:
         return []
+
+# 重写，获取唯一的管家奖励列表
+def get_unique_housekeeper_award_list(file_path):
+
+    try:
+        # Load the CSV file
+        data = pd.read_csv(file_path)
+        
+        # Construct a new column that combines '管家(serviceHousekeeper)' and '服务商(orgName)'
+        data['unique_key'] = data.apply(lambda row: f"{row['管家(serviceHousekeeper)']}_{row['服务商(orgName)']}", axis=1)
+        
+        # Group by the constructed key and aggregate '奖励名称' into a list
+        grouped_rewards = data.groupby('unique_key')['奖励名称'].apply(list).to_dict()
+
+        # Clean: Remove NaN values, duplicates, and split combined rewards
+        cleaned_grouped_rewards = {}
+        for housekeeper, rewards in grouped_rewards.items():
+            cleaned_rewards = []
+            for reward in filter(pd.notna, rewards):
+                # Split combined rewards and extend the list
+                cleaned_rewards.extend(reward.split(", "))
+            # Remove duplicates
+            cleaned_grouped_rewards[housekeeper] = list(dict.fromkeys(cleaned_rewards))
+        
+        return cleaned_grouped_rewards
+    except FileNotFoundError:
+        return []
     
 def load_send_status(filename):
     """加载发送状态文件"""

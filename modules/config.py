@@ -52,10 +52,6 @@ STATUS_FILENAME_SHANGHAI = 'state/send_status_shanghai.json'
 WECHAT_GROUP_NAME_SHANGHAI = '雨虹防水管家红包激励群'
 CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI = '满浩浩'
 
-# Dev
-# WECHAT_GROUP_NAME_SHANGHAI = '文件传输助手'
-# CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI = '文件传输助手'
-
 # 北京地区，2024年5月活动
 # 第四个任务，北京销售激励活动（5月）API配置
 API_URL_BJ_MAY = METABASE_URL + "/api/card/792/query"
@@ -70,11 +66,6 @@ STATUS_FILENAME_BJ_MAY = 'state/send_status_bj_may.json'
 WECOM_GROUP_NAME_BJ_MAY = '（北京）修链服务运营'
 CAMPAIGN_CONTACT_BJ_MAY = '王爽'
 
-# Dev
-# WECHAT_GROUP_NAME_BJ_MAY = '文件传输助手'
-# WECOM_GROUP_NAME_BJ_MAY = '孙埜'
-# CAMPAIGN_CONTACT_BJ_MAY = '文件传输助手'
-
 # 上海地区，2024年5月活动
 # 第五个任务，销售激励活动（5月）API配置
 API_URL_SH_MAY = METABASE_URL + "/api/card/798/query"
@@ -88,11 +79,6 @@ STATUS_FILENAME_SH_MAY = 'state/send_status_sh_may.json'
 # WECHAT_GROUP_NAME_SH_MAY = '满浩浩'
 WECOM_GROUP_NAME_SH_MAY = '（上海）运营群'
 CAMPAIGN_CONTACT_SH_MAY = '满浩浩'
-
-# Dev
-# WECHAT_GROUP_NAME_SH_MAY = '文件传输助手'
-# WECOM_GROUP_NAME_SH_MAY = '孙埜'
-# CAMPAIGN_CONTACT_SH_MAY = '文件传输助手'
 
 # 第六个任务，工单联络超时提醒
 API_URL_CONTACT_TIMEOUT = "http://metabase.fsgo365.cn:3000/api/card/980/query"
@@ -113,10 +99,6 @@ STATUS_FILENAME_BJ_JUNE = 'state/send_status_bj_june.json'
 WECOM_GROUP_NAME_BJ_JUNE = '（北京）修链服务运营'
 CAMPAIGN_CONTACT_BJ_JUNE = '王爽'
 
-# Dev
-# WECHAT_GROUP_NAME_BJ_JUNE = '文件传输助手'
-# WECOM_GROUP_NAME_BJ_JUNE = '孙埜'
-# CAMPAIGN_CONTACT_BJ_JUNE = '文件传输助手'
 
 # 上海地区，2024年6月活动
 # 第八个任务，销售激励活动（6月）API配置
@@ -132,10 +114,6 @@ STATUS_FILENAME_SH_JUNE = 'state/send_status_sh_june.json'
 WECOM_GROUP_NAME_SH_JUNE = '（上海）运营群'
 CAMPAIGN_CONTACT_SH_JUNE = '满浩浩'
 
-# Dev
-# WECHAT_GROUP_NAME_SH_JUNE = '文件传输助手'
-# WECOM_GROUP_NAME_SH_JUNE = '孙埜'
-# CAMPAIGN_CONTACT_SH_JUNE = '文件传输助手'
 
 # 北京地区，2024年7月活动
 # 第九个任务，北京销售激励活动（7月）API配置
@@ -174,3 +152,32 @@ CAMPAIGN_CONTACT_SH_JULY = '满浩浩'
 # WECHAT_GROUP_NAME_SH_JULY = '文件传输助手'
 # WECOM_GROUP_NAME_SH_JULY = '孙埜'
 # CAMPAIGN_CONTACT_SH_JULY = '文件传输助手'
+
+# 北京地区，2024年8月活动
+# 第十一个任务，北京销售激励活动（8月）API配置
+API_URL_BJ_AUG = METABASE_URL + "/api/card/1196/query"
+
+# 北京销售激励活动 JOB signing_and_sales_incentive_aug_beijing
+TEMP_CONTRACT_DATA_FILE_BJ_AUG = 'state/ContractData-BJ-Aug.csv'
+PERFORMANCE_DATA_FILENAME_BJ_AUG = 'state/PerformanceData-BJ-Aug.csv'
+STATUS_FILENAME_BJ_AUG = 'state/send_status_bj_aug.json'
+
+# Pro
+# WECHAT_GROUP_NAME = '修链(北京)运营沟通群'
+WECOM_GROUP_NAME_BJ_AUG = '（北京）修链服务运营'
+CAMPAIGN_CONTACT_BJ_AUG = '王爽'
+
+
+# 上海地区，2024年8月活动
+# 第十个任务，销售激励活动（8月）API配置
+API_URL_SH_AUG = METABASE_URL + "/api/card/1197/query"
+
+# 销售激励活动 JOB signing_and_sales_incentive_aug_shanghai
+TEMP_CONTRACT_DATA_FILE_SH_AUG = 'state/ContractData-SH-Aug.csv'
+PERFORMANCE_DATA_FILENAME_SH_AUG = 'state/PerformanceData-SH-Aug.csv'
+STATUS_FILENAME_SH_AUG = 'state/send_status_sh_aug.json'
+
+# Pro
+# WECHAT_GROUP_NAME_SH_AUG = '满浩浩'
+WECOM_GROUP_NAME_SH_AUG = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_AUG = '满浩浩'
