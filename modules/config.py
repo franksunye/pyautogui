@@ -153,9 +153,10 @@ CAMPAIGN_CONTACT_SH_JULY = '满浩浩'
 # WECOM_GROUP_NAME_SH_JULY = '孙埜'
 # CAMPAIGN_CONTACT_SH_JULY = '文件传输助手'
 
-# 北京地区，2024年8月活动
+## 北京地区，2024年8月活动
 # 第十一个任务，北京销售激励活动（8月）API配置
-API_URL_BJ_AUG = METABASE_URL + "/api/card/1196/query"
+API_URL_BJ_AUG = METABASE_URL + "/api/card/1340/query"
+# API_URL_BJ_AUG = METABASE_URL + "/api/card/1456/query"
 
 # 北京销售激励活动 JOB signing_and_sales_incentive_aug_beijing
 TEMP_CONTRACT_DATA_FILE_BJ_AUG = 'state/ContractData-BJ-Aug.csv'
@@ -168,7 +169,7 @@ WECOM_GROUP_NAME_BJ_AUG = '（北京）修链服务运营'
 CAMPAIGN_CONTACT_BJ_AUG = '王爽'
 
 
-# 上海地区，2024年8月活动
+## 上海地区，2024年8月活动
 # 第十个任务，销售激励活动（8月）API配置
 API_URL_SH_AUG = METABASE_URL + "/api/card/1197/query"
 
@@ -181,3 +182,30 @@ STATUS_FILENAME_SH_AUG = 'state/send_status_sh_aug.json'
 # WECHAT_GROUP_NAME_SH_AUG = '满浩浩'
 WECOM_GROUP_NAME_SH_AUG = '（上海）运营群'
 CAMPAIGN_CONTACT_SH_AUG = '满浩浩'
+
+## 北京地区，2024年9月活动
+# 第十一个任务，北京销售激励活动（8月）API配置
+API_URL_BJ_SEP = METABASE_URL + "/api/card/1465/query"
+
+# 北京销售激励活动 JOB signing_and_sales_incentive_sep_beijing
+TEMP_CONTRACT_DATA_FILE_BJ_SEP = 'state/ContractData-BJ-Sep.csv'
+PERFORMANCE_DATA_FILENAME_BJ_SEP = 'state/PerformanceData-BJ-Sep.csv'
+STATUS_FILENAME_BJ_SEP = 'state/send_status_bj_sep.json'
+
+# Pro
+WECOM_GROUP_NAME_BJ_SEP = '（北京）修链服务运营'
+CAMPAIGN_CONTACT_BJ_SEP = '王爽'
+
+
+## 上海地区，2024年9月活动
+# 第十个任务，销售激励活动（9月）API配置
+API_URL_SH_SEP = METABASE_URL + "/api/card/1469/query"
+
+# 销售激励活动 JOB signing_and_sales_incentive_sep_shanghai
+TEMP_CONTRACT_DATA_FILE_SH_SEP = 'state/ContractData-SH-Sep.csv'
+PERFORMANCE_DATA_FILENAME_SH_SEP = 'state/PerformanceData-SH-Sep.csv'
+STATUS_FILENAME_SH_SEP = 'state/send_status_sh_sep.json'
+
+# Pro
+WECOM_GROUP_NAME_SH_SEP = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_SEP = '满浩浩'

@@ -5,6 +5,7 @@ import logging
 from modules.log_config import setup_logging
 from jobs import *
 from modules.config import RUN_JOBS_SERIALLY_SCHEDULE
+import datetime
 
 # 设置日志
 setup_logging()
@@ -12,21 +13,45 @@ setup_logging()
 # 定义一个函数来串行执行任务
 def run_jobs_serially():
     
-    # 北京7月份
-    try:
-        signing_and_sales_incentive_aug_beijing()
-        time.sleep(5)
-    except Exception as e:
-        logging.error(f"An error occurred while running signing_and_sales_incentive_ctt1mc_beijing: {e}")
-        logging.error(traceback.format_exc())
-   
-    # 上海7月份
-    try:
-        signing_and_sales_incentive_aug_shanghai()
-        time.sleep(5)
-    except Exception as e:
-        logging.error(f"An error occurred while running signing_and_sales_incentive_ctt1mc_shanghai: {e}")
-        logging.error(traceback.format_exc())          
+    current_month = datetime.datetime.now().month
+    print("Current month is:", current_month)
+
+    if current_month == 8:
+        # 上海8月份
+        try:
+            signing_and_sales_incentive_aug_shanghai()
+            time.sleep(5)
+        except Exception as e:
+            logging.error(f"An error occurred while running signing_and_sales_incentive_aug_shanghai: {e}")
+            logging.error(traceback.format_exc())
+            
+        # 北京8月份
+        try:
+            signing_and_sales_incentive_aug_beijing()
+            time.sleep(5)
+        except Exception as e:
+            logging.error(f"An error occurred while running signing_and_sales_incentive_aug_beijing: {e}")
+            logging.error(traceback.format_exc())
+            
+    elif current_month == 9:
+        # 上海9月份
+        try:
+            signing_and_sales_incentive_sep_shanghai()
+            time.sleep(5)
+        except Exception as e:
+            logging.error(f"An error occurred while running signing_and_sales_incentive_ctt1mc_shanghai: {e}")
+            logging.error(traceback.format_exc())
+            
+        # 北京9月份
+        try:
+            signing_and_sales_incentive_sep_beijing()
+            time.sleep(5)
+        except Exception as e:
+            logging.error(f"An error occurred while running signing_and_sales_incentive_ctt1mc_beijing: {e}")
+            logging.error(traceback.format_exc())
+                        
+    else:
+        logging.info("No tasks scheduled for this month.")       
     
     # 检查工程师状态
     try:
@@ -42,14 +67,14 @@ schedule.every(RUN_JOBS_SERIALLY_SCHEDULE).minutes.do(run_jobs_serially)
 if __name__ == '__main__':
     logging.info('Program started')
 
-    # signing_and_sales_incentive_july_beijing() 
-    # signing_and_sales_incentive_june_shanghai()
+    signing_and_sales_incentive_aug_beijing() 
+    # signing_and_sales_incentive_aug_shanghai()
     # check_contact_timeout()     
-    while True:
-        try:
-            schedule.run_pending()
-            time.sleep(1)
-        except Exception as e:
-            logging.error(f"Job failed with exception: {e}")
-            logging.error(traceback.format_exc())
-            time.sleep(5)
+    # while True:
+    #     try:
+    #         schedule.run_pending()
+    #         time.sleep(1)
+    #     except Exception as e:
+    #         logging.error(f"Job failed with exception: {e}")
+    #         logging.error(traceback.format_exc())
+    #         time.sleep(5)
