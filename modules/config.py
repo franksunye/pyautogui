@@ -11,7 +11,7 @@ METABASE_SESSION = METABASE_URL + '/api/session/'
 METABASE_USERNAME = 'wangshuang@xlink.bj.cn'
 METABASE_PASSWORD = 'xlink123456'
 
-RUN_JOBS_SERIALLY_SCHEDULE = 10 # 每2分钟执行一次
+RUN_JOBS_SERIALLY_SCHEDULE = 3 # 每3分钟执行一次
 
 # 北京地区
 # 北京运营企微群机器人通讯地址
@@ -184,7 +184,7 @@ WECOM_GROUP_NAME_SH_AUG = '（上海）运营群'
 CAMPAIGN_CONTACT_SH_AUG = '满浩浩'
 
 ## 北京地区，2024年9月活动
-# 第十一个任务，北京销售激励活动（8月）API配置
+# 第十一个任务，北京销售激励活动（9月）API配置
 API_URL_BJ_SEP = METABASE_URL + "/api/card/1465/query"
 
 # 北京销售激励活动 JOB signing_and_sales_incentive_sep_beijing
@@ -209,3 +209,52 @@ STATUS_FILENAME_SH_SEP = 'state/send_status_sh_sep.json'
 # Pro
 WECOM_GROUP_NAME_SH_SEP = '（上海）运营群'
 CAMPAIGN_CONTACT_SH_SEP = '满浩浩'
+
+## 北京地区，2024年10月活动
+API_URL_BJ_OCT = METABASE_URL + "/api/card/1493/query"
+
+# 北京销售激励活动 JOB signing_and_sales_incentive_oct_beijing
+TEMP_CONTRACT_DATA_FILE_BJ_OCT = 'state/ContractData-BJ-Oct.csv'
+PERFORMANCE_DATA_FILENAME_BJ_OCT = 'state/PerformanceData-BJ-Oct.csv'
+STATUS_FILENAME_BJ_OCT = 'state/send_status_bj_oct.json'
+
+# Pro
+WECOM_GROUP_NAME_BJ_OCT = '（北京）修链服务运营'
+CAMPAIGN_CONTACT_BJ_OCT = '王爽'
+
+
+## 上海地区，2024年10月活动
+API_URL_SH_OCT = METABASE_URL + "/api/card/1494/query"
+
+# 销售激励活动 JOB signing_and_sales_incentive_oct_shanghai
+TEMP_CONTRACT_DATA_FILE_SH_OCT = 'state/ContractData-SH-Oct.csv'
+PERFORMANCE_DATA_FILENAME_SH_OCT = 'state/PerformanceData-SH-Oct.csv'
+STATUS_FILENAME_SH_OCT = 'state/send_status_sh_oct.json'
+
+# Pro
+WECOM_GROUP_NAME_SH_OCT = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_OCT = '满浩浩'
+
+## 北京地区，2024年11月活动
+API_URL_BJ_NOV = METABASE_URL + "/api/card/1522/query"
+
+# 北京销售激励活动 JOB signing_and_sales_incentive_oct_beijing
+TEMP_CONTRACT_DATA_FILE_BJ_NOV = 'state/ContractData-BJ-Nov.csv'
+PERFORMANCE_DATA_FILENAME_BJ_NOV = 'state/PerformanceData-BJ-Nov.csv'
+STATUS_FILENAME_BJ_NOV = 'state/send_status_bj_nov.json'
+
+# Pro
+WECOM_GROUP_NAME_BJ_NOV = '（北京）修链服务运营'
+CAMPAIGN_CONTACT_BJ_NOV = '王爽'
+
+## 上海地区，2024年11月活动
+API_URL_SH_NOV = METABASE_URL + "/api/card/1523/query"
+
+# 销售激励活动 JOB signing_and_sales_incentive_nov_shanghai
+TEMP_CONTRACT_DATA_FILE_SH_NOV = 'state/ContractData-SH-Nov.csv'
+PERFORMANCE_DATA_FILENAME_SH_NOV = 'state/PerformanceData-SH-Nov.csv'
+STATUS_FILENAME_SH_NOV = 'state/send_status_sh_nov.json'
+
+# Pro
+WECOM_GROUP_NAME_SH_NOV = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_NOV = '满浩浩'
