@@ -174,7 +174,7 @@ def process_data_nov_beijing(contract_data, existing_contract_ids, housekeeper_a
         processed_contract_ids.add(contract_id)
 
         # 计算奖励类型和名称
-        reward_types, reward_names, next_reward_gap = determine_rewards_oct_beijing(contract_count_in_activity, housekeeper_contracts[housekeeper], current_contract_amount)
+        reward_types, reward_names, next_reward_gap = determine_rewards_nov_beijing(contract_count_in_activity, housekeeper_contracts[housekeeper], current_contract_amount)
         
         if contract_id in existing_contract_ids:
             # 如果合同ID已经存在于已处理的合同ID集合中，则跳过此合同的处理
