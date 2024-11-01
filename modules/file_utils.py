@@ -133,6 +133,9 @@ def get_unique_housekeeper_award_list(file_path):
     try:
         # Load the CSV file
         data = pd.read_csv(file_path)
+
+        if data.empty:
+            return {}  # 处理空 DataFrame 的情况
         
         # Construct a new column that combines '管家(serviceHousekeeper)' and '服务商(orgName)'
         data['unique_key'] = data.apply(lambda row: f"{row['管家(serviceHousekeeper)']}_{row['服务商(orgName)']}", axis=1)
@@ -152,7 +155,7 @@ def get_unique_housekeeper_award_list(file_path):
         
         return cleaned_grouped_rewards
     except FileNotFoundError:
-        return []
+        return {}
     
 def load_send_status(filename):
     """加载发送状态文件"""
