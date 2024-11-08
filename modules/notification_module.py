@@ -151,210 +151,6 @@ def notify_awards_nov_beijing(performance_data_filename, status_filename):
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
 
-# 2024年10月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶
-def notify_awards_oct_beijing(performance_data_filename, status_filename):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '接好运': '58',
-        '接好运万元以上': '88',
-        '达标奖': '400',
-        '优秀奖': '800',
-        '精英奖': '1200'
-    }
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        
-        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
-            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
-恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
-
-\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
-
-\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元
-
-\U0001F44A {next_msg}。
-'''
-            # logging.info(f"Constructed message: {msg}")
-
-            send_wecom_message(WECOM_GROUP_NAME_BJ_OCT, msg)
-            time.sleep(3)  # 添加3秒的延迟
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_BJ_OCT, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            # time.sleep(2)  # 添加3秒的延迟
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-
-# 2024年9月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶 
-def notify_awards_sep_beijing(performance_data_filename, status_filename):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '接好运': '58',
-        '接好运万元以上': '88',
-        '达标奖': '200',
-        '优秀奖': '800',
-        '精英奖': '1200'
-    }
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        
-        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
-            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
-恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
-
-\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
-
-\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元
-
-\U0001F44A {next_msg}。
-'''
-            # logging.info(f"Constructed message: {msg}")
-
-            send_wecom_message(WECOM_GROUP_NAME_BJ_SEP, msg)
-            time.sleep(3)  # 添加3秒的延迟
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_BJ_SEP, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            # time.sleep(2)  # 添加3秒的延迟
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-
-def notify_awards_aug_beijing(performance_data_filename, status_filename):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '接好运': '58',
-        '接好运万元以上': '88',
-        '达标奖': '200',
-        '优秀奖': '400',
-        '精英奖': '800',
-        '卓越奖': '1600'
-    }
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        
-        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
-            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
-恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
-
-\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
-
-\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元
-
-\U0001F44A {next_msg}。
-'''
-            # logging.info(f"Constructed message: {msg}")
-
-            # send_wecom_message(WECOM_GROUP_NAME_BJ_AUG, msg)
-            time.sleep(2)  # 添加2秒的延迟
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                # send_wechat_message(CAMPAIGN_CONTACT_BJ_AUG, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            # time.sleep(2)  # 添加3秒的延迟
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-        
-def notify_awards_july_beijing(performance_data_filename, status_filename):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '接好运': '66',
-        '接好运万元以上': '166',
-        '达标奖': '200',
-        '优秀奖': '400',
-        '精英奖': '600',
-        '卓越奖': '1600'
-    }
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        
-        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
-            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
-恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
-
-\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
-
-\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元
-
-\U0001F44A {next_msg}。
-'''
-            # logging.info(f"Constructed message: {msg}")
-
-            send_wecom_message(WECOM_GROUP_NAME_BJ_AUG, msg)
-            # time.sleep(2)  # 添加3秒的延迟
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_BJ_AUG, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            # time.sleep(2)  # 添加3秒的延迟
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-
 def notify_awards_july_shanghai(performance_data_filename, status_filename,contract_data):
     """通知奖励并更新性能数据文件，同时跟踪发送状态"""
     records = get_all_records_from_csv(performance_data_filename)
@@ -399,363 +195,6 @@ def notify_awards_july_shanghai(performance_data_filename, status_filename,contr
 
             update_send_status(status_filename, contract_id, '发送成功')
             time.sleep(2)
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-
-def notify_awards_june_shanghai(performance_data_filename, status_filename,contract_data):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '基础奖': '100',
-        '达标奖': '200',
-        '优秀奖': '300',
-        '精英奖': '600',
-        '卓越奖': '1000',
-    }
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        
-        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-        processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
-                        
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
-            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
-恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
-
-\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
-
-\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元
-
-\U0001F44A {next_msg}。
-'''
-            # logging.info(f"Constructed message: {msg}")
-
-            send_wecom_message(WECOM_GROUP_NAME_SH_JUNE, msg)
-            time.sleep(2)
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_SH_JUNE, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            time.sleep(2)
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-
-def notify_awards_june_beijing(performance_data_filename, status_filename, contract_data):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '达标奖': '200',
-        '优秀奖': '400',
-        '精英奖': '800'
-    }
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        
-        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
-            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
-恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
-
-\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
-
-\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元
-
-\U0001F44A {next_msg}。
-'''
-            # logging.info(f"Constructed message: {msg}")
-
-            send_wecom_message(WECOM_GROUP_NAME_BJ_JUNE, msg)
-            # time.sleep(2)  # 添加3秒的延迟
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_BJ_JUNE, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            # time.sleep(2)  # 添加3秒的延迟
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-   
-def notify_awards_ctt1mc_shanghai(performance_data_filename, status_filename,contract_data):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '基础奖': '100',
-        '达标奖': '200',
-        '优秀奖': '400',
-        '精英奖': '800'
-    }
-
-    max_accumulated_amount = max(float(record['管家累计金额']) for record in records)
-    # max_average_price = max(int(float(record['平均客单价(average)'])) for record in records if record['平均客单价(average)'].strip() and record['平均客单价(average)'].replace('.', '', 1).isdigit())
-    max_average_price = max(int(float(record['平均客单价(average)'])) for record in contract_data if record['平均客单价(average)'].strip() and record['平均客单价(average)'].replace('.', '', 1).isdigit())
-
-    max_conversion_rate = max(record['转化率(conversion)'] for record in contract_data)
-    # max_conversion_rate = max(record['转化率(conversion)'] for record in records)
-    # valid_conversion_rates = [float(record['转化率(conversion)']) for record in records if record['转化率(conversion)'].strip() and record['转化率(conversion)'].replace('.', '', 1).isdigit() and float(record['转化率(conversion)']) < 1]
-    valid_conversion_rates = [float(record['转化率(conversion)']) for record in contract_data if record['转化率(conversion)'].strip() and record['转化率(conversion)'].replace('.', '', 1).isdigit() and float(record['转化率(conversion)']) <= 1]
-
-    if valid_conversion_rates:
-        max_conversion_rate = max(valid_conversion_rates)
-        max_conversion_rate_percentage = int(max_conversion_rate * 100)
-        max_conversion_rate_formatted = f"{max_conversion_rate_percentage}%"
-    else:
-        max_conversion_rate_formatted = "-" # Or any other placeholder for missing data
-
-    total_bonus_pool = int(sum(float(record['奖金池']) for record in records if record['奖金池'].replace('.', '', 1).isdigit()))
-    total_bonus_pool_str = str(total_bonus_pool)
-    total_bonus_pool = preprocess_amount(total_bonus_pool_str)
-
-    max_accumulated_amount_str = str(max_accumulated_amount)
-    max_accumulated_amount = preprocess_amount(max_accumulated_amount_str)
-    max_average_price_str = str(max_average_price)
-    max_average_price = preprocess_amount(max_average_price_str)
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        
-        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-        processed_average_price = preprocess_amount(record["平均客单价(average)"])
-        processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
-                        
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
-            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
-恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
-
-本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
-
-\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元
-\U0001F33B 平均客单价 {processed_average_price} 元
-\U0001F33B 转化率 {processed_conversion_rate}
-
-\U0001F947 平台最高累计签约 {max_accumulated_amount} 元
-\U0001F947 平台最高平均客单价 {max_average_price} 元
-\U0001F947 平台最高转化率 {max_conversion_rate_formatted}
-
-\U0001F44A {next_msg}。
-
-\U0001F3C6 当前奖金池已累计 {total_bonus_pool} 元。
-'''
-            # logging.info(f"Constructed message: {msg}")
-
-            send_wecom_message(WECOM_GROUP_NAME_SH_MAY, msg)
-            time.sleep(2)
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_SH_MAY, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            time.sleep(2)
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-  
-def notify_awards_ctt1mc_beijing(performance_data_filename, status_filename, contract_data):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '达标奖': '200',
-        '优秀奖': '400',
-        '精英奖': '1200'
-    }
-
-    max_accumulated_amount = max(float(record['管家累计金额']) for record in records)
-    # max_average_price = max(int(float(record['平均客单价(average)'])) for record in records if record['平均客单价(average)'].strip() and record['平均客单价(average)'].replace('.', '', 1).isdigit())
-    max_average_price = max(int(float(record['平均客单价(average)'])) for record in contract_data if record['平均客单价(average)'].strip() and record['平均客单价(average)'].replace('.', '', 1).isdigit())
-
-    max_conversion_rate = max(record['转化率(conversion)'] for record in contract_data)
-    # max_conversion_rate = max(record['转化率(conversion)'] for record in records)
-    # valid_conversion_rates = [float(record['转化率(conversion)']) for record in records if record['转化率(conversion)'].strip() and record['转化率(conversion)'].replace('.', '', 1).isdigit() and float(record['转化率(conversion)']) < 1]
-    valid_conversion_rates = [float(record['转化率(conversion)']) for record in contract_data if record['转化率(conversion)'].strip() and record['转化率(conversion)'].replace('.', '', 1).isdigit() and float(record['转化率(conversion)']) <= 1]
-
-    if valid_conversion_rates:
-        max_conversion_rate = max(valid_conversion_rates)
-        max_conversion_rate_percentage = int(max_conversion_rate * 100)
-        max_conversion_rate_formatted = f"{max_conversion_rate_percentage}%"
-    else:
-        max_conversion_rate_formatted = "-" # Or any other placeholder for missing data
-
-    total_bonus_pool = int(sum(float(record['奖金池']) for record in records if record['奖金池'].replace('.', '', 1).isdigit()))
-    total_bonus_pool_str = str(total_bonus_pool)
-    total_bonus_pool = preprocess_amount(total_bonus_pool_str)
-
-    max_accumulated_amount_str = str(max_accumulated_amount)
-    max_accumulated_amount = preprocess_amount(max_accumulated_amount_str)
-    max_average_price_str = str(max_average_price)
-    max_average_price = preprocess_amount(max_average_price_str)
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        
-        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-        processed_average_price = preprocess_amount(record["平均客单价(average)"])
-        processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
-                        
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
-            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
-恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
-
-本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
-
-\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元
-\U0001F33B 平均客单价 {processed_average_price} 元
-\U0001F33B 转化率 {processed_conversion_rate}
-
-\U0001F947 平台最高累计签约 {max_accumulated_amount} 元
-\U0001F947 平台最高平均客单价 {max_average_price} 元
-\U0001F947 平台最高转化率 {max_conversion_rate_formatted}
-
-\U0001F44A {next_msg}。
-
-\U0001F3C6 当前奖金池已累计 {total_bonus_pool} 元。
-'''
-            # logging.info(f"Constructed message: {msg}")
-
-            send_wecom_message(WECOM_GROUP_NAME_BJ_MAY, msg)
-            # time.sleep(2)  # 添加3秒的延迟
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_BJ_MAY, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            # time.sleep(2)  # 添加3秒的延迟
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-    
-def notify_awards(performance_data_filename, status_filename):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '开门红': '166',
-        '接好运': '166',
-        '达标奖': '200',
-        '优秀奖': '600',
-        '精英奖': '1600'
-    }
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '，恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩[庆祝][庆祝][庆祝]' if '无' in record["下一级奖项所需金额差"] else f'，{record["下一级奖项所需金额差"]}'
-            msg = f'''开工大吉[爆竹][爆竹][爆竹]
-恭喜{record["管家(serviceHousekeeper)"]}签约合同{record["合同编号(contractdocNum)"]}并完成线上收款[烟花][烟花][烟花]
-
-本单为本月平台累计签约第{record["活动期内第几个合同"]}单，个人累计签约第{record["管家累计单数"]}单，累计签约金额{record["管家累计金额"]}元{next_msg}'''
-            
-            send_wechat_message(WECHAT_GROUP_NAME, msg)
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_WECHAT_NAME, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            time.sleep(3)  # 添加3秒的延迟
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-
-def generate_award_message_shanghai(record, awards_mapping):
-    service_housekeeper = record["管家(serviceHousekeeper)"]
-    contract_number = record["合同编号(contractdocNum)"]
-    award_messages = []
-    for award in record["奖励类型"].split(', '):
-        if award in awards_mapping:
-            award_info = awards_mapping[award]
-            award_messages.append(f'达成 {award} 奖励条件，获得签约奖励 {award_info}元 [红包][红包][红包]')
-    return f'{service_housekeeper} 签约合同 {contract_number}\n\n' + '\n'.join(award_messages)
-
-def notify_awards_shanghai(performance_data_filename, status_filename):
-    """通知奖励并更新活动台账数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '签约奖励-50': '50',
-        '签约奖励-100': '100'
-    }
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = record["备注"]
-            msg = f'''[玫瑰][礼物][礼物][爆竹][爆竹][爆竹][礼物][礼物]
-恭喜 {record["管家(serviceHousekeeper)"]} 成功签约，合同编号为 {record["合同编号(contractdocNum)"]} 合同金额为 {record["合同金额(adjustRefundMoney)"]}，并完成线上收款[烟花][烟花][烟花]
-
-本单为“春暖花开”活动期间累计签约第{record["活动期内第几个合同"]}单，{record["管家(serviceHousekeeper)"]}个人累计签约第{record["管家累计单数"]}单，累计签约金额{record["管家累计金额"]}元。
-'''
-            
-            # logging.info(f"Constructed message: {msg}")
-            
-            send_wechat_message(WECHAT_GROUP_NAME_SHANGHAI, msg)
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message_shanghai(record, awards_mapping)
-                # logging.info(f"Generated award message: {jiangli_msg}")
-                send_wechat_message(CAMPAIGN_CONTACT_WECHAT_NAME_SHANGHAI, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            time.sleep(1)  # 添加3秒的延迟
 
             record['是否发送通知'] = 'Y'
             updated = True
@@ -811,6 +250,56 @@ def notify_technician_status_changes(status_changes, status_filename):
             update_send_status(status_filename, change_id, '通知成功')
             
             logging.info(f"Notification sent for technician status change: {change_id}")
+
+
+def notify_daily_service_report(report_data, status_filename):
+    """通知日报并跟踪发送状态"""
+    send_status = load_send_status(status_filename)  # 加载发送状态
+
+    # 根据 orgName 分组
+    grouped_data = {}
+    for record in report_data:
+        org_name = record[5]  # orgName 在第6个位置
+        if org_name not in grouped_data:
+            grouped_data[org_name] = []
+        grouped_data[org_name].append(record)
+
+    # 记录已发送通知的服务商
+    notified_service_providers = set()
+
+    # 遍历每个组织，构建并发送消息
+    for org_name, records in grouped_data.items():
+        # 获取接收人名称，如果服务商名称不在SERVICE_PROVIDER_MAPPING中，则使用sunye
+        receiver_name = SERVICE_PROVIDER_MAPPING.get(org_name, "sunye")
+        if receiver_name == "sunye":
+            logging.error(f"No mapping found for org_name: {org_name}")
+        
+        # 构建消息内容
+        msg_lines = []
+        for record in records:
+            # 解析建单时间并格式化
+            create_time = datetime.fromisoformat(record[4].replace("Z", "+00:00"))  # 处理时区
+            formatted_time = create_time.strftime("%Y年%m月%d日 %H:%M")  # 格式化为 YYYY年MM月DD日 HH:MM
+            
+            msg_lines.append(f'工单编号：{record[2]}\n建单时间：{formatted_time}\n管家：{record[6]}\n违规类型：{record[9]}\n违规描述：{record[10]}\n')
+        
+        # 将所有消息行合并为一个完整的消息
+        msg = f'📢 超时情况通报\n\n' + '\n'.join(msg_lines) + '\n说明：以上数据为服务商昨日工单超时统计，如有异议请于下周一十二点前联系运营人员王金申诉。'
+
+        # 检查是否已发送通知
+        if records[0][0] not in send_status:  # 使用第一个记录的_id进行检查
+            send_wecom_message(receiver_name, msg)  # 使用接收人名称发送消息
+            update_send_status(status_filename, records[0][0], '通知成功')  # 使用第一个记录的_id更新状态
+            notified_service_providers.add(org_name)  # 记录已发送通知的服务商
+            logging.info(f"Notification sent for orders to {org_name}")
+
+    # 遍历 SERVICE_PROVIDER_MAPPING，发送默认消息给未发送通知的服务商
+    for org_name in SERVICE_PROVIDER_MAPPING.keys():
+        if org_name not in notified_service_providers:
+            default_msg = "昨日无超时工单，请继续保持。👍"
+            receiver_name = SERVICE_PROVIDER_MAPPING[org_name]
+            send_wecom_message(receiver_name, default_msg)  # 发送默认消息
+            logging.info(f"Default message sent to {receiver_name} for {org_name}")
 
 def notify_contact_timeout_changes(contact_timeout_data):
     """
