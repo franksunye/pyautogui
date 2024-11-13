@@ -66,7 +66,7 @@ def signing_and_sales_incentive_nov_beijing():
     housekeeper_award_lists = get_housekeeper_award_list(performance_data_filename)
 
     # 使用新的通用数据处理函数
-    processed_data = process_data_generic(contract_data, existing_contract_ids, housekeeper_award_lists, 'nov_beijing')
+    processed_data = process_data_beijing(contract_data, existing_contract_ids, housekeeper_award_lists, 'nov_beijing')
     logging.info('BEIJING 2024 11月, Data processed')
 
     performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)', '活动期内第几个合同', '管家累计金额', '管家累计单数', '奖金池', '激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
@@ -126,21 +126,19 @@ def check_technician_status():
     api_url = API_URL_TS
     status_filename = STATUS_FILENAME_TS
 
-    logging.info('BEIJING, Job started ...')
+    logging.info('BEIJING, Technician Status Check Job started')
 
-    # session_id = get_metabase_session()
-    # response = send_request(session_id, api_url)
-    response = send_request_with_managed_session(api_url)
-    
+    response = send_request_with_managed_session(api_url)    
     status_changes = response['data']['rows']
 
     notify_technician_status_changes(status_changes, status_filename)
 
-    logging.info('BEIJING, Job ended') 
+    logging.info('BEIJING, Technician Status Check Job ended') 
 
 def generate_daily_service_report():
     logging.info('Daily service report generation started...')
     api_url = API_URL_DAILY_SERVICE_REPORT
+    temp_daily_service_report_file = TEMP_DAILY_SERVICE_REPORT_FILE
     status_code_filename = STATUS_FILENAME_DAILY_REPORT
 
     try:
@@ -154,7 +152,16 @@ def generate_daily_service_report():
             logging.warning('No data found for the daily service report.')
             # return
 
-        # 3. 发送通知
+        # 3. 保存数据到CSV文件
+        columns = ["_id", "sid", "saCreateTime", "orderNum", "province", "orgName", "supervisorName", "sourceType", "status", "msg", "memo", "workType", "createTime"]
+        save_to_csv_with_headers(report_data, temp_daily_service_report_file, columns)
+        logging.info(f"Daily service report data saved to {temp_daily_service_report_file}")
+
+        # 4. 读取数据
+        report_data = read_daily_service_report(temp_daily_service_report_file)
+        logging.info(f"Report data: {report_data}")
+
+        # 5. 发送通知
         notify_daily_service_report(report_data, status_code_filename)
         logging.info('Daily service report notification sent successfully.')
 

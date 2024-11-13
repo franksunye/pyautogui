@@ -20,7 +20,7 @@ def save_to_csv_with_headers(data, filename='ContractData.csv', columns=None):
     df = pd.DataFrame(data, columns=columns)   
     df.to_csv(filename, index=False)
 
-def archive_file(filename, archive_dir='archive', days_to_keep=3):
+def archive_file(filename, archive_dir='archive', days_to_keep=1):
     # Get current timestamp in China timezone
     china_tz = pytz.timezone('Asia/Shanghai')
     timestamp = datetime.now(china_tz).strftime('%Y%m%d%H%M')
@@ -72,6 +72,11 @@ def read_contract_data(filename):
         reader = csv.DictReader(file)
         return list(reader)
     
+def read_daily_service_report(filename):
+    with open(filename, 'r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        return list(reader)
+
 def get_all_records_from_csv(filename):
     """读取性能数据文件并返回记录列表"""
     with open(filename, mode='r', encoding='utf-8-sig', newline='') as file:

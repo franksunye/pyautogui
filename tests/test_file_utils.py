@@ -1,53 +1,51 @@
 import unittest
+import pandas as pd
 import os
-from modules.file_utils import read_contract_data, collect_unique_contract_ids_from_file, get_housekeeper_award_list
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../modules')))
+from modules.file_utils import get_unique_housekeeper_award_list
 
 class TestFileUtils(unittest.TestCase):
 
     def setUp(self):
-        # Specify the path to the ContractData-SH-May_01.csv file
-        self.test_file = 'tests\ContractData-SH-May_01.csv'
-        # Ensure the file exists before proceeding with the test
-        assert os.path.exists(self.test_file), f"File {self.test_file} does not exist."
+        # 创建一个临时 CSV 文件，仅包含标题行
+        self.empty_file_path = 'test_empty_file.csv'
+        with open(self.empty_file_path, 'w', encoding='utf-8') as f:
+            f.write('管家(serviceHousekeeper),服务商(orgName),奖励名称\n')  # 仅写入标题行
 
-        # Specify the path to the PerformanceData-SH-May_01.csv file
-        self.performance_test_file = 'tests\PerformanceData-SH-May_01.csv'
-        # Ensure the file exists before proceeding with the test
-        assert os.path.exists(self.performance_test_file), f"File {self.performance_test_file} does not exist."
-
-        # Specify the path to the HousekeeperAwards-SH-May_01.csv file
-        self.housekeeper_awards_file = 'tests\PerformanceData-SH-May_01.csv'
-        # Ensure the file exists before proceeding with the test
-        assert os.path.exists(self.housekeeper_awards_file), f"File {self.housekeeper_awards_file} does not exist."
+        # 创建一个临时 CSV 文件，包含示例数据
+        self.data_file_path = 'test_data_file.csv'
+        with open(self.data_file_path, 'w', encoding='utf-8') as f:
+            f.write('管家(serviceHousekeeper),服务商(orgName),奖励名称\n')  # 写入标题行
+            f.write('Alice,Org1,Reward1\n')  # 添加一行数据
+            f.write('Bob,Org2,Reward2\n')    # 添加另一行数据
 
     def tearDown(self):
-        # No cleanup needed as the file is not being deleted
-        pass
+        # 清理测试文件
+        if os.path.exists(self.empty_file_path):
+            os.remove(self.empty_file_path)
+        if os.path.exists(self.data_file_path):
+            os.remove(self.data_file_path)
 
-    def test_read_contract_data(self):
-        # Call the function and check the result
-        data = read_contract_data(self.test_file)
-        print("Contract Data:", data) # Print the contract data
-        self.assertEqual(len(data), 2) # Check if the number of data rows is correct
-        self.assertEqual(data[0]['合同ID(_id)'], '6997900857389134380') # Check if the content of the data is correct
+    def test_get_unique_housekeeper_award_list_empty_file(self):
+        # 调用函数并获取结果
+        result = get_unique_housekeeper_award_list(self.empty_file_path)
 
-    def test_collect_unique_contract_ids_from_file(self):
-        # Call the function and check the result
-        contract_ids = collect_unique_contract_ids_from_file(self.performance_test_file)
-        print("Contract IDs:", contract_ids) # Print the contract IDs
-        # Assuming the first contract ID in the test file is '1'
-        self.assertIn('6997900857389134380', contract_ids)
-        # You can add more assertions based on the expected data in your test file
+        # 验证结果是否为 {}
+        self.assertEqual(result, {})  # 期望返回空字典
 
-    def test_get_housekeeper_award_list(self):
-        # Call the function and check the result
-        awards_list = get_housekeeper_award_list(self.housekeeper_awards_file)
-        print("Awards List:", awards_list) # Print the awards list
-        # Assuming the test file contains at least one housekeeper with awards
-        self.assertIn('杨理想', awards_list)
-        # You can add more assertions based on the expected data in your test file
-        # For example, checking the number of awards for a specific housekeeper
-        self.assertEqual(len(awards_list['杨理想']), 0)
-        
+    def test_get_unique_housekeeper_award_list_with_data(self):
+        # 调用函数并获取结果
+        result = get_unique_housekeeper_award_list(self.data_file_path)
+
+        # # 打印结果
+        # print(result)
+
+        # 验证结果是否符合预期
+        expected_result = {'Alice_Org1': ['Reward1'], 'Bob_Org2': ['Reward2']}  # 根据您的逻辑调整预期结果
+        self.assertEqual(result, expected_result)
+
 if __name__ == '__main__':
     unittest.main()
+
+# python -m unittest discover -s tests -p "test_file_utils.py"

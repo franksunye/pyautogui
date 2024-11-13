@@ -5,7 +5,7 @@ import requests
 import datetime
 from requests.exceptions import Timeout
 import logging
-from modules.config import API_URL, METABASE_PASSWORD, METABASE_SESSION, METABASE_USERNAME
+from modules.config import METABASE_PASSWORD, METABASE_SESSION, METABASE_USERNAME
 from modules.log_config import setup_logging
 
 # 设置日志
@@ -89,13 +89,14 @@ def _send_request_with_session(session_id, api_url):
 
 def send_request(session_id, api_url=None):
     if api_url is None:
-        api_url = API_URL
+        logging.error("API URL not provided.")
+        return None
     return _send_request_with_session(session_id, api_url)
 
 def send_request_with_managed_session(api_url=None):
     if api_url is None:
-        api_url = API_URL
-
+        logging.error("API URL not provided.")
+        return None
     logging.debug(f"send_request_with_managed_session called at {datetime.datetime.now()}")
 
     session_id = get_valid_session()

@@ -18,26 +18,9 @@ RUN_JOBS_SERIALLY_SCHEDULE = 3 # 每3分钟执行一次
 WEBHOOK_URL_DEFAULT = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=59cf22c5-0623-4b34-b207-0f404f13eeeb'
 PHONE_NUMBER = '15327103039'
 
-# 第一个任务，北京销售激励活动API配置
-API_URL = METABASE_URL + "/api/card/336/query"
-
-# 北京销售激励活动 JOB check_signing_and_award_sales_incentive
-TEMP_CONTRACT_DATA_FILE = 'state/ContractData.csv'
-PERFORMANCE_DATA_FILENAME = 'state/PerformanceData.csv'
-STATUS_FILENAME = 'state/send_status.json'
-
-# Pro
-WECHAT_GROUP_NAME = '修链(北京)运营沟通群'
-CAMPAIGN_CONTACT_WECHAT_NAME = '王爽'
-
-# Dev
-# WECHAT_GROUP_NAME = '文件传输助手'
-# CAMPAIGN_CONTACT_WECHAT_NAME = '文件传输助手'
-
 # 第二个任务，北京技师状态检查 JOB check_technician_status
 API_URL_TS = "http://metabase.fsgo365.cn:3000/api/card/719/query"
 STATUS_FILENAME_TS = './state/technician_status_record.json'
-
 
 # 第六个任务，工单联络超时提醒
 API_URL_CONTACT_TIMEOUT = "http://metabase.fsgo365.cn:3000/api/card/980/query"
@@ -66,11 +49,12 @@ PERFORMANCE_DATA_FILENAME_SH_NOV = 'state/PerformanceData-SH-Nov.csv'
 STATUS_FILENAME_SH_NOV = 'state/send_status_sh_nov.json'
 
 # Pro
-WECOM_GROUP_NAME_SH_NOV = '（上海）运营群'
-CAMPAIGN_CONTACT_SH_NOV = '满浩浩'
+WECOM_GROUP_NAME_SH = '（上海）运营群'
+CAMPAIGN_CONTACT_SH = '满浩浩'
 
 # 昨日指定服务时效规范执行情况日报 JOB generate_daily_service_report
 API_URL_DAILY_SERVICE_REPORT = METABASE_URL + "/api/card/1514/query"
+TEMP_DAILY_SERVICE_REPORT_FILE = 'state/daily_service_report_record.csv'
 STATUS_FILENAME_DAILY_REPORT = './state/daily_service_report_record.json'
 # 服务商名称到接收人名称的映射
 SERVICE_PROVIDER_MAPPING = {
@@ -78,6 +62,7 @@ SERVICE_PROVIDER_MAPPING = {
     # "北京恒润万通防水工程有限公司": "孙埜",
     # "北京博远恒泰装饰装修有限公司": "孙埜",
     # "北京腾飞瑞欧建筑装饰有限公司": "孙埜",
+    # "北京德客声商贸有限公司": "孙埜",
 
     "北京博远恒泰装饰装修有限公司": "博远恒泰（沟通群）",
     "北京德客声商贸有限公司": "德客声（沟通群）",

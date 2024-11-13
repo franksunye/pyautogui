@@ -1,3 +1,4 @@
+# modules\log_config.py
 import logging
 import logging.handlers
 import os
@@ -17,7 +18,12 @@ def setup_logging():
         os.makedirs(log_dir)
 
     # 配置logs/app.log文件处理器
-    app_file_handler = logging.handlers.RotatingFileHandler(os.path.join(log_dir, 'app.log'), maxBytes=5000000, backupCount=5)
+    app_file_handler = logging.handlers.RotatingFileHandler(
+        os.path.join(log_dir, 'app.log'), 
+        maxBytes=5000000, 
+        backupCount=5,
+        encoding="utf-8"  # 设置编码为 UTF-8
+    )
     app_file_handler.setLevel(logging.DEBUG)
     app_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(filename)s - %(funcName)s - %(message)s')
     app_file_handler.setFormatter(app_formatter)

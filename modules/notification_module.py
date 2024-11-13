@@ -186,12 +186,12 @@ def notify_awards_july_shanghai(performance_data_filename, status_filename,contr
 '''
             # logging.info(f"Constructed message: {msg}")
 
-            send_wecom_message(WECOM_GROUP_NAME_SH_AUG, msg)
+            send_wecom_message(WECOM_GROUP_NAME_SH, msg)
             time.sleep(2)
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_SH_AUG, jiangli_msg)
+                send_wechat_message(CAMPAIGN_CONTACT_SH, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             time.sleep(2)
@@ -211,7 +211,7 @@ def notify_technician_status_changes(status_changes, status_filename):
     :param status_changes: 状态变更数组
     :param status_filename: 状态记录文件的路径
     """
-    # 加载状态记录文件
+    # 加载状态记录
     send_status = load_send_status(status_filename)
 
     for change in status_changes:
@@ -254,21 +254,27 @@ def notify_technician_status_changes(status_changes, status_filename):
 
 def notify_daily_service_report(report_data, status_filename):
     """通知日报并跟踪发送状态"""
+    logging.info("开始通知日报服务")
     send_status = load_send_status(status_filename)  # 加载发送状态
+    logging.info("状态加载完成")
 
     # 根据 orgName 分组
     grouped_data = {}
     for record in report_data:
-        org_name = record[5]  # orgName 在第6个位置
+        org_name = record['orgName']  # 使用字典的键来获取 orgName
         if org_name not in grouped_data:
             grouped_data[org_name] = []
         grouped_data[org_name].append(record)
+
+    logging.info(f"分组完成，共有 {len(grouped_data)} 个组织")
 
     # 记录已发送通知的服务商
     notified_service_providers = set()
 
     # 遍历每个组织，构建并发送消息
     for org_name, records in grouped_data.items():
+        logging.info(f"处理组织: {org_name}, 记录数: {len(records)}")
+        
         # 获取接收人名称，如果服务商名称不在SERVICE_PROVIDER_MAPPING中，则使用sunye
         receiver_name = SERVICE_PROVIDER_MAPPING.get(org_name, "sunye")
         if receiver_name == "sunye":
@@ -277,29 +283,49 @@ def notify_daily_service_report(report_data, status_filename):
         # 构建消息内容
         msg_lines = []
         for record in records:
-            # 解析建单时间并格式化
-            create_time = datetime.fromisoformat(record[4].replace("Z", "+00:00"))  # 处理时区
-            formatted_time = create_time.strftime("%Y年%m月%d日 %H:%M")  # 格式化为 YYYY年MM月DD日 HH:MM
-            
-            msg_lines.append(f'工单编号：{record[2]}\n建单时间：{formatted_time}\n管家：{record[6]}\n违规类型：{record[9]}\n违规描述：{record[10]}\n')
-        
+            try:
+                # 解析建单时间并格式化
+                create_time = datetime.fromisoformat(record['saCreateTime'].replace("Z", ""))  # 去掉时区
+                # formatted_time = create_time.strftime("%Y年%m月%d日 %H:%M")  # 格式化为 YYYY年MM月DD日 HH:MM
+                
+                msg_line = f'工单编号：{record["orderNum"]}\n建单时间：{create_time}\n管家：{record["supervisorName"]}\n违规类型：{record["msg"]}\n违规描述：{record["memo"]}\n'
+
+                msg_lines.append(msg_line)  # 直接添加字符串
+            except Exception as e:
+                logging.error(f"Error processing record {record}: {e}")
+
+        logging.info(f"构建消息行完成，当前消息行数: {len(msg_lines)}")
+
         # 将所有消息行合并为一个完整的消息
-        msg = f'📢 超时情况通报\n\n' + '\n'.join(msg_lines) + '\n说明：以上数据为服务商昨日工单超时统计，如有异议请于下周一十二点前联系运营人员王金申诉。'
+        try:
+            msg = f'\U0001F4E2 超时情况通报\n\n' + '\n'.join(msg_lines) + '\n说明：以上数据为服务商昨日工单超时统计，如有异议请于下周一十二点前联系运营人员王金申诉。'
+            logging.info(f"消息构建完成，消息内容长度: {len(msg)}")
+        except Exception as e:
+            logging.error(f"Error constructing message for {org_name}: {e}")
+            continue  # Skip this organization if message construction fails
 
         # 检查是否已发送通知
-        if records[0][0] not in send_status:  # 使用第一个记录的_id进行检查
-            send_wecom_message(receiver_name, msg)  # 使用接收人名称发送消息
-            update_send_status(status_filename, records[0][0], '通知成功')  # 使用第一个记录的_id更新状态
-            notified_service_providers.add(org_name)  # 记录已发送通知的服务商
-            logging.info(f"Notification sent for orders to {org_name}")
+        if records[0]['_id'] not in send_status:  # 使用第一个记录的_id进行检查
+            try:
+                send_wecom_message(receiver_name, msg)  # 使用接收人名称发送消息
+                update_send_status(status_filename, records[0]['_id'], '通知成功')  # 使用第一个记录的_id更新状态
+                notified_service_providers.add(org_name)  # 记录已发送通知的服务商
+                logging.info(f"Notification sent for orders to {org_name}")
+            except Exception as e:
+                logging.error(f"Error sending message to {receiver_name}: {e}")
 
     # 遍历 SERVICE_PROVIDER_MAPPING，发送默认消息给未发送通知的服务商
     for org_name in SERVICE_PROVIDER_MAPPING.keys():
         if org_name not in notified_service_providers:
             default_msg = "昨日无超时工单，请继续保持。👍"
             receiver_name = SERVICE_PROVIDER_MAPPING[org_name]
-            send_wecom_message(receiver_name, default_msg)  # 发送默认消息
-            logging.info(f"Default message sent to {receiver_name} for {org_name}")
+            try:
+                send_wecom_message(receiver_name, default_msg)  # 发送默认消息
+                logging.info(f"Default message sent to {receiver_name} for {org_name}")
+            except Exception as e:
+                logging.error(f"Error sending default message to {receiver_name}: {e}")
+
+    logging.info("日报通知服务结束")
 
 def notify_contact_timeout_changes(contact_timeout_data):
     """
