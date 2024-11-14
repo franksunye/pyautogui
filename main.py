@@ -86,14 +86,14 @@ if __name__ == '__main__':
 
     # generate_daily_service_report()
     # signing_and_sales_incentive_nov_beijing()
-    # signing_and_sales_incentive_nov_shanghai()
+    signing_and_sales_incentive_nov_shanghai()
     # check_technician_status()
     # # 启动调度循环
-    while True:
-        try:
-            schedule.run_pending()
-            time.sleep(1)
-        except Exception as e:
-            logging.error(f"Job failed with exception: {e}")
-            logging.error(traceback.format_exc())
-            time.sleep(5)
+    # while True:
+    #     try:
+    #         schedule.run_pending()
+    #         time.sleep(1)
+    #     except Exception as e:
+    #         logging.error(f"Job failed with exception: {e}")
+    #         logging.error(traceback.format_exc())
+    #         time.sleep(5)

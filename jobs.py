@@ -115,7 +115,7 @@ def signing_and_sales_incentive_nov_shanghai():
     write_performance_data(performance_data_filename, processed_data, performance_data_headers)
 
     # 当月的数据处理逻辑，与7月一致
-    notify_awards_july_shanghai(performance_data_filename, status_filename, contract_data)
+    # notify_awards_july_shanghai(performance_data_filename, status_filename, contract_data)
 
     archive_file(contract_data_filename)
     logging.info('SHANGHAI 2024 11月 Conq & triumph, take 1 more city, Data archived')

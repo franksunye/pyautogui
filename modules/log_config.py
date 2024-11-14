@@ -25,14 +25,18 @@ def setup_logging():
         encoding="utf-8"  # 设置编码为 UTF-8
     )
     app_file_handler.setLevel(logging.DEBUG)
-    app_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(filename)s - %(funcName)s - %(message)s')
+    
+    # 修改格式化器，去掉记录器名称，并用方括号括起文件名和函数名
+    app_formatter = logging.Formatter('%(asctime)s - %(levelname)s - [%(filename)s] - [%(funcName)s] - %(message)s')
     app_file_handler.setFormatter(app_formatter)
     root_logger.addHandler(app_file_handler)
     
     # 配置控制台处理器
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
-    console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(filename)s - %(funcName)s - %(message)s')
+    
+    # 修改控制台格式化器，去掉记录器名称，并用方括号括起文件名和函数名
+    console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - [%(filename)s] - [%(funcName)s] - %(message)s')
     console_handler.setFormatter(console_formatter)
     root_logger.addHandler(console_handler)
 
@@ -43,7 +47,9 @@ def setup_logging():
     # 配置send_messages.log文件处理器
     send_file_handler = logging.FileHandler(os.path.join(log_dir, 'send_messages.log'))
     send_file_handler.setLevel(logging.INFO)
-    send_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    # 修改发送日志格式化器，去掉记录器名称，并用方括号括起文件名
+    send_formatter = logging.Formatter('%(asctime)s - %(levelname)s - [%(message)s]')
     send_file_handler.setFormatter(send_formatter)
     send_logger.addHandler(send_file_handler)
 

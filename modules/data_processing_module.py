@@ -168,20 +168,24 @@ def determine_rewards_shanghai(contract_number, housekeeper_data, config):
     reward_names = []
     next_reward_gap = ""
 
+    # 判断是否达到最小合同数量
     if housekeeper_data['count'] >= config['min_contracts']:
         amount = housekeeper_data['total_amount']
-        next_reward = None
+        
         for i, threshold in enumerate(config['reward_thresholds']):
-            if amount >= threshold and config['reward_names'][i] not in housekeeper_data['awarded']:
+            reward_name = config['reward_names'][i]
+            # 如果达到该奖励的金额且该奖励未获得
+            if amount >= threshold and reward_name not in housekeeper_data['awarded']:
                 reward_types.append("节节高")
-                reward_names.append(config['reward_names'][i])
-                housekeeper_data['awarded'].append(config['reward_names'][i])
-            elif not next_reward:
-                next_reward = config['reward_names'][i]
+                reward_names.append(reward_name)
+                housekeeper_data['awarded'].append(reward_name)
+            # 计算第一个不达成的奖励差距
+            elif amount < threshold:
+                next_reward_gap = f"距离 {reward_name} 还需 {threshold - amount:,} 元"
+                break  # 一旦找到第一个不达成条件的奖励后，立即退出循环
 
-        if next_reward:
-            next_reward_gap = f"距离 {next_reward} 还需 {threshold - amount:,} 元"
     else:
+        # 合同数不达标时计算差距
         if not set(config['reward_names']).intersection(housekeeper_data['awarded']):
             next_reward_gap = f"距离达成节节高奖励条件还需 {config['min_contracts'] - housekeeper_data['count']} 单"
 

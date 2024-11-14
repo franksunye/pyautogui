@@ -133,12 +133,12 @@ def notify_awards_nov_beijing(performance_data_filename, status_filename):
 '''
             # logging.info(f"Constructed message: {msg}")
 
-            send_wecom_message(WECOM_GROUP_NAME_BJ_OCT, msg)
+            send_wecom_message(WECOM_GROUP_NAME_BJ_NOV, msg)
             time.sleep(3)  # 添加3秒的延迟
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_BJ_OCT, jiangli_msg)
+                send_wechat_message(CAMPAIGN_CONTACT_BJ_NOV, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             # time.sleep(2)  # 添加3秒的延迟
