@@ -5,40 +5,7 @@ from modules.data_processing_module import *
 from modules.file_utils import *
 from modules.notification_module import *
 from modules.config import *
-
-def service_provider_weekly_report():
-    logging.info('服务商周报任务开始...')
-
-    # 步骤1: 从两个Metabase数据源获取数据
-    inspection_rate_api_url = 'http://metabase.fsgo365.cn:3000/api/card/1274/query'
-    wecom_usage_api_url = 'http://metabase.fsgo365.cn:3000/api/card/1272/query'
-    
-    response_inspection_rate = send_request_with_managed_session(inspection_rate_api_url)
-    print(response_inspection_rate)  # Add this line to print the response
-    
-    inspectionRateData = response_inspection_rate['data']['rows']
-
-    response_wecom_usage = send_request_with_managed_session(wecom_usage_api_url)
-    wecomUsageData = response_wecom_usage['data']['rows']
-
-    logging.info('从Metabase数据源获取数据完成')
-
-    # # 步骤2: 将两部分数据进行合并
-    # merged_data = merge_data_sources(inspectionRateData, wecomUsageData)
-    # logging.info('数据合并完成')
-    
-    # # 步骤3: 处理合并后的数据，批量生成周报
-    # weekly_reports = generate_weekly_report_for_each_supplier(merged_data)
-    # logging.info('周报生成完成')
-
-    # 步骤4: 发送周报
-    # send_status = send_reports(weekly_reports)
-    # if send_status:
-    #     logging.info('周报发送成功')
-    # else:
-    #     logging.error('周报发送失败')
-
-    # logging.info('服务商周报任务结束')
+from modules.service_provider_sla_monitor import monitor_sla_compliance_and_report, update_sla_violation_records
     
 # 2024年11月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶
 def signing_and_sales_incentive_nov_beijing():
@@ -50,12 +17,13 @@ def signing_and_sales_incentive_nov_beijing():
     logging.info('BEIJING 2024 11月, Job started ...')
 
     response = send_request_with_managed_session(api_url)
+ 
     logging.info('BEIJING 2024 11月, Request sent')
 
     rows = response['data']['rows']
 
     columns = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)", "转化率(conversion)", "平均客单价(average)"]
-    save_to_csv_with_headers(rows, contract_data_filename, columns)
+    save_to_csv_with_headers(rows,contract_data_filename,columns)
 
     logging.info(f'BEIJING 2024 11月, Data saved to {contract_data_filename}')
 
@@ -65,14 +33,15 @@ def signing_and_sales_incentive_nov_beijing():
 
     housekeeper_award_lists = get_housekeeper_award_list(performance_data_filename)
 
-    # 使用新的通用数据处理函数
-    processed_data = process_data_beijing(contract_data, existing_contract_ids, housekeeper_award_lists, 'nov_beijing')
+    # 当月的数据处理逻辑
+    processed_data = process_data_nov_beijing(contract_data, existing_contract_ids,housekeeper_award_lists)
     logging.info('BEIJING 2024 11月, Data processed')
 
-    performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)', '活动期内第几个合同', '管家累计金额', '管家累计单数', '奖金池', '激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+    performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
 
     write_performance_data(performance_data_filename, processed_data, performance_data_headers)
 
+    # 当月的数据处理逻辑
     notify_awards_nov_beijing(performance_data_filename, status_filename)
 
     archive_file(contract_data_filename)
@@ -106,7 +75,7 @@ def signing_and_sales_incentive_nov_shanghai():
     housekeeper_award_lists = get_unique_housekeeper_award_list(performance_data_filename)
 
     # 当月的数据处理逻辑，与7月一致
-    processed_data = process_data_shanghai(contract_data, existing_contract_ids,housekeeper_award_lists,'june_shanghai')
+    processed_data = process_data_july_shanghai(contract_data, existing_contract_ids,housekeeper_award_lists)
 
     logging.info('SHANGHAI 2024 11月 Conq & triumph, take 1 more city, Data processed')
 
@@ -139,7 +108,6 @@ def generate_daily_service_report():
     logging.info('Daily service report generation started...')
     api_url = API_URL_DAILY_SERVICE_REPORT
     temp_daily_service_report_file = TEMP_DAILY_SERVICE_REPORT_FILE
-    status_code_filename = STATUS_FILENAME_DAILY_REPORT
 
     try:
         # 1. 发送请求以获取日报数据
@@ -155,15 +123,22 @@ def generate_daily_service_report():
         # 3. 保存数据到CSV文件
         columns = ["_id", "sid", "saCreateTime", "orderNum", "province", "orgName", "supervisorName", "sourceType", "status", "msg", "memo", "workType", "createTime"]
         save_to_csv_with_headers(report_data, temp_daily_service_report_file, columns)
-        logging.info(f"Daily service report data saved to {temp_daily_service_report_file}")
 
         # 4. 读取数据
         report_data = read_daily_service_report(temp_daily_service_report_file)
         logging.info(f"Report data: {report_data}")
 
-        # 5. 发送通知
-        notify_daily_service_report(report_data, status_code_filename)
-        logging.info('Daily service report notification sent successfully.')
+        # 5. 更新SLA违规记录并发送通知
+        update_sla_violation_records(report_data)
+        logging.info('SLA violation records updated successfully.')
+
+        monitor_sla_compliance_and_report(report_data)
+        logging.info('SLA compliance report notification sent successfully.')
+
+        # # 原有版本的日报发送
+        # notify_daily_service_report(report_data, status_code_filename)
+        # logging.info('Daily service report notification sent successfully.')
+
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")

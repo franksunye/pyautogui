@@ -84,11 +84,10 @@ schedule.every(RUN_JOBS_SERIALLY_SCHEDULE).minutes.do(run_jobs_serially)
 if __name__ == '__main__':
     logging.info('Program started')
 
-    # generate_daily_service_report()
+    generate_daily_service_report()
     # signing_and_sales_incentive_nov_beijing()
-    signing_and_sales_incentive_nov_shanghai()
-    # check_technician_status()
-    # # 启动调度循环
+    # signing_and_sales_incentive_nov_shanghai()
+    # 启动调度循环
     # while True:
     #     try:
     #         schedule.run_pending()

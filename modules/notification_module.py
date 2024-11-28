@@ -186,12 +186,12 @@ def notify_awards_july_shanghai(performance_data_filename, status_filename,contr
 '''
             # logging.info(f"Constructed message: {msg}")
 
-            send_wecom_message(WECOM_GROUP_NAME_SH, msg)
+            send_wecom_message(WECOM_GROUP_NAME_SH_NOV, msg)
             time.sleep(2)
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_SH, jiangli_msg)
+                send_wechat_message(CAMPAIGN_CONTACT_SH_NOV, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             time.sleep(2)
@@ -211,7 +211,7 @@ def notify_technician_status_changes(status_changes, status_filename):
     :param status_changes: 状态变更数组
     :param status_filename: 状态记录文件的路径
     """
-    # 加载状态记录
+    # 加载状态记录文件
     send_status = load_send_status(status_filename)
 
     for change in status_changes:
@@ -285,11 +285,17 @@ def notify_daily_service_report(report_data, status_filename):
         for record in records:
             try:
                 # 解析建单时间并格式化
-                create_time = datetime.fromisoformat(record['saCreateTime'].replace("Z", ""))  # 去掉时区
+                create_time = datetime.fromisoformat(record['saCreateTime'].replace("Z", ""))  # 处理时区
                 # formatted_time = create_time.strftime("%Y年%m月%d日 %H:%M")  # 格式化为 YYYY年MM月DD日 HH:MM
                 
-                msg_line = f'工单编号：{record["orderNum"]}\n建单时间：{create_time}\n管家：{record["supervisorName"]}\n违规类型：{record["msg"]}\n违规描述：{record["memo"]}\n'
-
+                # 使用 str.format() 构建消息行
+                msg_line = '工单编号：{}\n建单时间：{}\n管家：{}\n违规类型：{}\n违规描述：{}\n'.format(
+                    record['orderNum'],
+                    create_time,
+                    record['supervisorName'],
+                    record['msg'],
+                    record['memo']
+                )
                 msg_lines.append(msg_line)  # 直接添加字符串
             except Exception as e:
                 logging.error(f"Error processing record {record}: {e}")
@@ -326,7 +332,7 @@ def notify_daily_service_report(report_data, status_filename):
                 logging.error(f"Error sending default message to {receiver_name}: {e}")
 
     logging.info("日报通知服务结束")
-
+	
 def notify_contact_timeout_changes(contact_timeout_data):
     """
     通知工单联络超时的信息。
