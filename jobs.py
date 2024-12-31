@@ -5,7 +5,7 @@ from modules.data_processing_module import *
 from modules.file_utils import *
 from modules.notification_module import *
 from modules.config import *
-from modules.service_provider_sla_monitor import monitor_sla_compliance_and_report, update_sla_violation_records
+from modules.service_provider_sla_monitor import process_sla_violations
     
 # 2024年11月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶
 def signing_and_sales_incentive_nov_beijing():
@@ -49,23 +49,23 @@ def signing_and_sales_incentive_nov_beijing():
 
     logging.info('BEIJING 2024 11月, Job ended')
 
-# 2024年11月，上海. 与10月的活动规则一致
-def signing_and_sales_incentive_nov_shanghai():
-    contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_NOV
-    performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_NOV
-    status_filename = STATUS_FILENAME_SH_NOV
-    api_url = API_URL_SH_NOV
+# 2024年12月，上海. 与10月的活动规则一致
+def signing_and_sales_incentive_dec_shanghai():
+    contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_DEC
+    performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_DEC
+    status_filename = STATUS_FILENAME_SH_DEC
+    api_url = API_URL_SH_DEC
 
-    logging.info('SHANGHAI 2024 11月 Conq & triumph, take 1 more city, Job started ...')
+    logging.info('SHANGHAI 2024 12月 Conq & triumph, take 1 more city, Job started ...')
     response = send_request_with_managed_session(api_url)
-    logging.info('SHANGHAI 2024 11月 Conq & triumph, take 1 more city, Request sent')
+    logging.info('SHANGHAI 2024 12月 Conq & triumph, take 1 more city, Request sent')
 
     rows = response['data']['rows']
 
     columns = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)", "转化率(conversion)", "平均客单价(average)"]
     save_to_csv_with_headers(rows,contract_data_filename,columns)
 
-    logging.info(f'SHANGHAI 2024 11月 Conq & triumph, take 1 more city, Data saved to {contract_data_filename}')
+    logging.info(f'SHANGHAI 2024 12月 Conq & triumph, take 1 more city, Data saved to {contract_data_filename}')
 
     contract_data = read_contract_data(contract_data_filename)
 
@@ -75,21 +75,64 @@ def signing_and_sales_incentive_nov_shanghai():
     housekeeper_award_lists = get_unique_housekeeper_award_list(performance_data_filename)
 
     # 当月的数据处理逻辑，与7月一致
-    processed_data = process_data_july_shanghai(contract_data, existing_contract_ids,housekeeper_award_lists)
+    processed_data = process_data_shanghai(contract_data, existing_contract_ids,housekeeper_award_lists)
 
-    logging.info('SHANGHAI 2024 11月 Conq & triumph, take 1 more city, Data processed')
+    logging.info('SHANGHAI 2024 12月 Conq & triumph, take 1 more city, Data processed')
 
-    performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+    performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池', '计入业绩金额','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
 
     write_performance_data(performance_data_filename, processed_data, performance_data_headers)
 
     # 当月的数据处理逻辑，与7月一致
     # notify_awards_july_shanghai(performance_data_filename, status_filename, contract_data)
+    notify_awards_july_shanghai_generate_message(performance_data_filename, status_filename, contract_data)
 
     archive_file(contract_data_filename)
-    logging.info('SHANGHAI 2024 11月 Conq & triumph, take 1 more city, Data archived')
+    logging.info('SHANGHAI 2024 12月 Conq & triumph, take 1 more city, Data archived')
 
-    logging.info('SHANGHAI 2024 11月 Conq & triumph, take 1 more city, Job ended')   
+    logging.info('SHANGHAI 2024 12月 Conq & triumph, take 1 more city, Job ended')   
+
+# 2025年1月，上海. 仅做签约播报
+def signing_and_sales_incentive_jan_shanghai():
+    contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_JAN
+    performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_JAN
+    status_filename = STATUS_FILENAME_SH_JAN
+    api_url = API_URL_SH_JAN
+
+    logging.info('SHANGHAI 2025 1月 Conq & triumph, take 1 more city, Job started ...')
+    response = send_request_with_managed_session(api_url)
+    logging.info('SHANGHAI 2025 1月 Conq & triumph, take 1 more city, Request sent')
+
+    rows = response['data']['rows']
+
+    columns = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)", "转化率(conversion)", "平均客单价(average)"]
+    save_to_csv_with_headers(rows,contract_data_filename,columns)
+
+    logging.info(f'SHANGHAI 2025 1月 Conq & triumph, take 1 more city, Data saved to {contract_data_filename}')
+
+    contract_data = read_contract_data(contract_data_filename)
+
+    existing_contract_ids = collect_unique_contract_ids_from_file(performance_data_filename)
+
+    # 获取管家奖励列表，升级唯一奖励列表
+    housekeeper_award_lists = get_unique_housekeeper_award_list(performance_data_filename)
+
+    # 当月的数据处理逻辑，与7月一致
+    processed_data = process_data_shanghai(contract_data, existing_contract_ids, housekeeper_award_lists)
+
+    logging.info('SHANGHAI 2025 1月 Conq & triumph, take 1 more city, Data processed')
+
+    performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+
+    write_performance_data(performance_data_filename, processed_data, performance_data_headers)
+
+    # 当月的通知数据处理逻辑
+    notify_awards_shanghai_generate_message_january(performance_data_filename, status_filename, contract_data)
+
+    archive_file(contract_data_filename)
+    logging.info('SHANGHAI 2025 1月 Conq & triumph, take 1 more city, Data archived')
+
+    logging.info('SHANGHAI 2025 1月 Conq & triumph, take 1 more city, Job ended')   
 
 def check_technician_status():
     api_url = API_URL_TS
@@ -108,6 +151,7 @@ def generate_daily_service_report():
     logging.info('Daily service report generation started...')
     api_url = API_URL_DAILY_SERVICE_REPORT
     temp_daily_service_report_file = TEMP_DAILY_SERVICE_REPORT_FILE
+    status_code_filename = DAILY_SERVICE_REPORT_RECORD_FILE
 
     try:
         # 1. 发送请求以获取日报数据
@@ -128,17 +172,13 @@ def generate_daily_service_report():
         report_data = read_daily_service_report(temp_daily_service_report_file)
         logging.info(f"Report data: {report_data}")
 
-        # 5. 更新SLA违规记录并发送通知
-        update_sla_violation_records(report_data)
-        logging.info('SLA violation records updated successfully.')
+        # 新的SLA违规检查并发送通知服务
+        process_sla_violations(report_data)
+        logging.info('SLA violations processed successfully.')
 
-        monitor_sla_compliance_and_report(report_data)
-        logging.info('SLA compliance report notification sent successfully.')
-
-        # # 原有版本的日报发送
+        # # 当前适用的发送日常服务报告
         # notify_daily_service_report(report_data, status_code_filename)
         # logging.info('Daily service report notification sent successfully.')
-
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")

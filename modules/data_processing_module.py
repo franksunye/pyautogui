@@ -2,6 +2,12 @@
 import logging
 from modules.log_config import setup_logging
 from datetime import date
+from modules.config import (
+    PERFORMANCE_AMOUNT_CAP,
+    ENABLE_PERFORMANCE_AMOUNT_CAP,
+    BONUS_POOL_RATIO,  # Import the configurable bonus pool ratio
+)
+from modules import config  # Add config import to use config.x consistently
 
 # 设置日志
 setup_logging()
@@ -232,14 +238,15 @@ def process_data_nov_beijing(contract_data, existing_contract_ids, housekeeper_a
     # 返回处理后的性能数据列表
     return performance_data
 
-def determine_rewards_june_shanghai(contract_number, housekeeper_data):
+def determine_rewards_shanghai(contract_number, housekeeper_data):
     reward_types = []
     reward_names = []
     next_reward_gap = ""  # 下一级奖励所需金额差
 
     # 节节高奖励逻辑（需要管家合同数量大于等于3）
     if housekeeper_data['count'] >= 3:
-        amount = housekeeper_data['total_amount']
+        # 计算下一级奖励所需金额差，如果启用了绩效金额，使用绩效金额，否则使用合同金额
+        amount = housekeeper_data['performance_amount'] if config.ENABLE_PERFORMANCE_AMOUNT_CAP else housekeeper_data['total_amount']
         next_reward = None
         if amount >= 160000 and '卓越奖' not in housekeeper_data['awarded']:
             # 卓越奖
@@ -319,7 +326,7 @@ def determine_rewards_june_shanghai(contract_number, housekeeper_data):
         
     return ', '.join(reward_types), ', '.join(reward_names), next_reward_gap
 
-def process_data_july_shanghai(contract_data, existing_contract_ids, housekeeper_award_lists):
+def process_data_shanghai(contract_data, existing_contract_ids, housekeeper_award_lists):
 
     logging.info(f"Starting data processing with {len(existing_contract_ids)} existing contract IDs.")
 
@@ -327,8 +334,11 @@ def process_data_july_shanghai(contract_data, existing_contract_ids, housekeeper
 
     performance_data = []
     contract_count_in_activity = len(existing_contract_ids) + 1
+
+    # 用于跟踪每个管家的合同数据
     housekeeper_contracts = {}
 
+    # 用于跟踪已经处理过的合同，也避免有重复的合同，重复的合同不进行重复处理
     processed_contract_ids = set()
 
     logging.info("Starting to process contract data...")
@@ -348,19 +358,32 @@ def process_data_july_shanghai(contract_data, existing_contract_ids, housekeeper
             housekeeper_award = []
             if unique_housekeeper_key in housekeeper_award_lists:
                 housekeeper_award = housekeeper_award_lists[unique_housekeeper_key]
-            housekeeper_contracts[unique_housekeeper_key] = {'count': 0, 'total_amount': 0, 'awarded': housekeeper_award}
 
+            # 初始化管家的合同相关数据，包括合同数量、总金额、绩效金额、已获得的奖励
+            # 这是程序计算中的关键数据结构    
+            housekeeper_contracts[unique_housekeeper_key] = {
+                'count': 0, 
+                'total_amount': 0, 
+                'performance_amount': 0,
+                'awarded': housekeeper_award
+            }
+
+        contract_amount = float(contract['合同金额(adjustRefundMoney)'])
+        performance_amount = min(contract_amount, config.PERFORMANCE_AMOUNT_CAP)  # 使用配置的上限值
+        
         housekeeper_contracts[unique_housekeeper_key]['count'] += 1
-        housekeeper_contracts[unique_housekeeper_key]['total_amount'] += float(contract['合同金额(adjustRefundMoney)'])
+        housekeeper_contracts[unique_housekeeper_key]['total_amount'] += contract_amount
+        housekeeper_contracts[unique_housekeeper_key]['performance_amount'] += performance_amount
 
         housekeeper_contracts[unique_housekeeper_key]['total_amount'] = int(housekeeper_contracts[unique_housekeeper_key]['total_amount'])
+        housekeeper_contracts[unique_housekeeper_key]['performance_amount'] = int(housekeeper_contracts[unique_housekeeper_key]['performance_amount'])
 
         logging.debug(f"Housekeeper {unique_housekeeper_key} count: {housekeeper_contracts[unique_housekeeper_key]['count']}")
         logging.debug(f"Housekeeper {unique_housekeeper_key} total amount: {housekeeper_contracts[unique_housekeeper_key]['total_amount']}")
 
         processed_contract_ids.add(contract_id)
 
-        reward_types, reward_names, next_reward_gap = determine_rewards_june_shanghai(contract_count_in_activity, housekeeper_contracts[unique_housekeeper_key])
+        reward_types, reward_names, next_reward_gap = determine_rewards_shanghai(contract_count_in_activity, housekeeper_contracts[unique_housekeeper_key])
 
         if contract_id in existing_contract_ids:
             logging.debug(f"Skipping existing contract ID: {contract_id}")
@@ -390,7 +413,8 @@ def process_data_july_shanghai(contract_data, existing_contract_ids, housekeeper
             '活动期内第几个合同': contract_count_in_activity,
             '管家累计单数': housekeeper_contracts[unique_housekeeper_key]['count'],
             '管家累计金额': housekeeper_contracts[unique_housekeeper_key]['total_amount'],
-            '奖金池': float(contract['合同金额(adjustRefundMoney)']) * 0.002, # 新增字段，计算奖金池           
+            '奖金池': float(contract['合同金额(adjustRefundMoney)']) * config.BONUS_POOL_RATIO, # 可配置的奖金池计算比例
+            '计入业绩金额': housekeeper_contracts[unique_housekeeper_key]['performance_amount'],           
             '激活奖励状态': active_status,
             '奖励类型': reward_types,
             '奖励名称': reward_names,

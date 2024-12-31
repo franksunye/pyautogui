@@ -8,41 +8,128 @@ from modules.notification_module import send_wecom_message as original_send_weco
 # 假设SLA违规记录存储在这个文件中
 # SLA_VIOLATIONS_RECORDS_FILE = 'sla_violations.json'
 
-def monitor_sla_compliance_and_report(sla_violation_data):
-    # 1. 检查前一天的SLA违规情况
-    if has_sla_violations_yesterday(sla_violation_data):
-        # 发送SLA违规通知
-        send_sla_violation_notifications(sla_violation_data)
-        logging.info("已发送昨日SLA违规通知，违规数量: %d", len(sla_violation_data))
-    else:
-        logging.debug("昨日无SLA违规记录，无需发送通知")
+def process_sla_violations(violation_data):
+    """
+    处理SLA违规数据：更新记录并发送通知
+    
+    Args:
+        violation_data: 违规数据列表
+    """
+    try:
+        # 1. 更新违规记录
+        _update_violation_records(violation_data)
+        
+        # 2. 处理违规通知
+        if has_sla_violations_yesterday(violation_data):
+            send_sla_violation_notifications(violation_data)
+            logging.info("已发送昨日SLA违规通知，违规数量: %d", len(violation_data))
+        else:
+            logging.info("昨日无SLA违规记录，无需发送通知")
 
-    # 2. 检查过去一周的SLA达标情况
-    sla_violating_providers = get_weekly_sla_violations()  # 获取过去一周违反SLA的服务商
-    if is_monday():  # 每周一进行周报
+        # 3. 处理每周报告
+        if is_monday():
+            _process_weekly_sla_report()
+            
+    except Exception as e:
+        logging.error("处理SLA违规数据时出错: %s", str(e))
+        logging.error(traceback.format_exc())
+        raise
+
+def _update_violation_records(violation_data):
+    """
+    更新SLA违规记录
+    
+    Args:
+        violation_data: 违规数据列表
+    """
+    logging.info("开始更新SLA违规记录，数据条数: %d", len(violation_data))
+    
+    try:
+        # 读取现有记录
+        timeout_records = _load_or_create_records()
+        
+        # 清理过期记录
+        timeout_records = _clean_old_records(timeout_records)
+        
+        # 更新今天的记录
+        today_str = datetime.now().date().strftime('%Y-%m-%d')
+        timeout_records[today_str] = violation_data
+        
+        # 保存更新后的记录
+        _save_records(timeout_records)
+        
+        logging.info("SLA违规记录更新完成")
+    except Exception as e:
+        logging.error("更新SLA违规记录时出错: %s", str(e))
+        raise
+
+def _process_weekly_sla_report():
+    """处理每周SLA报告"""
+    try:
+        sla_violating_providers = get_weekly_sla_violations()
         compliant_providers = get_sla_compliant_providers(sla_violating_providers)
         
-        # 发送表扬消息给达标的服务商
+        # 发送表扬消息
         if compliant_providers:
-            compliance_msg = "上周无超时工单，请继续保持。👍"
-            for provider_name in compliant_providers:
-                receiver_name = SERVICE_PROVIDER_MAPPING.get(provider_name, "sunye")
-                try:
-                    send_wecom_message_wrapper(receiver_name, compliance_msg)
-                    logging.debug(f"已向服务商 {provider_name}({receiver_name}) 发送SLA达标通知")
-                except Exception as e:
-                    logging.error(f"发送SLA达标通知给 {receiver_name} 时出错: {e}")
+            _send_compliance_notifications(compliant_providers)
 
-        # 为每个违反SLA的服务商发送详细的周报
-        for provider_name in sla_violating_providers:
-            sla_performance_report = generate_sla_performance_report(provider_name)
-            logging.debug(f"生成{provider_name}的SLA表现周报:\n{sla_performance_report}")
-            receiver_name = SERVICE_PROVIDER_MAPPING.get(provider_name, "sunye")
-            try:
-                send_wecom_message_wrapper(receiver_name, sla_performance_report)
-                logging.info(f"已完成服务商 {provider_name} 的SLA周报发送")
-            except Exception as e:
-                logging.error(f"发送SLA周报给 {receiver_name} 时出错: {e}")
+        # 发送违规周报
+        _send_violation_reports(sla_violating_providers)
+            
+    except Exception as e:
+        logging.error("处理每周SLA报告时出错: %s", str(e))
+        raise
+
+def _load_or_create_records():
+    """加载或创建新的记录文件"""
+    if not os.path.exists(SLA_VIOLATIONS_RECORDS_FILE):
+        return {}
+    with open(SLA_VIOLATIONS_RECORDS_FILE, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def _clean_old_records(records):
+    """清理一周前的旧记录"""
+    today = datetime.now().date()
+    last_week = today - timedelta(days=7)
+    old_count = len(records)
+    
+    cleaned_records = {
+        date: data 
+        for date, data in records.items() 
+        if datetime.strptime(date, '%Y-%m-%d').date() >= last_week 
+        and datetime.strptime(date, '%Y-%m-%d').date() < today
+    }
+    
+    logging.info("清理完成，删除了 %d 条过期记录", old_count - len(cleaned_records))
+    return cleaned_records
+
+def _save_records(records):
+    """保存记录到文件"""
+    with open(SLA_VIOLATIONS_RECORDS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(records, f, ensure_ascii=False, indent=4)
+
+def _send_compliance_notifications(compliant_providers):
+    """发送合规通知给达标的服务商"""
+    compliance_msg = "上周无超时工单，请继续保持。👍"
+    for provider_name in compliant_providers:
+        receiver_name = SERVICE_PROVIDER_MAPPING.get(provider_name, "sunye")
+        try:
+            send_wecom_message_wrapper(receiver_name, compliance_msg)
+            logging.info(f"已向服务商 {provider_name}({receiver_name}) 发送SLA达标通知")
+        except Exception as e:
+            logging.error(f"发送SLA达标通知给 {receiver_name} 时出错: {e}")
+
+def _send_violation_reports(violating_providers):
+    """发送违规报告给违规的服务商"""
+    for provider_name in violating_providers:
+        sla_performance_report = generate_sla_performance_report(provider_name)
+        logging.debug(f"生成{provider_name}的SLA表现周报:\n{sla_performance_report}")
+        receiver_name = SERVICE_PROVIDER_MAPPING.get(provider_name, "sunye")
+        try:
+            send_wecom_message_wrapper(receiver_name, sla_performance_report)
+            logging.info(f"已完成服务商 {provider_name} 的SLA周报发送")
+        except Exception as e:
+            logging.error(f"发送SLA周报给 {receiver_name} 时出错: {e}")
 
 def has_sla_violations_yesterday(sla_data):
     return len(sla_data) > 0
@@ -120,53 +207,11 @@ def construct_sla_violation_message(violation_record):
         logging.error(f"Error constructing message for record {violation_record}: {e}")
         return "消息构建失败"
 
-def update_sla_violation_records(violation_data):
-    logging.info("开始更新SLA违规记录，数据条数: %d", len(violation_data))
-    # 更新超时记录
+def load_sla_violation_records():
     if not os.path.exists(SLA_VIOLATIONS_RECORDS_FILE):
-        logging.debug("SLA违规记录文件不存在，创建新的记录字典")
-        timeout_records = {}
-    else:
-        logging.debug("从文件加载已有的SLA违规记录")
-        with open(SLA_VIOLATIONS_RECORDS_FILE, 'r', encoding='utf-8') as f:
-            timeout_records = json.load(f)
-
-    today = datetime.now().date()
-    last_week = today - timedelta(days=7)
-    logging.debug(f"开始清理{last_week}之前的过期记录")
-
-    # 清理过期记录
-    old_records_count = len(timeout_records)
-    timeout_records = {date: records for date, records in timeout_records.items() if datetime.strptime(date, '%Y-%m-%d').date() >= last_week and datetime.strptime(date, '%Y-%m-%d').date() < today}
-    logging.info(f"清理完成，删除了 {old_records_count - len(timeout_records)} 条过期记录")
-
-    # 记录今天的超时情况，记录详细信息
-    today_str = today.strftime('%Y-%m-%d')
-    timeout_records[today_str] = violation_data  # 直接记录所有详细信息
-    logging.info(f"更新{today_str}的违规记录完成，共{len(violation_data)}条")
-
-    # 保存更新后的记录，确保中文字符不被转义
-    logging.debug("开始保存更新后的记录到文件")
-    with open(SLA_VIOLATIONS_RECORDS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(timeout_records, f, ensure_ascii=False, indent=4)
-    logging.info("SLA违规记录更新完成")
-
-def get_last_week_sla_violations():
-    # 获取过去一周的超时记录，不包括今天
-    if not os.path.exists(SLA_VIOLATIONS_RECORDS_FILE):
-        return []
-
-    with open(SLA_VIOLATIONS_RECORDS_FILE, 'r') as f:
-        timeout_records = json.load(f)
-
-    last_week_records = set()
-    today = datetime.now().date()
-    for i in range(1, 8):  # 从1到7，确保不包括今天
-        date_str = (today - timedelta(days=i)).strftime('%Y-%m-%d')
-        if date_str in timeout_records:
-            last_week_records.update(timeout_records[date_str])
-
-    return list(last_week_records)
+        return {}
+    with open(SLA_VIOLATIONS_RECORDS_FILE, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 def is_monday():
     """
@@ -193,7 +238,7 @@ def generate_sla_performance_report(provider):
     # 计算数据周期
     period_start = (monday - timedelta(days=7)).strftime('%Y.%m.%d')
     period_end = (monday - timedelta(days=1)).strftime('%Y.%m.%d')
-    appeal_deadline = monday.strftime('%Y 年%m月%d日')
+    appeal_deadline = monday.strftime('%Y.%m.%d')
     
     report = f"数据周期: {period_start}-{period_end}\n"
     report += f"服务商: {provider}\n\n"
@@ -226,12 +271,6 @@ def get_provider_sla_violations(provider_name):
                     records.append(record_with_date)
 
     return records
-
-def load_sla_violation_records():
-    if not os.path.exists(SLA_VIOLATIONS_RECORDS_FILE):
-        return {}
-    with open(SLA_VIOLATIONS_RECORDS_FILE, 'r', encoding='utf-8') as f:
-        return json.load(f)
 
 # 示例调用
 if __name__ == "__main__":
@@ -290,11 +329,4 @@ if __name__ == "__main__":
     ]
 
     # 更新超时记录
-    update_sla_violation_records(report_data)
-
-    # 发送日报通知
-    monitor_sla_compliance_and_report(report_data)
-
-    # 额外的测试数据，模拟一周内无超时情况
-    # 这里可以手动修改 timeout_records.json 文件，确保过去一周没有超时记录
-    # 例如，手动清空 timeout_records.json 文件或确保其中的记录为 []
+    process_sla_violations(report_data)
