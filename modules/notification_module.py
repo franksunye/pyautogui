@@ -10,122 +10,13 @@ import requests
 from modules.config import *
 from modules.file_utils import load_send_status, update_send_status, get_all_records_from_csv, write_performance_data_to_csv
 from datetime import datetime, timezone
-from task_manager import create_task, update_task
+from task_manager import create_task
 
 # 配置日志
 setup_logging()
 # 使用专门的发送消息日志记录器
 send_logger = logging.getLogger('sendLogger')
 
-def update_task_status(task_id, status):
-    update_task(task_id, status)
-
-def insert_task(task_type, recipient, message):
-    create_task(task_type, recipient, message)
-
-def send_wechat_message(user, message):
-    logging.info(f"Preparing to open WeChat PC application to send message to {user}...")
-    active_window = gw.getActiveWindow()
-    is_active = re.match(r'^微信', active_window.title) is not None
-
-    if not is_active:
-        logging.info(f"Opening WeChat PC application to send message to {user}...")
-        pyautogui.hotkey('ctrl', 'alt', 'w')
-        time.sleep(1)
-        
-    pyautogui.hotkey('ctrl', 'f')
-    pyperclip.copy(user)
-    pyautogui.hotkey('ctrl', 'v')
-    time.sleep(1)
-    pyautogui.press('enter')
-    time.sleep(1)
-
-    pyperclip.copy(message)
-    pyautogui.hotkey('ctrl', 'v')
-    pyautogui.press('enter')
-    time.sleep(1)
-
-    logging.info("Messages have been 'sent'.")
-
-def send_wechat_message_with_tasks(task):
-    user = task['recipient']
-    message = task['message']
-    logging.info(f"Preparing to open WeChat PC application to send message to {user}...")
-    active_window = gw.getActiveWindow()
-    is_active = re.match(r'^微信', active_window.title) is not None
-
-    if not is_active:
-        logging.info(f"Opening WeChat PC application to send message to {user}...")
-        pyautogui.hotkey('ctrl', 'alt', 'w')
-        time.sleep(1)
-        
-    pyautogui.hotkey('ctrl', 'f')
-    pyperclip.copy(user)
-    pyautogui.hotkey('ctrl', 'v')
-    time.sleep(1)
-    pyautogui.press('enter')
-    time.sleep(1)
-
-    pyperclip.copy(message)
-    pyautogui.hotkey('ctrl', 'v')
-    pyautogui.press('enter')
-    time.sleep(1)
-
-    logging.info("Messages have been 'sent'.")
-
-def send_wecom_message(user, message):
-    logging.info(f"Preparing to open WeCom PC application to send message to {user}...")
-    wechat_window = gw.getWindowsWithTitle('企业微信')[0] if gw.getWindowsWithTitle('企业微信') else None
-
-    if not wechat_window or not wechat_window.isActive:
-        logging.info(f"Opening WeCom PC application to send message to {user}...")
-        pyautogui.hotkey('shift', 'alt', 's')
-        time.sleep(1)
-
-    pyautogui.hotkey('alt')
-    time.sleep(0.1) # 可以根据需要调整延迟时间
-    pyautogui.hotkey('alt')
-    
-    pyperclip.copy(user)
-    pyautogui.hotkey('ctrl', 'v')
-    time.sleep(1)
-    pyautogui.press('enter')
-    time.sleep(1)
-
-    pyperclip.copy(message)
-    pyautogui.hotkey('ctrl', 'v')
-    pyautogui.press('enter')
-    time.sleep(1)
-
-    logging.info("Messages have been 'sent'.")
-
-def send_wecom_message_with_tasks(task):
-    user = task['recipient']
-    message = task['message']
-    logging.info(f"Preparing to open WeCom PC application to send message to {user}...")
-    wechat_window = gw.getWindowsWithTitle('企业微信')[0] if gw.getWindowsWithTitle('企业微信') else None
-
-    if not wechat_window or not wechat_window.isActive:
-        logging.info(f"Opening WeCom PC application to send message to {user}...")
-        pyautogui.hotkey('shift', 'alt', 's')
-        time.sleep(1)
-
-    pyautogui.hotkey('alt')
-    time.sleep(0.1) # 可以根据需要调整延迟时间
-    pyautogui.hotkey('alt')
-    
-    pyperclip.copy(user)
-    pyautogui.hotkey('ctrl', 'v')
-    time.sleep(1)
-    pyautogui.press('enter')
-    time.sleep(1)
-
-    pyperclip.copy(message)
-    pyautogui.hotkey('ctrl', 'v')
-    pyautogui.press('enter')
-    time.sleep(1)
-
-    logging.info("Messages have been 'sent'.")
 def generate_award_message(record, awards_mapping):
     service_housekeeper = record["管家(serviceHousekeeper)"]
     contract_number = record["合同编号(contractdocNum)"]
@@ -198,7 +89,60 @@ def notify_awards_nov_beijing(performance_data_filename, status_filename):
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_BJ_NOV, jiangli_msg)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_NOV, jiangli_msg)
+
+            update_send_status(status_filename, contract_id, '发送成功')
+            # time.sleep(2)  # 添加3秒的延迟
+
+            record['是否发送通知'] = 'Y'
+            updated = True
+            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+
+    if updated:
+        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
+        logging.info("PerformanceData.csv updated with notification status.")
+
+# 2024年11月，北京. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶
+def notify_awards_feb_beijing(performance_data_filename, status_filename):
+    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
+    records = get_all_records_from_csv(performance_data_filename)
+    send_status = load_send_status(status_filename)
+    updated = False
+
+    awards_mapping = {
+        '接好运': '58',
+        '接好运万元以上': '88',
+        '达标奖': '400',
+        '优秀奖': '800',
+        '精英奖': '1200'
+    }
+
+    for record in records:
+        contract_id = record['合同ID(_id)']
+        
+        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
+        processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
+
+        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
+            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
+            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
+恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
+
+\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
+
+\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元{f', 累计计入业绩 {processed_enter_performance_amount} 元' if ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB else ''}
+
+\U0001F44A {next_msg}。
+'''
+            # logging.info(f"Constructed message: {msg}")
+
+            # send_wecom_message(WECOM_GROUP_NAME_BJ_NOV, msg)
+            create_task('send_wecom_message', WECOM_GROUP_NAME_BJ_FEB, msg)
+            time.sleep(3)  # 添加3秒的延迟
+
+            if record['激活奖励状态'] == '1':
+                jiangli_msg = generate_award_message(record, awards_mapping)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_FEB, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             # time.sleep(2)  # 添加3秒的延迟
@@ -253,7 +197,7 @@ def notify_awards_july_shanghai(performance_data_filename, status_filename,contr
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping)
-                send_wechat_message(CAMPAIGN_CONTACT_SH_DEC, jiangli_msg)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_SH_DEC, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             time.sleep(2)
@@ -303,11 +247,11 @@ def notify_awards_july_shanghai_generate_message(performance_data_filename, stat
 '''
             # logging.info(f"Constructed message: {msg}")
 
-            insert_task('send_wecom_message', WECOM_GROUP_NAME_SH_DEC, msg)
+            create_task('send_wecom_message', WECOM_GROUP_NAME_SH_JAN, msg)
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping)
-                insert_task('send_wechat_message', CAMPAIGN_CONTACT_SH_DEC, jiangli_msg)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_SH_DEC, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             time.sleep(2)
@@ -319,7 +263,91 @@ def notify_awards_july_shanghai_generate_message(performance_data_filename, stat
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
+
+def notify_awards_shanghai_generate_message_march(performance_data_filename, status_filename,contract_data):
+    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
+    records = get_all_records_from_csv(performance_data_filename)
+    send_status = load_send_status(status_filename)
+    updated = False
+
+    for record in records:
+        contract_id = record['合同ID(_id)']
         
+        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
+        
+        processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
+                        
+        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
+            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
+            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
+
+恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
+
+\U0001F33B 本单为本月平台累计签约第 {record["活动期内第几个合同"]} 单，
+
+\U0001F33B 个人累计签约第 {record["管家累计单数"]} 单，
+
+\U0001F33B 个人累计签约 {processed_accumulated_amount} 元，
+
+\U0001F33B 个人转化率 {processed_conversion_rate}，
+
+\U0001F44A {next_msg}。
+'''
+            create_task('send_wecom_message', WECOM_GROUP_NAME_SH_MAR, msg)
+
+            if record['激活奖励状态'] == '1':
+                jiangli_msg = generate_award_message(record, awards_mapping)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_SH_MAR, jiangli_msg)
+
+            update_send_status(status_filename, contract_id, '发送成功')
+            time.sleep(2)
+
+            record['是否发送通知'] = 'Y'
+            updated = True
+            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+
+    if updated:
+        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
+        logging.info("PerformanceData.csv updated with notification status.")
+
+def notify_awards_shanghai_generate_message_february(performance_data_filename, status_filename,contract_data):
+    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
+    records = get_all_records_from_csv(performance_data_filename)
+    send_status = load_send_status(status_filename)
+    updated = False
+
+    for record in records:
+        contract_id = record['合同ID(_id)']
+        
+        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
+        
+        processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
+                        
+        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
+            logging.info(f"Processing contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+            
+            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
+恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
+
+\U0001F33B 本单为本月平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单，
+
+\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元，
+
+\U0001F33B 转化率 {processed_conversion_rate}。
+'''
+            create_task('send_wecom_message', WECOM_GROUP_NAME_SH_FEB, msg)
+
+            update_send_status(status_filename, contract_id, '发送成功')
+            time.sleep(2)
+
+            record['是否发送通知'] = 'Y'
+            updated = True
+            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+
+    if updated:
+        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
+        logging.info("PerformanceData.csv updated with notification status.")
+                
 def notify_awards_shanghai_generate_message_january(performance_data_filename, status_filename,contract_data):
     """通知奖励并更新性能数据文件，同时跟踪发送状态"""
     records = get_all_records_from_csv(performance_data_filename)
@@ -334,16 +362,18 @@ def notify_awards_shanghai_generate_message_january(performance_data_filename, s
         processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
                         
         if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
+            logging.info(f"Processing contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+            
             msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
 恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
 
-\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单，
+\U0001F33B 本单为本月平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单，
 
 \U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元，
 
 \U0001F33B 转化率 {processed_conversion_rate}。
 '''
-            insert_task('send_wecom_message', WECOM_GROUP_NAME_SH_DEC, msg)
+            create_task('send_wecom_message', WECOM_GROUP_NAME_SH_JAN, msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             time.sleep(2)
@@ -394,7 +424,7 @@ def notify_technician_status_changes(status_changes, status_filename):
 
         if change_id not in send_status:
             
-            send_wechat_message(company_name, message)
+            create_task('send_wechat_message', company_name, message)
             # send_wechat_message('文件传输助手', message)
             
             post_text_to_webhook(message)
@@ -465,7 +495,7 @@ def notify_daily_service_report(report_data, status_filename):
         # 检查是否已发送通知
         if records[0]['_id'] not in send_status:  # 使用第一个记录的_id进行检查
             try:
-                send_wecom_message(receiver_name, msg)  # 使用接收人名称发送消息
+                create_task('send_wecom_message', receiver_name, msg)  # 使用接收人名称发送消息
                 update_send_status(status_filename, records[0]['_id'], '通知成功')  # 使用第一个记录的_id更新状态
                 notified_service_providers.add(org_name)  # 记录已发送通知的服务商
                 logging.info(f"Notification sent for orders to {org_name}")
@@ -478,7 +508,7 @@ def notify_daily_service_report(report_data, status_filename):
             default_msg = "昨日无超时工单，请继续保持。👍"
             receiver_name = SERVICE_PROVIDER_MAPPING[org_name]
             try:
-                send_wecom_message(receiver_name, default_msg)  # 发送默认消息
+                create_task('send_wecom_message', receiver_name, default_msg)  # 发送默认消息
                 logging.info(f"Default message sent to {receiver_name} for {org_name}")
             except Exception as e:
                 logging.error(f"Error sending default message to {receiver_name}: {e}")

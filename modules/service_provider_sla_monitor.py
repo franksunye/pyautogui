@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 import logging
 from modules.config import SERVICE_PROVIDER_MAPPING, SLA_VIOLATIONS_RECORDS_FILE, SLA_CONFIG  # 引入配置中的服务商映射和文件路径
-from modules.notification_module import send_wecom_message as original_send_wecom_message  # 导入已有的发送消息函数并重命名
+from modules.message_sender import send_wecom_message as original_send_wecom_message  # 导入已有的发送消息函数并重命名
 
 # 假设SLA违规记录存储在这个文件中
 # SLA_VIOLATIONS_RECORDS_FILE = 'sla_violations.json'

@@ -325,3 +325,16 @@ __pycache__/task_manager.cpython-312.pyc
 __pycache__/task_model.cpython-312.pyc
 __pycache__/task_operations.cpython-312.pyc
 __pycache__/task_scheduler.cpython-312.pyc
+archive/state/ContractData-SH-Mar_202502281322.csv
+archive/state/ContractData-SH-Mar_202502281328.csv
+archive/state/ContractData-SH-Mar_202502281337.csv
+archive/state/ContractData-SH-Mar_202502281345.csv
+state/ContractData-BJ-Feb.csv
+state/PerformanceData-BJ-Feb.csv
+state/PerformanceData-SH-Feb.csv
+state/PerformanceData-SH-Jan.csv
+state/PerformanceData-SH-Mar.csv
+state/send_status_bj_feb.json
+state/send_status_sh_jan.json
+state/send_status_sh_mar.json
+modules/__pycache__/message_sender.cpython-312.pyc

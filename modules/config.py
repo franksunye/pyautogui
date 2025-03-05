@@ -43,6 +43,18 @@ STATUS_FILENAME_BJ_NOV = 'state/send_status_bj_nov.json'
 WECOM_GROUP_NAME_BJ_NOV = '（北京）修链服务运营'
 CAMPAIGN_CONTACT_BJ_NOV = '王爽'
 
+## 上海地区，2024年12月活动
+API_URL_SH_DEC = METABASE_URL + "/api/card/1558/query"
+
+# 销售激励活动 JOB signing_and_sales_incentive_nov_shanghai
+TEMP_CONTRACT_DATA_FILE_SH_DEC = 'state/ContractData-SH-Dec.csv'
+PERFORMANCE_DATA_FILENAME_SH_DEC = 'state/PerformanceData-SH-Dec.csv'
+STATUS_FILENAME_SH_DEC = 'state/send_status_sh_dec.json'
+
+# # Pro
+WECOM_GROUP_NAME_SH_DEC = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_DEC = '满浩浩'
+
 ## 上海地区，2025年1月活动
 API_URL_SH_JAN = METABASE_URL + "/api/card/1567/query"
 
@@ -55,29 +67,63 @@ STATUS_FILENAME_SH_JAN = 'state/send_status_sh_jan.json'
 WECOM_GROUP_NAME_SH_JAN = '（上海）运营群'
 CAMPAIGN_CONTACT_SH_JAN = '满浩浩'
 
-## 上海地区，2024年12月活动
-API_URL_SH_DEC = METABASE_URL + "/api/card/1558/query"
+## 上海地区，2025年2月活动
+API_URL_SH_FEB = METABASE_URL + "/api/card/1575/query"
 
 # 销售激励活动 JOB signing_and_sales_incentive_nov_shanghai
-TEMP_CONTRACT_DATA_FILE_SH_DEC = 'state/ContractData-SH-Dec.csv'
-PERFORMANCE_DATA_FILENAME_SH_DEC = 'state/PerformanceData-SH-Dec.csv'
-STATUS_FILENAME_SH_DEC = 'state/send_status_sh_dec.json'
+TEMP_CONTRACT_DATA_FILE_SH_FEB = 'state/ContractData-SH-Feb.csv'
+PERFORMANCE_DATA_FILENAME_SH_FEB = 'state/PerformanceData-SH-Feb.csv'
+STATUS_FILENAME_SH_FEB = 'state/send_status_sh_feb.json'
+
+# Pro
+WECOM_GROUP_NAME_SH_FEB = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_FEB = '满浩浩'
+
+## 上海地区，2025年3月活动
+API_URL_SH_MAR = METABASE_URL + "/api/card/1601/query"
+
+# 销售激励活动 JOB signing_and_sales_incentive_mar_shanghai
+TEMP_CONTRACT_DATA_FILE_SH_MAR = 'state/ContractData-SH-Mar.csv'
+PERFORMANCE_DATA_FILENAME_SH_MAR = 'state/PerformanceData-SH-Mar.csv'
+STATUS_FILENAME_SH_MAR = 'state/send_status_sh_mar.json'
 
 # # Pro
-# WECOM_GROUP_NAME_SH_DEC = '（上海）运营群'
-# CAMPAIGN_CONTACT_SH_DEC = '满浩浩'
+WECOM_GROUP_NAME_SH_MAR = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_MAR = '满浩浩'
 
-# Test
-WECOM_GROUP_NAME_SH_DEC = '孙埜'
-CAMPAIGN_CONTACT_SH_DEC = '文件传输助手'
+# # Test
+# WECOM_GROUP_NAME_SH_MAR = '孙埜'
+# CAMPAIGN_CONTACT_SH_MAR = '文件传输助手'
 
+## 上海的特殊配置选项
 # 销售激励活动 奖金池计算比例
 BONUS_POOL_RATIO = 0.002  # 默认为0.2%,可根据需要调整
 
 # 业绩金额上限配置
 PERFORMANCE_AMOUNT_CAP = 40000  # 单个合同计入业绩金额上限
 # 是否启用业绩金额上限
-ENABLE_PERFORMANCE_AMOUNT_CAP = True
+ENABLE_PERFORMANCE_AMOUNT_CAP = False
+
+## 北京地区，2025年2月活动
+API_URL_BJ_FEB = METABASE_URL + "/api/card/1576/query"
+
+# 北京销售激励活动 JOB signing_and_sales_incentive_oct_beijing
+TEMP_CONTRACT_DATA_FILE_BJ_FEB = 'state/ContractData-BJ-Feb.csv'
+PERFORMANCE_DATA_FILENAME_BJ_FEB = 'state/PerformanceData-BJ-Feb.csv'
+STATUS_FILENAME_BJ_FEB = 'state/send_status_bj_feb.json'
+
+# # Pro
+WECOM_GROUP_NAME_BJ_FEB = '（北京）修链服务运营'
+CAMPAIGN_CONTACT_BJ_FEB = '王爽'
+
+## 北京的特殊配置选项
+# 销售激励活动 奖金池计算比例
+BONUS_POOL_RATIO_BJ_FEB = 0.002  # 默认为0.2%,可根据需要调整
+
+# 业绩金额上限配置
+PERFORMANCE_AMOUNT_CAP_BJ_FEB = 100000  # 单个合同计入业绩金额上限
+# 是否启用业绩金额上限
+ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB = True
 
 # 昨日指定服务时效规范执行情况日报 JOB generate_daily_service_report
 API_URL_DAILY_SERVICE_REPORT = METABASE_URL + "/api/card/1514/query"

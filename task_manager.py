@@ -52,3 +52,12 @@ def update_task(task_id, status):
         task.id = task_id  # Set the task ID
         task.update_status(status)
     conn.close()
+
+def get_pending_tasks():
+    conn = sqlite3.connect('tasks.db')
+    conn.row_factory = sqlite3.Row  # Set row factory to Row to return dictionaries
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks WHERE status='pending'")
+    tasks = cursor.fetchall()
+    conn.close()
+    return tasks

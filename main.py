@@ -21,24 +21,38 @@ def run_jobs_serially():
         current_month = datetime.datetime.now().month
         print("Current month is:", current_month)
 
-        if current_month == 12:
-            # 上海12月份
+        if current_month == 2:
+            # 上海2月份
             try:
-                signing_and_sales_incentive_dec_shanghai()
+                signing_and_sales_incentive_feb_shanghai()
                 time.sleep(5)
             except Exception as e:
                 logging.error(f"An error occurred while running signing_and_sales_incentive_dec_shanghai: {e}")
                 logging.error(traceback.format_exc())
-                
-        elif current_month == 1:
-            # 上海1月份
+
+            # 北京2月份
             try:
-                signing_and_sales_incentive_jan_shanghai()
+                signing_and_sales_incentive_feb_beijing()
+                time.sleep(5)
+            except Exception as e:
+                logging.error(f"An error occurred while running signing_and_sales_incentive_feb_beijing: {e}")
+                logging.error(traceback.format_exc())
+
+        elif current_month == 3:
+            # 上海3月份
+            try:
+                signing_and_sales_incentive_mar_shanghai()
                 time.sleep(5)
             except Exception as e:
                 logging.error(f"An error occurred while running signing_and_sales_incentive_jan_shanghai: {e}")
                 logging.error(traceback.format_exc())
-                                       
+            # 北京2-3月份
+            try:
+                signing_and_sales_incentive_feb_beijing()
+                time.sleep(5)
+            except Exception as e:
+                logging.error(f"An error occurred while running signing_and_sales_incentive_feb_beijing: {e}")
+                logging.error(traceback.format_exc())                                       
         else:
             logging.info("No tasks scheduled for this month.")       
         
@@ -75,8 +89,10 @@ if __name__ == '__main__':
     scheduler_thread.start()
 
     # generate_daily_service_report()
-    # signing_and_sales_incentive_nov_beijing()
-    # signing_and_sales_incentive_dec_shanghai()
+    # check_technician_status()
+
+    # signing_and_sales_incentive_mar_shanghai()
+    # signing_and_sales_incentive_feb_shanghai()
     # 启动调度循环
     while True:
         try:
