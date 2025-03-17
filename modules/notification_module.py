@@ -270,6 +270,14 @@ def notify_awards_shanghai_generate_message_march(performance_data_filename, sta
     send_status = load_send_status(status_filename)
     updated = False
 
+    awards_mapping = {
+        '基础奖': '200',
+        '达标奖': '300',
+        '优秀奖': '400',
+        '精英奖': '800',
+        # '卓越奖': '1200',
+    }
+
     for record in records:
         contract_id = record['合同ID(_id)']
         
