@@ -86,19 +86,21 @@ if __name__ == '__main__':
     # 启动任务调度器
     scheduler_thread = threading.Thread(target=task_scheduler.start)
     scheduler_thread.daemon = True  # 设置为守护线程
-    scheduler_thread.start()
+    # scheduler_thread.start()
 
     # generate_daily_service_report()
     # check_technician_status()
 
     # signing_and_sales_incentive_mar_shanghai()
     # signing_and_sales_incentive_feb_shanghai()
-    # 启动调度循环
-    while True:
-        try:
-            schedule.run_pending()
-            time.sleep(1)
-        except Exception as e:
-            logging.error(f"Job failed with exception: {e}")
-            logging.error(traceback.format_exc())
-            time.sleep(5)
+    # signing_and_sales_incentive_apr_beijing()
+    signing_and_sales_incentive_apr_shanghai()
+    # # 启动调度循环
+    # while True:
+    #     try:
+    #         schedule.run_pending()
+    #         time.sleep(1)
+    #     except Exception as e:
+    #         logging.error(f"Job failed with exception: {e}")
+    #         logging.error(traceback.format_exc())
+    #         time.sleep(5)

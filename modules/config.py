@@ -18,7 +18,8 @@ TASK_CHECK_INTERVAL = 10
 
 # 北京地区
 # 北京运营企微群机器人通讯地址
-WEBHOOK_URL_DEFAULT = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=59cf22c5-0623-4b34-b207-0f404f13eeeb'
+# WEBHOOK_URL_DEFAULT = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=59cf22c5-0623-4b34-b207-0f404f13eeeb'
+WEBHOOK_URL_DEFAULT = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=689cebff-3328-4150-9741-fed8b8ce4713'
 PHONE_NUMBER = '15327103039'
 
 # 第二个任务，北京技师状态检查 JOB check_technician_status
@@ -87,13 +88,21 @@ TEMP_CONTRACT_DATA_FILE_SH_MAR = 'state/ContractData-SH-Mar.csv'
 PERFORMANCE_DATA_FILENAME_SH_MAR = 'state/PerformanceData-SH-Mar.csv'
 STATUS_FILENAME_SH_MAR = 'state/send_status_sh_mar.json'
 
-# # Pro
+# Pro
 WECOM_GROUP_NAME_SH_MAR = '（上海）运营群'
 CAMPAIGN_CONTACT_SH_MAR = '满浩浩'
 
-# # Test
-# WECOM_GROUP_NAME_SH_MAR = '孙埜'
-# CAMPAIGN_CONTACT_SH_MAR = '文件传输助手'
+## 上海地区，2025年4月活动
+API_URL_SH_APR = METABASE_URL + "/api/card/1601/query"
+
+# 销售激励活动 JOB signing_and_sales_incentive_apr_shanghai
+TEMP_CONTRACT_DATA_FILE_SH_APR = 'state/ContractData-SH-Apr.csv'
+PERFORMANCE_DATA_FILENAME_SH_APR = 'state/PerformanceData-SH-Apr.csv'
+STATUS_FILENAME_SH_APR = 'state/send_status_sh_apr.json'
+
+# Pro
+WECOM_GROUP_NAME_SH_APR = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_APR = '满浩浩'
 
 ## 上海的特殊配置选项
 # 销售激励活动 奖金池计算比例
@@ -116,10 +125,24 @@ STATUS_FILENAME_BJ_FEB = 'state/send_status_bj_feb.json'
 WECOM_GROUP_NAME_BJ_FEB = '（北京）修链服务运营'
 CAMPAIGN_CONTACT_BJ_FEB = '王爽'
 
+## 北京地区，2025年4月活动
+API_URL_BJ_APR = METABASE_URL + "/api/card/1576/query"
+
+# 北京销售激励活动 JOB signing_and_sales_incentive_apr_beijing
+TEMP_CONTRACT_DATA_FILE_BJ_APR = 'state/ContractData-BJ-Apr.csv'
+PERFORMANCE_DATA_FILENAME_BJ_APR = 'state/PerformanceData-BJ-Apr.csv'
+STATUS_FILENAME_BJ_APR = 'state/send_status_bj_apr.json'
+
+# # Pro
+WECOM_GROUP_NAME_BJ_APR = '（北京）修链服务运营'
+CAMPAIGN_CONTACT_BJ_APR = '王爽'
+
 ## 北京的特殊配置选项
 # 销售激励活动 奖金池计算比例
 BONUS_POOL_RATIO_BJ_FEB = 0.002  # 默认为0.2%,可根据需要调整
 
+# 单个项目合同金额上限
+SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_FEB = 1000000  # 单个项目合同金额上限
 # 业绩金额上限配置
 PERFORMANCE_AMOUNT_CAP_BJ_FEB = 100000  # 单个合同计入业绩金额上限
 # 是否启用业绩金额上限
@@ -154,8 +177,21 @@ SERVICE_PROVIDER_MAPPING = {
     "北京盛达洪雨防水技术有限公司": "盛达洪雨（沟通群）",
     "北京腾飞瑞欧建筑装饰有限公司": "潇译防水（沟通群）",
     "北京众德森建材有限责任公司": "众德森（沟通群）",
+    "北京九鼎建工建筑工程有限公司": "九鼎建工（沟通群）",
+    "北京顺建为安工程有限公司": "顺建为安（沟通群）",
+    "三河市中豫防水工程有限公司": "中豫防水（沟通群）",
+    "北京华锐龙盛建筑工程有限公司": "华锐龙盛（沟通群）",
     "云尚虹（北京）建筑工程有限公司": "云尚虹（沟通群）",
 
     # 可以继续添加其他服务商的映射
     # "服务商名称": "接收人名称",
 }
+
+##------ 徽章功能 ------##
+# 是否启用徽章，2025年4月新增
+ENABLE_BADGE_MANAGEMENT = True
+BADGE_EMOJI = "\U0001F396"  # 奖章
+BADGE_NAME = f"【{BADGE_EMOJI}精英管家】"
+
+# 精英管家列表，2025年4月份增加的逻辑，精英管家是技术工程师的一个头衔
+ELITE_HOUSEKEEPER = ["孔祥达1", "吕世军"]  # 可以根据需要添加更多管家

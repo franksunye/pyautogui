@@ -21,10 +21,26 @@ def generate_award_message(record, awards_mapping):
     service_housekeeper = record["管家(serviceHousekeeper)"]
     contract_number = record["合同编号(contractdocNum)"]
     award_messages = []
-    for award in record["奖励名称"].split(', '):
-        if award in awards_mapping:
-            award_info = awards_mapping[award]
-            award_messages.append(f'达成{award}奖励条件，获得签约奖励{award_info}元 \U0001F9E7\U0001F9E7\U0001F9E7')
+
+    if ENABLE_BADGE_MANAGEMENT and (service_housekeeper in ELITE_HOUSEKEEPER):
+        # 如果管家在精英管家列表里面，添加徽章和进行精英连击双倍奖励计算与提示
+        # logging.info(f'Generating award message for {service_housekeeper}, ENABLE_BADGE_MANAGEMENT={ENABLE_BADGE_MANAGEMENT}, ELITE_HOUSEKEEPER={ELITE_HOUSEKEEPER}...')
+        service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
+        for award in record["奖励名称"].split(', '):
+            if award in awards_mapping:
+                award_info = awards_mapping[award]
+                try:
+                    award_info_double = str(int(award_info) * 2)
+                except ValueError:
+                    pass
+                award_messages.append(f'达成 {award} 奖励条件，奖励金额 {award_info} 元，同时触发“精英连击双倍奖励”，奖励金额\U0001F680直升至 {award_info_double} 元！\U0001F9E7\U0001F9E7\U0001F9E7')
+    else:
+        # 不启用徽章功能
+        for award in record["奖励名称"].split(', '):
+            if award in awards_mapping:
+                award_info = awards_mapping[award]
+                award_messages.append(f'达成{award}奖励条件，获得签约奖励{award_info}元 \U0001F9E7\U0001F9E7\U0001F9E7')
+    
     return f'{service_housekeeper}签约合同{contract_number}\n\n' + '\n'.join(award_messages)
 
 def preprocess_rate(rate):
@@ -50,6 +66,64 @@ def preprocess_amount(amount):
     else:
         # 处理无效或空数据（例如，返回0或其他占位符）
         return "0"
+
+# 2025年4月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额10万封顶
+def notify_awards_apr_beijing(performance_data_filename, status_filename):
+    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
+    records = get_all_records_from_csv(performance_data_filename)
+    send_status = load_send_status(status_filename)
+    updated = False
+
+    awards_mapping = {
+        '接好运': '36',
+        '接好运万元以上': '66',
+        '达标奖': '200',
+        '优秀奖': '400',
+        '精英奖': '600'
+    }
+
+    for record in records:
+        contract_id = record['合同ID(_id)']
+        
+        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
+        processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
+        service_housekeeper = record["管家(serviceHousekeeper)"]
+
+        # 添加徽章
+        if ENABLE_BADGE_MANAGEMENT and service_housekeeper in ELITE_HOUSEKEEPER:
+            service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
+
+        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
+            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
+            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
+恭喜 {service_housekeeper} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
+
+\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
+
+\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元{f', 累计计入业绩 {processed_enter_performance_amount} 元' if ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB else ''}
+
+\U0001F44A {next_msg}。
+'''
+            # logging.info(f"Constructed message: {msg}")
+
+            # send_wecom_message(WECOM_GROUP_NAME_BJ_NOV, msg)
+            create_task('send_wecom_message', WECOM_GROUP_NAME_BJ_FEB, msg)
+            time.sleep(3)  # 添加3秒的延迟
+
+            if record['激活奖励状态'] == '1':
+                jiangli_msg = generate_award_message(record, awards_mapping)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_FEB, jiangli_msg)
+
+            update_send_status(status_filename, contract_id, '发送成功')
+            # time.sleep(2)  # 添加3秒的延迟
+
+            record['是否发送通知'] = 'Y'
+            updated = True
+            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+
+    if updated:
+        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
+        logging.info("PerformanceData.csv updated with notification status.")
 
 # 2024年11月，北京. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶
 def notify_awards_nov_beijing(performance_data_filename, status_filename):
@@ -102,7 +176,7 @@ def notify_awards_nov_beijing(performance_data_filename, status_filename):
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
 
-# 2024年11月，北京. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶
+# 2025年2月，北京. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶
 def notify_awards_feb_beijing(performance_data_filename, status_filename):
     """通知奖励并更新性能数据文件，同时跟踪发送状态"""
     records = get_all_records_from_csv(performance_data_filename)
