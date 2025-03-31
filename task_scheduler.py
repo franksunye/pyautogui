@@ -1,6 +1,4 @@
 import logging
-import sqlite3
-import schedule
 import time
 import threading
 from modules.message_sender import send_wechat_message, send_wecom_message
@@ -40,9 +38,12 @@ def check_tasks():
 
 def start():
     from modules.config import TASK_CHECK_INTERVAL
-    schedule.every(TASK_CHECK_INTERVAL).seconds.do(check_tasks)  # 使用配置的间隔时间检查任务
-    logging.info("Task scheduler started.")  # 记录启动
+    logging.info("Task scheduler started.")
 
     while True:
-        schedule.run_pending()
-        time.sleep(1)
+        try:
+            check_tasks()  # 直接调用检查任务
+            time.sleep(TASK_CHECK_INTERVAL)  # 使用配置的间隔时间
+        except Exception as e:
+            logging.error(f"Error in task scheduler: {e}")
+            time.sleep(5)

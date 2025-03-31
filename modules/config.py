@@ -116,14 +116,18 @@ ENABLE_PERFORMANCE_AMOUNT_CAP = False
 ## 北京地区，2025年2月活动
 API_URL_BJ_FEB = METABASE_URL + "/api/card/1576/query"
 
-# 北京销售激励活动 JOB signing_and_sales_incentive_oct_beijing
+# 北京销售激励活动 JOB signing_and_sales_incentive_feb_beijing
 TEMP_CONTRACT_DATA_FILE_BJ_FEB = 'state/ContractData-BJ-Feb.csv'
 PERFORMANCE_DATA_FILENAME_BJ_FEB = 'state/PerformanceData-BJ-Feb.csv'
 STATUS_FILENAME_BJ_FEB = 'state/send_status_bj_feb.json'
 
-# # Pro
+# Pro
 WECOM_GROUP_NAME_BJ_FEB = '（北京）修链服务运营'
 CAMPAIGN_CONTACT_BJ_FEB = '王爽'
+
+# # Test
+# WECOM_GROUP_NAME_BJ_FEB = '孙埜'
+# CAMPAIGN_CONTACT_BJ_FEB = '文件传输助手'
 
 ## 北京地区，2025年4月活动
 API_URL_BJ_APR = METABASE_URL + "/api/card/1576/query"
@@ -164,7 +168,7 @@ SERVICE_PROVIDER_MAPPING = {
     # "北京恒润万通防水工程有限公司": "孙埜",
     # "北京博远恒泰装饰装修有限公司": "孙埜",
     # "北京腾飞瑞欧建筑装饰有限公司": "孙埜",
-    # "北京德客声商贸有限公司": "孙埜",
+    # "北京久安有方建筑工程有限公司": "孙埜",
 
     "北京博远恒泰装饰装修有限公司": "博远恒泰（沟通群）",
     "北京德客声商贸有限公司": "德客声（沟通群）",
