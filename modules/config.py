@@ -32,54 +32,6 @@ API_URL_CONTACT_TIMEOUT = "http://metabase.fsgo365.cn:3000/api/card/980/query"
 WEBHOOK_URL_CONTACT_TIMEOUT = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=80ab1f45-2526-4b41-a639-c580ccde3e2f"
 
 
-## 北京地区，2024年11月活动
-API_URL_BJ_NOV = METABASE_URL + "/api/card/1522/query"
-
-# 北京销售激励活动 JOB signing_and_sales_incentive_oct_beijing
-TEMP_CONTRACT_DATA_FILE_BJ_NOV = 'state/ContractData-BJ-Nov.csv'
-PERFORMANCE_DATA_FILENAME_BJ_NOV = 'state/PerformanceData-BJ-Nov.csv'
-STATUS_FILENAME_BJ_NOV = 'state/send_status_bj_nov.json'
-
-# Pro
-WECOM_GROUP_NAME_BJ_NOV = '（北京）修链服务运营'
-CAMPAIGN_CONTACT_BJ_NOV = '王爽'
-
-## 上海地区，2024年12月活动
-API_URL_SH_DEC = METABASE_URL + "/api/card/1558/query"
-
-# 销售激励活动 JOB signing_and_sales_incentive_nov_shanghai
-TEMP_CONTRACT_DATA_FILE_SH_DEC = 'state/ContractData-SH-Dec.csv'
-PERFORMANCE_DATA_FILENAME_SH_DEC = 'state/PerformanceData-SH-Dec.csv'
-STATUS_FILENAME_SH_DEC = 'state/send_status_sh_dec.json'
-
-# # Pro
-WECOM_GROUP_NAME_SH_DEC = '（上海）运营群'
-CAMPAIGN_CONTACT_SH_DEC = '满浩浩'
-
-## 上海地区，2025年1月活动
-API_URL_SH_JAN = METABASE_URL + "/api/card/1567/query"
-
-# 销售激励活动 JOB signing_and_sales_incentive_nov_shanghai
-TEMP_CONTRACT_DATA_FILE_SH_JAN = 'state/ContractData-SH-Jan.csv'
-PERFORMANCE_DATA_FILENAME_SH_JAN = 'state/PerformanceData-SH-Jan.csv'
-STATUS_FILENAME_SH_JAN = 'state/send_status_sh_jan.json'
-
-# Pro
-WECOM_GROUP_NAME_SH_JAN = '（上海）运营群'
-CAMPAIGN_CONTACT_SH_JAN = '满浩浩'
-
-## 上海地区，2025年2月活动
-API_URL_SH_FEB = METABASE_URL + "/api/card/1575/query"
-
-# 销售激励活动 JOB signing_and_sales_incentive_nov_shanghai
-TEMP_CONTRACT_DATA_FILE_SH_FEB = 'state/ContractData-SH-Feb.csv'
-PERFORMANCE_DATA_FILENAME_SH_FEB = 'state/PerformanceData-SH-Feb.csv'
-STATUS_FILENAME_SH_FEB = 'state/send_status_sh_feb.json'
-
-# Pro
-WECOM_GROUP_NAME_SH_FEB = '（上海）运营群'
-CAMPAIGN_CONTACT_SH_FEB = '满浩浩'
-
 ## 上海地区，2025年3月活动
 API_URL_SH_MAR = METABASE_URL + "/api/card/1601/query"
 
@@ -93,7 +45,7 @@ WECOM_GROUP_NAME_SH_MAR = '（上海）运营群'
 CAMPAIGN_CONTACT_SH_MAR = '满浩浩'
 
 ## 上海地区，2025年4月活动
-API_URL_SH_APR = METABASE_URL + "/api/card/1601/query"
+API_URL_SH_APR = METABASE_URL + "/api/card/1617/query"
 
 # 销售激励活动 JOB signing_and_sales_incentive_apr_shanghai
 TEMP_CONTRACT_DATA_FILE_SH_APR = 'state/ContractData-SH-Apr.csv'
@@ -113,7 +65,7 @@ PERFORMANCE_AMOUNT_CAP = 40000  # 单个合同计入业绩金额上限
 # 是否启用业绩金额上限
 ENABLE_PERFORMANCE_AMOUNT_CAP = False
 
-## 北京地区，2025年2月活动
+## 北京地区，2025年2月及3月活动
 API_URL_BJ_FEB = METABASE_URL + "/api/card/1576/query"
 
 # 北京销售激励活动 JOB signing_and_sales_incentive_feb_beijing
@@ -130,7 +82,7 @@ CAMPAIGN_CONTACT_BJ_FEB = '王爽'
 # CAMPAIGN_CONTACT_BJ_FEB = '文件传输助手'
 
 ## 北京地区，2025年4月活动
-API_URL_BJ_APR = METABASE_URL + "/api/card/1576/query"
+API_URL_BJ_APR = METABASE_URL + "/api/card/1616/query"
 
 # 北京销售激励活动 JOB signing_and_sales_incentive_apr_beijing
 TEMP_CONTRACT_DATA_FILE_BJ_APR = 'state/ContractData-BJ-Apr.csv'
@@ -198,4 +150,4 @@ BADGE_EMOJI = "\U0001F396"  # 奖章
 BADGE_NAME = f"【{BADGE_EMOJI}精英管家】"
 
 # 精英管家列表，2025年4月份增加的逻辑，精英管家是技术工程师的一个头衔
-ELITE_HOUSEKEEPER = ["孔祥达1", "吕世军"]  # 可以根据需要添加更多管家
+ELITE_HOUSEKEEPER = ["胡林波", "余金凤", "文刘飞", "李卓", "吕世军"]  # 可以根据需要添加更多管家

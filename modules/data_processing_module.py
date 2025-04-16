@@ -12,7 +12,11 @@ from modules import config  # Add config import to use config.x consistently
 # 设置日志
 setup_logging()
 
-def determine_lucky_number_reward(contract_number: int, current_contract_amount: float, lucky_number: str) -> tuple[str, str]:
+def determine_lucky_number_reward(
+    contract_number: int, 
+    current_contract_amount: float, 
+    lucky_number: str
+) -> tuple:
     """
     Determine lucky number reward based on contract number and amount.
     
@@ -917,6 +921,9 @@ def process_data_shanghai_apr(contract_data, existing_contract_ids, housekeeper_
 
 # 4月份的奖励规则
 def determine_rewards_shanghai_apr(contract_number, housekeeper_data, contract_amount):
+    # 定义节节高奖励的合同数量阈值
+    JIEJIEGAO_CONTRACT_COUNT_THRESHOLD = 5
+
     reward_types = []
     reward_names = []
     next_reward_gap = ""  # 下一级奖励所需金额差
@@ -928,7 +935,7 @@ def determine_rewards_shanghai_apr(contract_number, housekeeper_data, contract_a
         reward_names.append(reward_name)
 
     # 节节高奖励逻辑（需要管家合同数量大于等于5）
-    if housekeeper_data['count'] >= 5:
+    if housekeeper_data['count'] >= JIEJIEGAO_CONTRACT_COUNT_THRESHOLD:
         # 计算下一级奖励所需金额差，如果启用了绩效金额，使用绩效金额，否则使用合同金额
         amount = housekeeper_data['performance_amount'] if config.ENABLE_PERFORMANCE_AMOUNT_CAP else housekeeper_data['total_amount']
         next_reward = None
@@ -996,7 +1003,7 @@ def determine_rewards_shanghai_apr(contract_number, housekeeper_data, contract_a
                 next_reward_gap = f"距离 {next_reward} 还需 {round(120000 - amount, 2):,} 元"             
     else:
         if  not set(["精英奖", "优秀奖", "达标奖"]).intersection(housekeeper_data['awarded']):
-            next_reward_gap = f"距离达成节节高奖励条件还需 {3 -  housekeeper_data['count']} 单"
+            next_reward_gap = f"距离达成节节高奖励条件还需 {JIEJIEGAO_CONTRACT_COUNT_THRESHOLD -  housekeeper_data['count']} 单"
         
     return ', '.join(reward_types), ', '.join(reward_names), next_reward_gap
 

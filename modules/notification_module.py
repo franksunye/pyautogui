@@ -345,6 +345,8 @@ def notify_awards_shanghai_generate_message_march(performance_data_filename, sta
     updated = False
 
     awards_mapping = {
+        '接好运': '36',
+        '接好运万元以上': '66',
         '基础奖': '200',
         '达标奖': '300',
         '优秀奖': '400',

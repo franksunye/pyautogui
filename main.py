@@ -22,20 +22,20 @@ def run_jobs_serially():
         print("Current month is:", current_month)
 
         if current_month == 4:
-            # 上海2月份
+            # 上海4月份
             try:
                 signing_and_sales_incentive_apr_shanghai()
                 time.sleep(5)
             except Exception as e:
-                logging.error(f"An error occurred while running signing_and_sales_incentive_dec_shanghai: {e}")
+                logging.error(f"An error occurred while running signing_and_sales_incentive_apr_shanghai: {e}")
                 logging.error(traceback.format_exc())
 
-            # 北京2月份
+            # 北京4月份
             try:
                 signing_and_sales_incentive_apr_beijing()
                 time.sleep(5)
             except Exception as e:
-                logging.error(f"An error occurred while running signing_and_sales_incentive_feb_beijing: {e}")
+                logging.error(f"An error occurred while running signing_and_sales_incentive_apr_beijing: {e}")
                 logging.error(traceback.format_exc())
 
         elif current_month == 3:
@@ -44,7 +44,7 @@ def run_jobs_serially():
                 signing_and_sales_incentive_mar_shanghai()
                 time.sleep(5)
             except Exception as e:
-                logging.error(f"An error occurred while running signing_and_sales_incentive_jan_shanghai: {e}")
+                logging.error(f"An error occurred while running signing_and_sales_incentive_mar_shanghai: {e}")
                 logging.error(traceback.format_exc())
             # 北京2-3月份
             try:
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     # 启动任务调度器
     scheduler_thread = threading.Thread(target=task_scheduler.start)
     scheduler_thread.daemon = True  # 设置为守护线程
-    scheduler_thread.start()
+    # scheduler_thread.start()
 
     # 单独测试任务
     # generate_daily_service_report()
@@ -94,14 +94,14 @@ if __name__ == '__main__':
     # signing_and_sales_incentive_mar_shanghai()
     # signing_and_sales_incentive_feb_shanghai()
     # signing_and_sales_incentive_apr_beijing()
-    # signing_and_sales_incentive_apr_shanghai()
+    signing_and_sales_incentive_apr_shanghai()
 
-    # 启动调度循环
-    while True:
-        try:
-            schedule.run_pending()  # 这里也在运行schedule的任务
-            time.sleep(1)
-        except Exception as e:
-            logging.error(f"Job failed with exception: {e}")
-            logging.error(traceback.format_exc())
-            time.sleep(5)
+    # # 启动调度循环
+    # while True:
+    #     try:
+    #         schedule.run_pending()  # 这里也在运行schedule的任务
+    #         time.sleep(1)
+    #     except Exception as e:
+    #         logging.error(f"Job failed with exception: {e}")
+    #         logging.error(traceback.format_exc())
+    #         time.sleep(5)
