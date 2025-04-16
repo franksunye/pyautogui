@@ -338,3 +338,15 @@ state/send_status_bj_feb.json
 state/send_status_sh_jan.json
 state/send_status_sh_mar.json
 modules/__pycache__/message_sender.cpython-312.pyc
+archive/state/ContractData-BJ-Feb_202503091650.csv
+archive/state/ContractData-SH-Mar_202503091641.csv
+archive/state/ContractData-SH-Mar_202503091649.csv
+archive/state/ContractData-SH-Mar_202503091656.csv
+archive/state/ContractData-SH-Mar_202503091700.csv
+archive/state/ContractData-SH-Apr_202504031156.csv
+archive/state/ContractData-SH-Apr_202504031203.csv
+archive/state/ContractData-SH-Apr_202504031205.csv
+state/send_status_sh_apr.json
+state/PerformanceData-BJ-Apr.csv
+state/PerformanceData-SH-Apr.csv
+state/send_status_bj_apr.json
