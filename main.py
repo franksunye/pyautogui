@@ -93,8 +93,8 @@ if __name__ == '__main__':
     # check_technician_status()
     # signing_and_sales_incentive_mar_shanghai()
     # signing_and_sales_incentive_feb_shanghai()
-    # signing_and_sales_incentive_apr_beijing()
-    signing_and_sales_incentive_apr_shanghai()
+    signing_and_sales_incentive_apr_beijing()
+    # signing_and_sales_incentive_apr_shanghai()
 
     # # 启动调度循环
     # while True:
