@@ -63,6 +63,27 @@ REWARD_CONFIGS = {
                 {"name": "精英奖", "threshold": 120000}
             ]
         }
+    },
+    # 北京2025年5月活动配置
+    "BJ-2025-05": {
+        "lucky_number": "6",
+        "lucky_rewards": {
+            "base": {"name": "接好运", "threshold": 0},
+            "high": {"name": "接好运万元以上", "threshold": 10000}
+        },
+        "performance_limits": {
+            "single_project_limit": 100000,
+            "enable_cap": True,
+            "single_contract_cap": 100000
+        },
+        "tiered_rewards": {
+            "min_contracts": 6,
+            "tiers": [
+                {"name": "达标奖", "threshold": 80000},
+                {"name": "优秀奖", "threshold": 120000},
+                {"name": "精英奖", "threshold": 160000}
+            ]
+        }
     }
 }
 
@@ -109,6 +130,18 @@ STATUS_FILENAME_SH_APR = 'state/send_status_sh_apr.json'
 WECOM_GROUP_NAME_SH_APR = '（上海）运营群'
 CAMPAIGN_CONTACT_SH_APR = '满浩浩'
 
+## 上海地区，2025年5月活动
+API_URL_SH_MAY = METABASE_URL + "/api/card/1694/query"
+
+# 销售激励活动 JOB signing_and_sales_incentive_may_shanghai
+TEMP_CONTRACT_DATA_FILE_SH_MAY = 'state/ContractData-SH-May.csv'
+PERFORMANCE_DATA_FILENAME_SH_MAY = 'state/PerformanceData-SH-May.csv'
+STATUS_FILENAME_SH_MAY = 'state/send_status_sh_may.json'
+
+# Pro
+WECOM_GROUP_NAME_SH_MAY = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_MAY = '满浩浩'
+
 ## 上海的特殊配置选项
 # 销售激励活动 奖金池计算比例
 BONUS_POOL_RATIO = 0.002  # 默认为0.2%,可根据需要调整
@@ -126,9 +159,21 @@ TEMP_CONTRACT_DATA_FILE_BJ_APR = 'state/ContractData-BJ-Apr.csv'
 PERFORMANCE_DATA_FILENAME_BJ_APR = 'state/PerformanceData-BJ-Apr.csv'
 STATUS_FILENAME_BJ_APR = 'state/send_status_bj_apr.json'
 
-# # Pro
+# Pro
 WECOM_GROUP_NAME_BJ_APR = '（北京）修链服务运营'
 CAMPAIGN_CONTACT_BJ_APR = '王爽'
+
+## 北京地区，2025年5月活动
+API_URL_BJ_MAY = METABASE_URL + "/api/card/1693/query"
+
+# 北京销售激励活动 JOB signing_and_sales_incentive_may_beijing
+TEMP_CONTRACT_DATA_FILE_BJ_MAY = 'state/ContractData-BJ-May.csv'
+PERFORMANCE_DATA_FILENAME_BJ_MAY = 'state/PerformanceData-BJ-May.csv'
+STATUS_FILENAME_BJ_MAY = 'state/send_status_bj_may.json'
+
+# Pro
+WECOM_GROUP_NAME_BJ_MAY = '（北京）修链服务运营'
+CAMPAIGN_CONTACT_BJ_MAY = '王爽'
 
 ## 北京的特殊配置选项
 # 销售激励活动 奖金池计算比例

@@ -67,6 +67,60 @@ def preprocess_amount(amount):
         # 处理无效或空数据（例如，返回0或其他占位符）
         return "0"
 
+# 2025年5月，北京. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额10万封顶
+def notify_awards_may_beijing(performance_data_filename, status_filename):
+    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
+    records = get_all_records_from_csv(performance_data_filename)
+    send_status = load_send_status(status_filename)
+    updated = False
+
+    awards_mapping = {
+        '接好运': '28',
+        '接好运万元以上': '58',
+        '达标奖': '200',
+        '优秀奖': '400',
+        '精英奖': '600'
+    }
+
+    for record in records:
+        contract_id = record['合同ID(_id)']
+        
+        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
+        processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
+        service_housekeeper = record["管家(serviceHousekeeper)"]
+
+        # 添加是否启用徽章管理的判断，如果启用则在管家名称前添加徽章名称
+        if ENABLE_BADGE_MANAGEMENT and service_housekeeper in ELITE_HOUSEKEEPER:
+            service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
+
+        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
+            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
+            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
+恭喜 {service_housekeeper} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
+
+\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
+
+\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元{f', 累计计入业绩 {processed_enter_performance_amount} 元' if ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB else ''}
+
+\U0001F44A {next_msg}。
+'''
+            create_task('send_wecom_message', WECOM_GROUP_NAME_BJ_MAY, msg)
+            time.sleep(3)
+
+            if record['激活奖励状态'] == '1':
+                jiangli_msg = generate_award_message(record, awards_mapping)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_MAY, jiangli_msg)
+
+            update_send_status(status_filename, contract_id, '发送成功')
+
+            record['是否发送通知'] = 'Y'
+            updated = True
+            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+
+    if updated:
+        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
+        logging.info("PerformanceData.csv updated with notification status.")
+
 # 2025年4月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额10万封顶
 def notify_awards_apr_beijing(performance_data_filename, status_filename):
     """通知奖励并更新性能数据文件，同时跟踪发送状态"""
@@ -107,116 +161,12 @@ def notify_awards_apr_beijing(performance_data_filename, status_filename):
             # logging.info(f"Constructed message: {msg}")
 
             # send_wecom_message(WECOM_GROUP_NAME_BJ_NOV, msg)
-            create_task('send_wecom_message', WECOM_GROUP_NAME_BJ_FEB, msg)
+            create_task('send_wecom_message', WECOM_GROUP_NAME_BJ_APR, msg)
             time.sleep(3)  # 添加3秒的延迟
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping)
-                create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_FEB, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            # time.sleep(2)  # 添加3秒的延迟
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-
-# 2024年11月，北京. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶
-def notify_awards_nov_beijing(performance_data_filename, status_filename):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '接好运': '58',
-        '接好运万元以上': '88',
-        '达标奖': '200',
-        '优秀奖': '600',
-        '精英奖': '800'
-    }
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        
-        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
-            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
-恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
-
-\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
-
-\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元
-
-\U0001F44A {next_msg}。
-'''
-            # logging.info(f"Constructed message: {msg}")
-
-            send_wecom_message(WECOM_GROUP_NAME_BJ_NOV, msg)
-            time.sleep(3)  # 添加3秒的延迟
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_NOV, jiangli_msg)
-
-            update_send_status(status_filename, contract_id, '发送成功')
-            # time.sleep(2)  # 添加3秒的延迟
-
-            record['是否发送通知'] = 'Y'
-            updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-
-    if updated:
-        write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
-        logging.info("PerformanceData.csv updated with notification status.")
-
-# 2025年2月，北京. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶
-def notify_awards_feb_beijing(performance_data_filename, status_filename):
-    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
-    records = get_all_records_from_csv(performance_data_filename)
-    send_status = load_send_status(status_filename)
-    updated = False
-
-    awards_mapping = {
-        '接好运': '58',
-        '接好运万元以上': '88',
-        '达标奖': '400',
-        '优秀奖': '800',
-        '精英奖': '1200'
-    }
-
-    for record in records:
-        contract_id = record['合同ID(_id)']
-        
-        processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-        processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
-
-        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
-            msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
-恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
-
-\U0001F33B 本单为活动期间平台累计签约第 {record["活动期内第几个合同"]} 单，个人累计签约第 {record["管家累计单数"]} 单。
-
-\U0001F33B {record["管家(serviceHousekeeper)"]}累计签约 {processed_accumulated_amount} 元{f', 累计计入业绩 {processed_enter_performance_amount} 元' if ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB else ''}
-
-\U0001F44A {next_msg}。
-'''
-            # logging.info(f"Constructed message: {msg}")
-
-            # send_wecom_message(WECOM_GROUP_NAME_BJ_NOV, msg)
-            create_task('send_wecom_message', WECOM_GROUP_NAME_BJ_FEB, msg)
-            time.sleep(3)  # 添加3秒的延迟
-
-            if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
-                create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_FEB, jiangli_msg)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_APR, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             # time.sleep(2)  # 添加3秒的延迟
@@ -377,11 +327,11 @@ def notify_awards_shanghai_generate_message_march(performance_data_filename, sta
 
 \U0001F44A {next_msg}。
 '''
-            create_task('send_wecom_message', WECOM_GROUP_NAME_SH_MAR, msg)
+            create_task('send_wecom_message', WECOM_GROUP_NAME_SH_MAY, msg)
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping)
-                create_task('send_wechat_message', CAMPAIGN_CONTACT_SH_MAR, jiangli_msg)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_SH_MAY, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             time.sleep(2)
