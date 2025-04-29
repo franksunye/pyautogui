@@ -345,6 +345,46 @@ def determine_rewards_apr_beijing_generic(contract_number, housekeeper_data, cur
         "BJ-2025-04"
     )
 
+# 使用通用奖励确定函数的4月上海奖励计算函数
+def determine_rewards_apr_shanghai_generic(contract_number, housekeeper_data, current_contract_amount):
+    """
+    使用通用奖励确定函数计算2025年4月上海活动的奖励
+
+    Args:
+        contract_number: 合同编号
+        housekeeper_data: 管家数据，包含count、total_amount和awarded等信息
+        current_contract_amount: 当前合同金额
+
+    Returns:
+        tuple: (reward_types_str, reward_names_str, next_reward_gap)
+    """
+    return determine_rewards_generic(
+        contract_number,
+        housekeeper_data,
+        current_contract_amount,
+        "SH-2025-04"
+    )
+
+# 使用通用奖励确定函数的5月上海奖励计算函数
+def determine_rewards_may_shanghai_generic(contract_number, housekeeper_data, current_contract_amount):
+    """
+    使用通用奖励确定函数计算2025年5月上海活动的奖励
+
+    Args:
+        contract_number: 合同编号
+        housekeeper_data: 管家数据，包含count、total_amount和awarded等信息
+        current_contract_amount: 当前合同金额
+
+    Returns:
+        tuple: (reward_types_str, reward_names_str, next_reward_gap)
+    """
+    return determine_rewards_generic(
+        contract_number,
+        housekeeper_data,
+        current_contract_amount,
+        "SH-2025-05"
+    )
+
 # 2025年4月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同金额10万以上按10万计算
 def determine_rewards_apr_beijing(contract_number, housekeeper_data, current_contract_amount):
 
@@ -762,93 +802,5 @@ def determine_rewards_shanghai_apr(contract_number, housekeeper_data, contract_a
     else:
         if  not set(["精英奖", "优秀奖", "达标奖"]).intersection(housekeeper_data['awarded']):
             next_reward_gap = f"距离达成节节高奖励条件还需 {JIEJIEGAO_CONTRACT_COUNT_THRESHOLD -  housekeeper_data['count']} 单"
-
-    return ', '.join(reward_types), ', '.join(reward_names), next_reward_gap
-
-def determine_rewards_shanghai(contract_number, housekeeper_data):
-    reward_types = []
-    reward_names = []
-    next_reward_gap = ""  # 下一级奖励所需金额差
-
-    # 节节高奖励逻辑（需要管家合同数量大于等于3）
-    if housekeeper_data['count'] >= 3:
-        # 计算下一级奖励所需金额差，如果启用了绩效金额，使用绩效金额，否则使用合同金额
-        amount = housekeeper_data['performance_amount'] if config.ENABLE_PERFORMANCE_AMOUNT_CAP else housekeeper_data['total_amount']
-        next_reward = None
-        if amount >= 160000 and '卓越奖' not in housekeeper_data['awarded']:
-            # 卓越奖
-            reward_types.append("节节高")
-            reward_names.append("卓越奖")
-            housekeeper_data['awarded'].append('卓越奖')
-        elif amount >= 120000 and '精英奖' not in housekeeper_data['awarded']:
-            # 精英奖
-            next_reward = "卓越奖"
-            reward_types.append("节节高")
-            reward_names.append("精英奖")
-            housekeeper_data['awarded'].append('精英奖')
-        elif amount >= 80000 and '优秀奖' not in housekeeper_data['awarded']:
-            # 优秀奖
-            next_reward = "精英奖"
-            reward_types.append("节节高")
-            reward_names.append("优秀奖")
-            housekeeper_data['awarded'].append('优秀奖')
-        elif amount >= 60000 and '达标奖' not in housekeeper_data['awarded']:
-            # 达标奖
-            next_reward = "优秀奖"
-            reward_types.append("节节高")
-            reward_names.append("达标奖")
-            housekeeper_data['awarded'].append('达标奖')
-        elif amount >= 40000 and '基础奖' not in housekeeper_data['awarded']:
-            # 达标奖
-            next_reward = "达标奖"
-            reward_types.append("节节高")
-            reward_names.append("基础奖")
-            housekeeper_data['awarded'].append('基础奖')
-        elif not set(["精英奖", "优秀奖", "达标奖", "基础奖"]).intersection(housekeeper_data['awarded']):
-            next_reward = "基础奖"  # 如果没有获得任何奖项，则下一个奖项是基础奖
-
-        # 自动发放所有低级别奖项（如果之前未获得）
-        if '基础奖' not in housekeeper_data['awarded'] and amount >= 40000:
-            reward_types.append("节节高")
-            reward_names.append("基础奖")
-            housekeeper_data['awarded'].append('基础奖')
-        if '达标奖' not in housekeeper_data['awarded'] and amount >= 60000:
-            reward_types.append("节节高")
-            reward_names.append("达标奖")
-            housekeeper_data['awarded'].append('达标奖')
-        if '优秀奖' not in housekeeper_data['awarded'] and amount >= 80000:
-            reward_types.append("节节高")
-            reward_names.append("优秀奖")
-            housekeeper_data['awarded'].append('优秀奖')
-        if '精英奖' not in housekeeper_data['awarded'] and amount >= 120000:
-            reward_types.append("节节高")
-            reward_names.append("精英奖")
-            housekeeper_data['awarded'].append('精英奖')
-
-        if not next_reward:
-            if '精英奖' in housekeeper_data['awarded'] and  amount < 160000 and  not set(["卓越奖"]).intersection(housekeeper_data['awarded']):
-                next_reward = "卓越奖"
-            elif '优秀奖' in housekeeper_data['awarded'] and  amount < 120000 and  not set(["卓越奖", "精英奖"]).intersection(housekeeper_data['awarded']):
-                next_reward = "精英奖"
-            elif '达标奖' in housekeeper_data['awarded'] and  amount < 80000 and  not set(["卓越奖", "精英奖", "优秀奖"]).intersection(housekeeper_data['awarded']):
-                next_reward = "优秀奖"
-            elif '基础奖' in housekeeper_data['awarded'] and  amount < 60000 and  not set(["卓越奖", "精英奖", "优秀奖", "达标奖"]).intersection(housekeeper_data['awarded']):
-                next_reward = "达标奖"
-
-        # 计算距离下一级奖励所需的金额差
-        if next_reward:
-            if next_reward == "基础奖":
-                next_reward_gap = f"距离 {next_reward} 还需 {round(40000 - amount, 2):,} 元"
-            elif next_reward == "达标奖":
-                next_reward_gap = f"距离 {next_reward} 还需 {round(60000 - amount, 2):,} 元"
-            elif next_reward == "优秀奖":
-                next_reward_gap = f"距离 {next_reward} 还需 {round(80000 - amount, 2):,} 元"
-            elif next_reward == "精英奖":
-                next_reward_gap = f"距离 {next_reward} 还需 {round(120000 - amount, 2):,} 元"
-            elif next_reward == "卓越奖":
-                next_reward_gap = f"距离 {next_reward} 还需 {round(160000 - amount, 2):,} 元"
-    else:
-        if  not set(["卓越奖", "精英奖", "优秀奖", "达标奖"]).intersection(housekeeper_data['awarded']):
-            next_reward_gap = f"距离达成节节高奖励条件还需 {3 -  housekeeper_data['count']} 单"
 
     return ', '.join(reward_types), ', '.join(reward_names), next_reward_gap

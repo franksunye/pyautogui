@@ -1,5 +1,11 @@
 # config.py
 
+# 上海的特殊配置选项（提前定义，以便在REWARD_CONFIGS中使用）
+# 业绩金额上限配置
+PERFORMANCE_AMOUNT_CAP = 40000  # 单个合同计入业绩金额上限
+# 是否启用业绩金额上限
+ENABLE_PERFORMANCE_AMOUNT_CAP = False
+
 # 通用奖励配置
 REWARD_CONFIGS = {
     # 北京2024年11月活动配置
@@ -84,6 +90,50 @@ REWARD_CONFIGS = {
                 {"name": "精英奖", "threshold": 160000}
             ]
         }
+    },
+    # 上海2025年4月活动配置
+    "SH-2025-04": {
+        "lucky_number": "6",
+        "lucky_rewards": {
+            "base": {"name": "接好运", "threshold": 0},
+            "high": {"name": "接好运万元以上", "threshold": 10000}
+        },
+        "performance_limits": {
+            "single_project_limit": None,  # 上海没有工单金额上限
+            "enable_cap": ENABLE_PERFORMANCE_AMOUNT_CAP,
+            "single_contract_cap": PERFORMANCE_AMOUNT_CAP
+        },
+        "tiered_rewards": {
+            "min_contracts": 5,  # 上海需要5个合同
+            "tiers": [
+                {"name": "基础奖", "threshold": 40000},
+                {"name": "达标奖", "threshold": 60000},
+                {"name": "优秀奖", "threshold": 80000},
+                {"name": "精英奖", "threshold": 120000}
+            ]
+        }
+    },
+    # 上海2025年5月活动配置
+    "SH-2025-05": {
+        "lucky_number": "6",
+        "lucky_rewards": {
+            "base": {"name": "接好运", "threshold": 0},
+            "high": {"name": "接好运万元以上", "threshold": 10000}
+        },
+        "performance_limits": {
+            "single_project_limit": None,  # 上海没有工单金额上限
+            "enable_cap": ENABLE_PERFORMANCE_AMOUNT_CAP,
+            "single_contract_cap": PERFORMANCE_AMOUNT_CAP
+        },
+        "tiered_rewards": {
+            "min_contracts": 5,  # 上海需要5个合同
+            "tiers": [
+                {"name": "基础奖", "threshold": 40000},
+                {"name": "达标奖", "threshold": 60000},
+                {"name": "优秀奖", "threshold": 80000},
+                {"name": "精英奖", "threshold": 120000}
+            ]
+        }
     }
 }
 
@@ -146,10 +196,7 @@ CAMPAIGN_CONTACT_SH_MAY = '满浩浩'
 # 销售激励活动 奖金池计算比例
 BONUS_POOL_RATIO = 0.002  # 默认为0.2%,可根据需要调整
 
-# 业绩金额上限配置
-PERFORMANCE_AMOUNT_CAP = 40000  # 单个合同计入业绩金额上限
-# 是否启用业绩金额上限
-ENABLE_PERFORMANCE_AMOUNT_CAP = False
+# 注意：业绩金额上限配置和是否启用业绩金额上限已移至文件顶部
 
 ## 北京地区，2025年4月活动
 API_URL_BJ_APR = METABASE_URL + "/api/card/1616/query"
