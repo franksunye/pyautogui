@@ -1,10 +1,18 @@
 # 奖励系统重构计划
 
-**文档状态**: 草稿  
-**创建日期**: 2025-04-29  
-**最后更新**: 2025-04-29  
-**负责人**: [待定]  
-**文档版本**: 1.0
+## 文档信息
+**文档类型**: 项目计划
+**文档编号**: reward_system-PLAN-001
+**版本**: 1.0.0
+**创建日期**: 2025-04-29
+**最后更新**: 2025-04-29
+**状态**: 草稿
+**负责人**: Frank
+**团队成员**: Frank, 小智
+
+**相关文档**:
+- [奖励系统重构任务清单](./reward_system_03_TASK_refactoring.md) (reward_system-TASK-001)
+- [奖励系统重构Scrum任务板](./reward_system_02_BOARD_sprint1.md) (reward_system-BOARD-001)
 
 ## 1. 项目概述
 
@@ -328,16 +336,16 @@
 
 ```python
 def process_data_generic(
-    contract_data, 
-    existing_contract_ids, 
-    housekeeper_award_lists, 
+    contract_data,
+    existing_contract_ids,
+    housekeeper_award_lists,
     config_key,  # 例如 "BJ-2025-04", "SH-2025-04"
     use_generic=True,
     use_combined_key=False  # 是否使用组合键（上海特有）
 ):
     # 从配置中获取相关参数
     city_code = config_key.split("-")[0]  # 例如 "BJ", "SH"
-    
+
     # 根据城市代码选择相应的配置
     if city_code == "BJ":
         performance_cap = config.PERFORMANCE_AMOUNT_CAP_BJ_FEB
@@ -347,18 +355,18 @@ def process_data_generic(
         performance_cap = config.PERFORMANCE_AMOUNT_CAP
         project_limit = None  # 上海没有工单金额上限
         enable_cap = config.ENABLE_PERFORMANCE_AMOUNT_CAP
-    
+
     # 初始化数据结构
     performance_data = []
     contract_count_in_activity = len(existing_contract_ids) + 1
     housekeeper_contracts = {}
     processed_contract_ids = set()
     service_appointment_amounts = {}
-    
+
     # 遍历合同数据
     for contract in contract_data:
         # 处理逻辑...
-        
+
     return performance_data
 ```
 
@@ -368,24 +376,28 @@ def process_data_generic(
 def process_data_apr_beijing(contract_data, existing_contract_ids, housekeeper_award_lists, use_generic=False):
     # 原始逻辑
     original_result = original_process_logic(...)
-    
+
     if config.USE_GENERIC_PROCESS_FUNCTION:
         # 新逻辑
         new_result = process_data_generic(
-            contract_data, 
+            contract_data,
             existing_contract_ids.copy(),  # 使用副本避免影响原始逻辑
-            housekeeper_award_lists, 
+            housekeeper_award_lists,
             "BJ-2025-04",
             use_generic,
             use_combined_key=False
         )
-        
+
         # 比较结果
         compare_results(original_result, new_result, "BJ-2025-04")
-    
+
     return original_result
 ```
 
----
 
-**文档结束**
+
+## 更新记录
+
+| 版本 | 日期 | 更新者 | 更新内容 |
+|------|------|--------|----------|
+| 1.0.0 | 2025-04-29 | Frank | 初始版本 |
