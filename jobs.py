@@ -7,19 +7,21 @@ from modules.notification_module import *
 from modules.config import *
 from modules.service_provider_sla_monitor import process_sla_violations
 
-# 2025年5月，北京. 
+# 2025年5月，北京.
 # 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；
 # 单个项目（工单）签约合同金额大于10万时，参与累计合同金额计算时均按10万计入。
 def signing_and_sales_incentive_may_beijing():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_BJ_MAY
     performance_data_filename = PERFORMANCE_DATA_FILENAME_BJ_MAY
     status_filename = STATUS_FILENAME_BJ_MAY
-    api_url = API_URL_BJ_MAY
+    # 使用函数获取变量值，确保在环境变量加载后调用
+    from modules.config import get_api_url_bj_may
+    api_url = get_api_url_bj_may()
 
     logging.info('BEIJING 2025 5月, Job started ...')
 
     response = send_request_with_managed_session(api_url)
- 
+
     logging.info('BEIJING 2025 5月, Request sent')
 
     rows = response['data']['rows']
@@ -51,19 +53,21 @@ def signing_and_sales_incentive_may_beijing():
 
     logging.info('BEIJING 2025 5月, Job ended')
 
-# 2025年4月，北京. 
+# 2025年4月，北京.
 # 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；
 # 单个项目（工单）签约合同金额大于10万时，参与累计合同金额计算时均按10万计入。
 def signing_and_sales_incentive_apr_beijing():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_BJ_APR
     performance_data_filename = PERFORMANCE_DATA_FILENAME_BJ_APR
     status_filename = STATUS_FILENAME_BJ_APR
-    api_url = API_URL_BJ_APR
+    # 使用函数获取变量值，确保在环境变量加载后调用
+    from modules.config import get_api_url_bj_apr
+    api_url = get_api_url_bj_apr()
 
     logging.info('BEIJING 2025 4月, Job started ...')
 
     response = send_request_with_managed_session(api_url)
- 
+
     logging.info('BEIJING 2025 4月, Request sent')
 
     rows = response['data']['rows']
@@ -100,7 +104,9 @@ def signing_and_sales_incentive_may_shanghai():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_MAY
     performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_MAY
     status_filename = STATUS_FILENAME_SH_MAY
-    api_url = API_URL_SH_MAY
+    # 使用函数获取变量值，确保在环境变量加载后调用
+    from modules.config import get_api_url_sh_may
+    api_url = get_api_url_sh_may()
 
     logging.info('SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Job started ...')
     response = send_request_with_managed_session(api_url)
@@ -135,14 +141,16 @@ def signing_and_sales_incentive_may_shanghai():
     archive_file(contract_data_filename)
     logging.info('SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Data archived')
 
-    logging.info('SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Job ended')   
+    logging.info('SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Job ended')
 
 # 2025年4月，上海. 签约和奖励播报
 def signing_and_sales_incentive_apr_shanghai():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_APR
     performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_APR
     status_filename = STATUS_FILENAME_SH_APR
-    api_url = API_URL_SH_APR
+    # 使用函数获取变量值，确保在环境变量加载后调用
+    from modules.config import get_api_url_sh_apr
+    api_url = get_api_url_sh_apr()
 
     logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Job started ...')
     response = send_request_with_managed_session(api_url)
@@ -177,26 +185,32 @@ def signing_and_sales_incentive_apr_shanghai():
     archive_file(contract_data_filename)
     logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Data archived')
 
-    logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Job ended')   
+    logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Job ended')
 
 def check_technician_status():
-    api_url = API_URL_TS
-    status_filename = STATUS_FILENAME_TS
+    # 使用函数获取变量值，确保在环境变量加载后调用
+    from modules.config import get_api_url_ts, get_status_filename_ts
+    api_url = get_api_url_ts()
+    status_filename = get_status_filename_ts()
 
     logging.info('BEIJING, Technician Status Check Job started')
+    logging.info(f'API_URL_TS: {api_url}')
 
-    response = send_request_with_managed_session(api_url)    
+    response = send_request_with_managed_session(api_url)
     status_changes = response['data']['rows']
 
     notify_technician_status_changes(status_changes, status_filename)
 
-    logging.info('BEIJING, Technician Status Check Job ended') 
+    logging.info('BEIJING, Technician Status Check Job ended')
 
 def generate_daily_service_report():
     logging.info('Daily service report generation started...')
-    api_url = API_URL_DAILY_SERVICE_REPORT
+    # 使用函数获取变量值，确保在环境变量加载后调用
+    from modules.config import get_api_url_daily_service_report
+    api_url = get_api_url_daily_service_report()
     temp_daily_service_report_file = TEMP_DAILY_SERVICE_REPORT_FILE
-    status_code_filename = DAILY_SERVICE_REPORT_RECORD_FILE
+    # 保存状态文件名（目前未使用，但保留以备将来使用）
+    # status_code_filename = DAILY_SERVICE_REPORT_RECORD_FILE
 
     try:
         # 1. 发送请求以获取日报数据
@@ -231,13 +245,15 @@ def generate_daily_service_report():
     logging.info('Daily service report generation completed.')
 
 def check_contact_timeout():
-    api_url = API_URL_CONTACT_TIMEOUT
+    # 使用函数获取变量值，确保在环境变量加载后调用
+    from modules.config import get_api_url_contact_timeout
+    api_url = get_api_url_contact_timeout()
     # notify_status_filename = STATUS_FILENAME_CONTACT_TIMEOUT
 
     logging.info('Contact Timeout Check, Job started ...')
 
     response = send_request_with_managed_session(api_url)
-    
+
     if response is None:
         logging.error('Failed to get response for contact timeout check')
         return
@@ -248,4 +264,3 @@ def check_contact_timeout():
     notify_contact_timeout_changes_template_card(contact_timeout_data)
 
     logging.info('Contact Timeout Check, Job ended')
-    

@@ -4,7 +4,7 @@ import json
 import requests
 import datetime
 import logging
-from modules.config import METABASE_PASSWORD, METABASE_SESSION, METABASE_USERNAME, get_env
+from modules.config import get_metabase_password, get_metabase_session_url, get_metabase_username, get_env
 from modules.log_config import setup_logging
 
 # 设置日志
@@ -16,8 +16,13 @@ SESSION_DURATION = get_env('CONFIG_SESSION_DURATION', 14 * 24 * 60 * 60, int)  #
 def get_metabase_session():
     logging.info("Attempting to get Metabase session.")
 
+    # 获取 Metabase 凭据
+    username = get_metabase_username()
+    password = get_metabase_password()
+    session_url = get_metabase_session_url()
+
     # 验证必要的环境变量是否存在
-    if not METABASE_USERNAME or not METABASE_PASSWORD or not METABASE_SESSION:
+    if not username or not password or not session_url:
         error_msg = "Missing required environment variables for Metabase session"
         logging.error(error_msg)
         raise EnvironmentError(error_msg)
@@ -26,11 +31,11 @@ def get_metabase_session():
         'Content-Type': 'application/json',
     }
 
-    data = {"username": METABASE_USERNAME, "password": METABASE_PASSWORD}
-    logging.debug(f"Sending POST request to {METABASE_SESSION} with username: {METABASE_USERNAME}")
+    data = {"username": username, "password": password}
+    logging.debug(f"Sending POST request to {session_url} with username: {username}")
 
     try:
-        response = requests.post(METABASE_SESSION, headers=headers, json=data, timeout=30)
+        response = requests.post(session_url, headers=headers, json=data, timeout=30)
         response.raise_for_status()  # 如果响应状态码不是200，抛出异常
 
         session_data = response.json()
