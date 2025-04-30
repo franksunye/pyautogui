@@ -5,27 +5,27 @@ import requests
 import datetime
 from requests.exceptions import Timeout
 import logging
-from modules.config import METABASE_PASSWORD, METABASE_SESSION, METABASE_USERNAME
+from modules.config import METABASE_PASSWORD, METABASE_SESSION, METABASE_USERNAME, get_env
 from modules.log_config import setup_logging
 
 # 设置日志
 setup_logging()
 
-SESSION_FILE = 'metabase_session.json'
-SESSION_DURATION = 14 * 24 * 60 * 60  # 14 days in seconds
+SESSION_FILE = get_env('FILE_SESSION', 'metabase_session.json')
+SESSION_DURATION = get_env('CONFIG_SESSION_DURATION', 14 * 24 * 60 * 60, int)  # 14 days in seconds
 
 def get_metabase_session():
     logging.info("Attempting to get Metabase session.")
-    
+
     headers = {
         'Content-Type': 'application/json',
     }
 
     data = {"username": METABASE_USERNAME, "password": METABASE_PASSWORD}
-    logging.debug(f"Sending POST request to {METABASE_SESSION} with username: {METABASE_USERNAME} and password: {METABASE_PASSWORD}")
+    logging.debug(f"Sending POST request to {METABASE_SESSION} with username: {METABASE_USERNAME}")
     response = requests.post(METABASE_SESSION, headers=headers, json=data, timeout=30)
     session_id = response.json()['id']
-    
+
     # Save session info to file
     session_info = {
         'id': session_id,
@@ -34,7 +34,7 @@ def get_metabase_session():
     logging.info(f"Saving session info to file: {SESSION_FILE}")
     with open(SESSION_FILE, 'w') as f:
         json.dump(session_info, f)
-    
+
     logging.info(f"Metabase session obtained with ID: {session_id}")
     return session_id
 
