@@ -3,11 +3,40 @@ import time
 import traceback
 import logging
 import threading
+import argparse
+import os
+from dotenv import load_dotenv
 from modules.log_config import setup_logging
 from jobs import *
 from modules.config import RUN_JOBS_SERIALLY_SCHEDULE
 import datetime
 import task_scheduler # 引入任务调度模块
+
+# 解析命令行参数
+def parse_args():
+    parser = argparse.ArgumentParser(description='奖励系统服务')
+    parser.add_argument('--env', type=str, choices=['dev', 'test', 'prod'], default='dev',
+                      help='指定运行环境 (dev: 开发环境, test: 测试环境, prod: 生产环境)')
+    parser.add_argument('--run-once', action='store_true',
+                      help='运行一次后退出，不进入循环')
+    parser.add_argument('--task', type=str, choices=['all', 'beijing-apr', 'beijing-may', 'shanghai-apr', 'shanghai-may', 'technician', 'daily-report'],
+                      help='指定要运行的任务')
+    return parser.parse_args()
+
+# 加载环境变量
+def load_environment(env):
+    if env == 'dev':
+        load_dotenv('.env', override=True)
+        logging.info('已加载开发环境配置')
+    elif env == 'test':
+        load_dotenv('.env.test', override=True)
+        logging.info('已加载测试环境配置')
+    elif env == 'prod':
+        load_dotenv('.env.production', override=True)
+        logging.info('已加载生产环境配置')
+    else:
+        load_dotenv('.env', override=True)
+        logging.info('已加载默认环境配置')
 
 # 设置日志
 setup_logging()
@@ -52,10 +81,10 @@ def run_jobs_serially():
                 time.sleep(5)
             except Exception as e:
                 logging.error(f"An error occurred while running signing_and_sales_incentive_feb_beijing: {e}")
-                logging.error(traceback.format_exc())                                       
+                logging.error(traceback.format_exc())
         else:
-            logging.info("No tasks scheduled for this month.")       
-        
+            logging.info("No tasks scheduled for this month.")
+
         # 检查工程师状态
         try:
             check_technician_status()
@@ -80,8 +109,71 @@ def daily_service_report_task():
 # 使用schedule库调度日报任务，每天11点执行
 schedule.every().day.at("11:00").do(daily_service_report_task)
 
+# 运行指定任务
+def run_specific_task(task):
+    with ui_lock:  # 确保在执行 UI 操作时获得锁
+        if task == 'all' or task is None:
+            run_jobs_serially()
+        elif task == 'beijing-apr':
+            try:
+                signing_and_sales_incentive_apr_beijing()
+            except Exception as e:
+                logging.error(f"An error occurred while running signing_and_sales_incentive_apr_beijing: {e}")
+                logging.error(traceback.format_exc())
+        elif task == 'beijing-may':
+            try:
+                signing_and_sales_incentive_may_beijing()
+            except Exception as e:
+                logging.error(f"An error occurred while running signing_and_sales_incentive_may_beijing: {e}")
+                logging.error(traceback.format_exc())
+        elif task == 'shanghai-apr':
+            try:
+                signing_and_sales_incentive_apr_shanghai()
+            except Exception as e:
+                logging.error(f"An error occurred while running signing_and_sales_incentive_apr_shanghai: {e}")
+                logging.error(traceback.format_exc())
+        elif task == 'shanghai-may':
+            try:
+                signing_and_sales_incentive_may_shanghai()
+            except Exception as e:
+                logging.error(f"An error occurred while running signing_and_sales_incentive_may_shanghai: {e}")
+                logging.error(traceback.format_exc())
+        elif task == 'technician':
+            try:
+                check_technician_status()
+            except Exception as e:
+                logging.error(f"An error occurred while running check_technician_status: {e}")
+                logging.error(traceback.format_exc())
+        elif task == 'daily-report':
+            try:
+                generate_daily_service_report()
+            except Exception as e:
+                logging.error(f"An error occurred while generating daily service report: {e}")
+                logging.error(traceback.format_exc())
+
 if __name__ == '__main__':
+    # 解析命令行参数
+    args = parse_args()
+
+    # 加载环境变量
+    load_environment(args.env)
+
     logging.info('Program started')
+    logging.info(f'运行环境: {args.env}')
+
+    # 如果指定了任务，则运行指定任务后退出
+    if args.task:
+        logging.info(f'运行指定任务: {args.task}')
+        run_specific_task(args.task)
+        logging.info('指定任务已完成，程序退出')
+        exit(0)
+
+    # 如果指定了只运行一次，则运行一次后退出
+    if args.run_once:
+        logging.info('运行一次后退出')
+        run_jobs_serially()
+        logging.info('任务已完成，程序退出')
+        exit(0)
 
     # 启动任务调度器
     scheduler_thread = threading.Thread(target=task_scheduler.start)
@@ -89,14 +181,8 @@ if __name__ == '__main__':
     # 启动任务调度器线程，注释后可单独测试任务且不会触发GUI操作
     scheduler_thread.start()
 
-    # 单独测试任务
-    # generate_daily_service_report()
-    # check_technician_status()
-    # signing_and_sales_incentive_may_beijing()
-    # signing_and_sales_incentive_apr_beijing()
-    # signing_and_sales_incentive_may_shanghai()
-
     # 启动调度循环
+    logging.info('进入调度循环')
     while True:
         try:
             schedule.run_pending()  # 这里也在运行schedule的任务
