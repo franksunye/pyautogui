@@ -81,3 +81,7 @@ v2-temp/
 # Make sure template and example files are not ignored
 !.env.example
 !.env.template
+
+# Ignore batch files with credentials
+*.bat
+!switch_env.bat
