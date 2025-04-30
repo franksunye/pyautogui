@@ -22,6 +22,8 @@ wheels/
 
 # Environment variables
 .env
+.env.test
+.env.*
 .venv
 env/
 venv/
@@ -76,5 +78,6 @@ v2-temp/
 *.xlsx
 *.png
 
-# Make sure .env.example is not ignored
+# Make sure template and example files are not ignored
 !.env.example
+!.env.template
