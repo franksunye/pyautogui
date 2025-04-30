@@ -40,7 +40,7 @@ def generate_award_message(record, awards_mapping):
             if award in awards_mapping:
                 award_info = awards_mapping[award]
                 award_messages.append(f'达成{award}奖励条件，获得签约奖励{award_info}元 \U0001F9E7\U0001F9E7\U0001F9E7')
-    
+
     return f'{service_housekeeper}签约合同{contract_number}\n\n' + '\n'.join(award_messages)
 
 def preprocess_rate(rate):
@@ -57,7 +57,7 @@ def preprocess_rate(rate):
     else:
         # 处理无效或空数据（例如，返回"N/A"或其他占位符）
         return "-"
-    
+
 def preprocess_amount(amount):
     # 检查金额数据是否为空或不是有效的浮点数
     if amount.strip() and amount.replace('.', '', 1).isdigit():
@@ -84,7 +84,7 @@ def notify_awards_may_beijing(performance_data_filename, status_filename):
 
     for record in records:
         contract_id = record['合同ID(_id)']
-        
+
         processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
         processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
         service_housekeeper = record["管家(serviceHousekeeper)"]
@@ -115,7 +115,7 @@ def notify_awards_may_beijing(performance_data_filename, status_filename):
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
@@ -138,7 +138,7 @@ def notify_awards_apr_beijing(performance_data_filename, status_filename):
 
     for record in records:
         contract_id = record['合同ID(_id)']
-        
+
         processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
         processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
         service_housekeeper = record["管家(serviceHousekeeper)"]
@@ -173,7 +173,7 @@ def notify_awards_apr_beijing(performance_data_filename, status_filename):
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
@@ -195,12 +195,12 @@ def notify_awards_july_shanghai(performance_data_filename, status_filename,contr
 
     for record in records:
         contract_id = record['合同ID(_id)']
-        
+
         processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
         processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
-        
+
         processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
-                        
+
         if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
             next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
             msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
@@ -228,12 +228,12 @@ def notify_awards_july_shanghai(performance_data_filename, status_filename,contr
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
-        
+
 def notify_awards_july_shanghai_generate_message(performance_data_filename, status_filename,contract_data):
     """通知奖励并更新性能数据文件，同时跟踪发送状态"""
     records = get_all_records_from_csv(performance_data_filename)
@@ -250,12 +250,12 @@ def notify_awards_july_shanghai_generate_message(performance_data_filename, stat
 
     for record in records:
         contract_id = record['合同ID(_id)']
-        
+
         processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
         processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
-        
+
         processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
-                        
+
         if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
             next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
             msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
@@ -282,7 +282,7 @@ def notify_awards_july_shanghai_generate_message(performance_data_filename, stat
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
@@ -306,11 +306,11 @@ def notify_awards_shanghai_generate_message_march(performance_data_filename, sta
 
     for record in records:
         contract_id = record['合同ID(_id)']
-        
+
         processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-        
+
         processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
-                        
+
         if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
             next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
             msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
@@ -338,7 +338,7 @@ def notify_awards_shanghai_generate_message_march(performance_data_filename, sta
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
@@ -352,14 +352,14 @@ def notify_awards_shanghai_generate_message_february(performance_data_filename, 
 
     for record in records:
         contract_id = record['合同ID(_id)']
-        
+
         processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-        
+
         processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
-                        
+
         if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            logging.info(f"Processing contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-            
+            logging.info(f"Processing contract ID: {record['合同ID(_id)'][-4:]}")
+
             msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
 恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
 
@@ -376,12 +376,12 @@ def notify_awards_shanghai_generate_message_february(performance_data_filename, 
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
-                
+
 def notify_awards_shanghai_generate_message_january(performance_data_filename, status_filename,contract_data):
     """通知奖励并更新性能数据文件，同时跟踪发送状态"""
     records = get_all_records_from_csv(performance_data_filename)
@@ -390,14 +390,14 @@ def notify_awards_shanghai_generate_message_january(performance_data_filename, s
 
     for record in records:
         contract_id = record['合同ID(_id)']
-        
+
         processed_accumulated_amount = preprocess_amount(record["管家累计金额"])
-        
+
         processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
-                        
+
         if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            logging.info(f"Processing contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
-            
+            logging.info(f"Processing contract ID: {record['合同ID(_id)'][-4:]}")
+
             msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
 恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
 
@@ -414,12 +414,12 @@ def notify_awards_shanghai_generate_message_january(performance_data_filename, s
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract INFO: {record['管家(serviceHousekeeper)']}, {record['合同ID(_id)']}")
+            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
-        
+
 def notify_technician_status_changes(status_changes, status_filename):
     """
     通知技师的状态变更信息，并更新状态记录文件。
@@ -436,13 +436,13 @@ def notify_technician_status_changes(status_changes, status_filename):
         technician_name = change[2]
         company_name = change[3]
         update_content = change[5]
-        
+
         parsed_time = datetime.strptime(change_time, "%Y-%m-%dT%H:%M:%S.%f%z")
-        simplified_time = parsed_time.strftime("%Y-%m-%d %H:%M")      
+        simplified_time = parsed_time.strftime("%Y-%m-%d %H:%M")
 
         online_icon = "🟢"
         offline_icon = "🔴"
-        
+
         status = update_content[0] if update_content else ""
 
         # 根据提取的状态决定使用哪个 Emoji
@@ -452,19 +452,19 @@ def notify_technician_status_changes(status_changes, status_filename):
             status_icon = offline_icon
         else:
             status_icon = ""  # 如果状态不是上线或下线，不使用图标
-            
+
         # message = f"技师状态变更：\n技师姓名：{technician_name}\n公司名称：{company_name}\n更新时间：{change_time}\n更新内容：{update_content}"
         message = f"您好，公司的管家：{technician_name}，在{simplified_time} {status_icon} {update_content} 了。"
 
         if change_id not in send_status:
-            
+
             create_task('send_wechat_message', company_name, message)
             # send_wechat_message('文件传输助手', message)
-            
+
             post_text_to_webhook(message)
-            
+
             update_send_status(status_filename, change_id, '通知成功')
-            
+
             logging.info(f"Notification sent for technician status change: {change_id}")
 
 
@@ -490,12 +490,12 @@ def notify_daily_service_report(report_data, status_filename):
     # 遍历每个组织，构建并发送消息
     for org_name, records in grouped_data.items():
         logging.info(f"处理组织: {org_name}, 记录数: {len(records)}")
-        
+
         # 获取接收人名称，如果服务商名称不在SERVICE_PROVIDER_MAPPING中，则使用sunye
         receiver_name = SERVICE_PROVIDER_MAPPING.get(org_name, "sunye")
         if receiver_name == "sunye":
             logging.error(f"No mapping found for org_name: {org_name}")
-        
+
         # 构建消息内容
         msg_lines = []
         for record in records:
@@ -503,7 +503,7 @@ def notify_daily_service_report(report_data, status_filename):
                 # 解析建单时间并格式化
                 create_time = datetime.fromisoformat(record['saCreateTime'].replace("Z", ""))  # 处理时区
                 # formatted_time = create_time.strftime("%Y年%m月%d日 %H:%M")  # 格式化为 YYYY年MM月DD日 HH:MM
-                
+
                 # 使用 str.format() 构建消息行
                 msg_line = '工单编号：{}\n建单时间：{}\n管家：{}\n违规类型：{}\n违规描述：{}\n'.format(
                     record['orderNum'],
@@ -548,7 +548,7 @@ def notify_daily_service_report(report_data, status_filename):
                 logging.error(f"Error sending default message to {receiver_name}: {e}")
 
     logging.info("日报通知服务结束")
-	
+
 def notify_contact_timeout_changes(contact_timeout_data):
     """
     通知工单联络超时的信息。
@@ -557,7 +557,7 @@ def notify_contact_timeout_changes(contact_timeout_data):
     """
     messages = []
     message_count = 1  # 初始化消息计数器
-    
+
     for data in contact_timeout_data:
         order_number = data[0]
         housekeeper = data[2]
@@ -567,7 +567,7 @@ def notify_contact_timeout_changes(contact_timeout_data):
         parsed_time = datetime.strptime(assign_time, "%Y-%m-%dT%H:%M:%S%z")
         # 将分单时间转换为本地时间
         local_assign_time = parsed_time.astimezone()
-        
+
         # 计算时间差
         time_difference = datetime.now(timezone.utc) - local_assign_time
         days = time_difference.days
@@ -581,11 +581,11 @@ def notify_contact_timeout_changes(contact_timeout_data):
         message = f"{message_number}. 工单编号：{order_number}，管家：{housekeeper}，分单时间：{simplified_time}，已超时：{time_difference_str}"
         messages.append(message)
         message_count += 1  # 消息计数器增加
-    
+
     if messages:
         full_message = "\n".join(messages)
         # print(full_message)  # 打印完整的消息
-        
+
         post_text_to_webhook(full_message, WEBHOOK_URL_CONTACT_TIMEOUT)
 
 def notify_contact_timeout_changes_markdown(contact_timeout_data):
@@ -614,7 +614,7 @@ def notify_contact_timeout_changes_markdown(contact_timeout_data):
         parsed_time = datetime.strptime(assign_time, "%Y-%m-%dT%H:%M:%S%z")
         # 将分单时间转换为本地时间
         local_assign_time = parsed_time.astimezone()
-        
+
         # 计算时间差
         time_difference = datetime.now(timezone.utc) - local_assign_time
         days = time_difference.days
@@ -634,13 +634,13 @@ def notify_contact_timeout_changes_markdown(contact_timeout_data):
         message = f"{message_number}. 工单编号：{order_number}，管家：{housekeeper}，分单时间：{simplified_time}，已超时：{time_difference_str}"
         message = f"<font color=\"{color}\">{message}</font>"
         messages.append(message)
-    
+
     if messages:
         full_message = "\n".join(messages)
         # print(full_message)  # 打印完整的消息
-        
+
         post_markdown_to_webhook(full_message, WEBHOOK_URL_CONTACT_TIMEOUT)
-        
+
 def post_text_to_webhook(message, webhook_url=WEBHOOK_URL_DEFAULT):  # WEBHOOK_URL_DEFAULT 是默认的 Webhook URL
     post_data = {
         'msgtype': "text",
@@ -649,7 +649,7 @@ def post_text_to_webhook(message, webhook_url=WEBHOOK_URL_DEFAULT):  # WEBHOOK_U
             # 'mentioned_mobile_list': [PHONE_NUMBER],
         },
     }
-   
+
     try:
         # 发送POST请求
         response = requests.post(webhook_url, json=post_data)
@@ -663,7 +663,7 @@ def post_text_to_webhook(message, webhook_url=WEBHOOK_URL_DEFAULT):  # WEBHOOK_U
 def post_markdown_to_webhook(message, webhook_url):
     """
     发送Markdown格式的消息到企业微信的Webhook。
-    
+
     :param message: 要发送的Markdown格式的消息
     :param webhook_url: Webhook的URL
     """
@@ -673,15 +673,15 @@ def post_markdown_to_webhook(message, webhook_url):
             'content': message
         }
     }
-    
+
     try:
         # 发送POST请求
         response = requests.post(webhook_url, json=post_data)
         response.raise_for_status()  # 如果响应状态码不是200，则引发异常
         logging.info(f"PostMarkdownToWebhook: Response status: {response.status_code}")
     except requests.exceptions.RequestException as e:
-        logging.error(f"PostMarkdownToWebhook: 发送到Webhook时发生错误: {e}")   
- 
+        logging.error(f"PostMarkdownToWebhook: 发送到Webhook时发生错误: {e}")
+
 def notify_contact_timeout_changes_template_card(contact_timeout_data):
     """
     通知工单联络超时的信息，使用企业微信的template_card格式。
@@ -705,7 +705,7 @@ def notify_contact_timeout_changes_template_card(contact_timeout_data):
         parsed_time = datetime.strptime(assign_time, "%Y-%m-%dT%H:%M:%S%z")
         # 将分单时间转换为本地时间
         local_assign_time = parsed_time.astimezone()
-        
+
         # 计算时间差
         time_difference = datetime.now(timezone.utc) - local_assign_time
         days = time_difference.days
@@ -722,14 +722,14 @@ def notify_contact_timeout_changes_template_card(contact_timeout_data):
             "keyname": "{}. 单号".format(message_number),
             "value": "{}，{}，{}，超：{}".format(order_number, housekeeper, simplified_time, time_difference_str)
         })
-    
+
     if horizontal_content_list:
         post_template_card_to_webhook(title, total_messages, horizontal_content_list, WEBHOOK_URL_CONTACT_TIMEOUT)
 
 def post_template_card_to_webhook(title, total_messages, horizontal_content_list, webhook_url):
     """
     发送template_card格式的消息到企业微信的Webhook。
-    
+
     :param title: 消息标题
     :param total_messages: 总消息数
     :param horizontal_content_list: 二级标题+文本列表
@@ -766,7 +766,7 @@ def post_template_card_to_webhook(title, total_messages, horizontal_content_list
             }
         }
     }
-    
+
     try:
         # 发送POST请求
         response = requests.post(webhook_url, json=post_data)

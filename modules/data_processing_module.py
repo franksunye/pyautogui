@@ -261,8 +261,8 @@ def process_data_may_beijing(contract_data, existing_contract_ids, housekeeper_a
         housekeeper_contracts[housekeeper]['performance_amount'] += performance_amount
 
         # 记录计算过程日志
-        logging.debug(f"Housekeeper {housekeeper} count: {housekeeper_contracts[housekeeper]['count']}")
-        logging.debug(f"Housekeeper {housekeeper} total amount: {housekeeper_contracts[housekeeper]['total_amount']}")
+        logging.debug(f"Housekeeper ID: {hash(housekeeper) % 1000}, count: {housekeeper_contracts[housekeeper]['count']}")
+        logging.debug(f"Housekeeper ID: {hash(housekeeper) % 1000}, total amount: {housekeeper_contracts[housekeeper]['total_amount']:.2f}")
 
         # 添加合同ID到已处理集合
         processed_contract_ids.add(contract_id)
@@ -275,8 +275,8 @@ def process_data_may_beijing(contract_data, existing_contract_ids, housekeeper_a
             continue
 
         # Debug log for rewards calculation result
-        logging.info(f"Reward types for contract {contract_id}: {reward_types}")
-        logging.info(f"Reward names for contract {contract_id}: {reward_names}")
+        logging.info(f"Reward types for contract {contract_id[-4:]}: {reward_types}")
+        logging.info(f"Reward names for contract {contract_id[-4:]}: {reward_names}")
 
         active_status = 1 if reward_types else 0  # 激活状态基于是否有奖励类型
 
@@ -312,12 +312,12 @@ def process_data_may_beijing(contract_data, existing_contract_ids, housekeeper_a
 
         # After processing a contract, add its ID to the existing_contract_ids set
         existing_contract_ids.add(contract_id)
-        logging.info(f"Added contract ID {contract_id} to existing_contract_ids.")
+        logging.info(f"Added contract ID {contract_id[-4:]} to existing_contract_ids.")
 
-        logging.info(f"Processing contract ID: {contract_id}, Rewards: {reward_types}")
+        logging.info(f"Processing contract ID: {contract_id[-4:]}, Rewards: {reward_types}")
         # 添加性能数据记录到列表中
         performance_data.append(performance_entry)
-        logging.info(f"Added performance entry for contract ID {contract_id}.")
+        logging.info(f"Added performance entry for contract ID {contract_id[-4:]}.")
 
         # 更新合同计数器
         contract_count_in_activity += 1
