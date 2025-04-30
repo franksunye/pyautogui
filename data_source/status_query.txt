@@ -1,0 +1,72 @@
+[
+  {
+    "$match": {
+      "smodule": "serviceResource"
+    }
+  },
+  {
+    "$project": {
+      "_id": "$_id",
+      "sid": "$sid",
+      "smodule": "$smodule",
+      "operation": "$operation",
+      "modifyList": "$modifyList",
+      "exts": "$exts",
+      "state": "$state",
+      "createTime": "$createTime",
+      "updateTime": "$updateTime",
+      "createUser": "$createUser",
+      "updateUser": "$updateUser",
+      "createUserName": "$createUserName",
+      "updateUserName": "$updateUserName",
+      "orgId": "$orgId",
+      "orgName": "$orgName",
+      "tenantId": "$tenantId",
+      "belongTo": "$belongTo",
+      "_class": "$_class",
+      "memo": "$memo",
+      "type": "$type",
+      "operationLogId": "$operationLogId"
+    }
+  },
+  {
+    "$addFields": {
+      "动作": {
+        "$map": {
+          "input": "$modifyList",
+          "as": "item",
+          "in": {
+            "$switch": {
+              "branches": [
+                {
+                  "case": {
+                    "$and": [
+                      { "$eq": ["$$item.field", "workType"] },
+                      { "$eq": ["$$item.pfrom", "0"] },
+                      { "$eq": ["$$item.pto", "-1"] }
+                    ]
+                  },
+                  "then": "下线"
+                },
+                {
+                  "case": {
+                    "$and": [
+                      { "$eq": ["$$item.field", "workType"] },
+                      { "$eq": ["$$item.pfrom", "-1"] },
+                      { "$eq": ["$$item.pto", "0"] }
+                    ]
+                  },
+                  "then": "上线"
+                }
+              ],
+              "default": "$$item"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "$limit": 1048575
+  }
+]
