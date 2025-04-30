@@ -1,5 +1,85 @@
 # 配置指南
 
+## 环境变量配置
+
+系统现在使用环境变量来存储敏感信息和配置项，以提高安全性和灵活性。以下是必须配置的环境变量：
+
+### 必需的环境变量
+
+| 环境变量名称 | 描述 | 示例值 |
+|------------|------|--------|
+| `METABASE_USERNAME` | Metabase用户名 | `user@example.com` |
+| `METABASE_PASSWORD` | Metabase密码 | `your_password` |
+| `METABASE_URL` | Metabase服务器URL | `http://metabase.example.com:3000` |
+| `WECOM_WEBHOOK_DEFAULT` | 默认企业微信机器人Webhook URL | `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx` |
+
+### 城市和活动特定的环境变量
+
+对于每个城市和活动月份，需要配置以下环境变量（以北京5月为例）：
+
+| 环境变量名称 | 描述 | 示例值 |
+|------------|------|--------|
+| `API_URL_BJ_2025_05` | 北京5月数据API地址 | `http://metabase.example.com:3000/api/card/1693/query` |
+| `FILE_TEMP_CONTRACT_DATA_BJ_2025_05` | 北京5月合同数据临时文件 | `temp_contract_data_bj_may.csv` |
+| `FILE_PERFORMANCE_DATA_BJ_2025_05` | 北京5月业绩数据文件 | `performance_data_bj_may.csv` |
+| `FILE_STATUS_BJ_2025_05` | 北京5月发送状态文件 | `status_bj_may.json` |
+| `CONTACT_WECOM_GROUP_NAME_BJ_2025_05` | 北京5月企业微信群名称 | `北京5月活动群` |
+| `CONTACT_CAMPAIGN_CONTACT_BJ_2025_05` | 北京5月活动联系人 | `张三` |
+| `CONFIG_PERFORMANCE_AMOUNT_CAP_BJ_2025_05` | 北京5月单个合同计入业绩金额上限 | `100000` |
+| `CONFIG_ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_2025_05` | 北京5月是否启用业绩金额上限 | `true` |
+| `CONFIG_SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_2025_05` | 北京5月单个项目合同金额上限 | `1000000` |
+
+### 环境变量设置方法
+
+#### Windows
+
+在命令提示符中使用以下命令设置环境变量：
+
+```cmd
+setx METABASE_USERNAME "user@example.com"
+setx METABASE_PASSWORD "your_password"
+```
+
+或者通过系统属性 -> 高级 -> 环境变量进行设置。
+
+#### Linux/macOS
+
+在终端中使用以下命令设置环境变量：
+
+```bash
+export METABASE_USERNAME="user@example.com"
+export METABASE_PASSWORD="your_password"
+```
+
+要永久设置，请将这些命令添加到 `~/.bashrc` 或 `~/.zshrc` 文件中。
+
+#### 使用 .env 文件
+
+也可以创建一个 `.env` 文件，并使用 `python-dotenv` 库加载环境变量：
+
+```
+METABASE_USERNAME=user@example.com
+METABASE_PASSWORD=your_password
+METABASE_URL=http://metabase.example.com:3000
+WECOM_WEBHOOK_DEFAULT=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx
+```
+
+然后在代码中加载：
+
+```python
+from dotenv import load_dotenv
+load_dotenv()
+```
+
+## 敏感信息保护措施
+
+系统实施了以下敏感信息保护措施：
+
+1. **环境变量存储敏感信息**：所有敏感信息（如密码、API密钥）都存储在环境变量中，而不是硬编码在代码中。
+2. **日志脱敏**：日志中的敏感信息（如合同ID、管家姓名、金额）会被脱敏处理，只显示部分信息。
+3. **会话信息安全存储**：Metabase会话信息存储在本地文件中，并定期刷新。
+4. **错误处理增强**：增强了错误处理，确保在环境变量缺失或API调用失败时提供清晰的错误信息，而不泄露敏感信息。
+
 ## 关键配置项说明
 
 ### 奖励配置 (REWARD_CONFIGS)
@@ -94,6 +174,26 @@ REWARD_CONFIGS["BJ-2025-05"]["tiered_rewards"]["tiers"][1]["threshold"] = 70000
 4. **配置验证**: 添加新配置后，运行测试验证其正确性
 5. **配置分组**: 相关配置项应放在一起，便于管理
 6. **变量顺序**: 确保变量在使用前已定义，特别是在 `REWARD_CONFIGS` 中引用的变量
+7. **敏感信息使用环境变量**: 所有敏感信息（密码、API密钥等）应使用环境变量存储，而不是硬编码在配置文件中
+8. **环境变量命名规范**: 使用统一的命名规范，如 `API_URL_BJ_2025_05` 表示北京2025年5月的API URL
+9. **环境变量验证**: 在应用启动时验证所有必需的环境变量是否存在
+
+## 环境变量最佳实践
+
+1. **不要在代码仓库中存储敏感信息**: 不要将包含敏感信息的 `.env` 文件提交到代码仓库
+2. **使用环境变量模板**: 提供一个 `.env.template` 文件，列出所有需要的环境变量，但不包含实际值
+3. **限制环境变量访问**: 限制对包含敏感环境变量的生产服务器的访问
+4. **定期轮换密钥**: 定期更改密码和API密钥，并更新相应的环境变量
+5. **使用不同环境的不同值**: 为开发、测试和生产环境使用不同的环境变量值
+6. **记录环境变量**: 在文档中记录所有环境变量的用途和格式，但不记录实际值
+
+## 日志安全最佳实践
+
+1. **避免记录敏感信息**: 不要在日志中记录密码、完整的合同ID、个人身份信息等敏感数据
+2. **使用掩码**: 对敏感信息使用掩码，如只显示合同ID的最后4位
+3. **使用适当的日志级别**: 使用适当的日志级别（DEBUG、INFO、WARNING、ERROR），避免在生产环境中使用过于详细的日志级别
+4. **限制日志访问**: 限制对日志文件的访问，确保只有授权人员可以查看日志
+5. **定期清理日志**: 定期清理旧的日志文件，避免敏感信息长期存储
 
 ## 当前配置重点
 
@@ -106,3 +206,12 @@ REWARD_CONFIGS["BJ-2025-05"]["tiered_rewards"]["tiers"][1]["threshold"] = 70000
    - 不同的最低合同数量要求
    - 不同的奖励等级结构
    - 不同的性能上限规则
+4. 确保所有敏感信息都使用环境变量存储，包括:
+   - Metabase凭据
+   - 企业微信Webhook URL
+   - API URL
+5. 确保日志中不包含敏感信息，特别是:
+   - 完整的合同ID
+   - 管家姓名
+   - 合同金额
+   - 密码和API密钥
