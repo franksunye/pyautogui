@@ -84,4 +84,6 @@ v2-temp/
 
 # Ignore batch files with credentials
 *.bat
-!switch_env.bat
+# Except for the start.bat and run_streamlit.bat files
+!start.bat
+!run_streamlit.bat
