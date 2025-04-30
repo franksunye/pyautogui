@@ -11,6 +11,10 @@
 
 **相关文档**:
 - [敏感信息保护计划](./sensitive_information_01_PLAN_protection.md) (sensitive_information-PLAN-001)
+- [敏感信息清单](./sensitive_information_00_DOC_inventory.md) (sensitive_information-DOC-001)
+- [环境变量结构设计](./sensitive_information_02_DOC_env_var_structure.md) (sensitive_information-DOC-002)
+- [敏感信息保护计划 - Sprint回顾](./sensitive_information_04_REVIEW_protection.md) (sensitive_information-REVIEW-001)
+- [敏感信息保护计划 - 部署计划](./sensitive_information_05_DEPLOY_plan.md) (sensitive_information-DEPLOY-001)
 
 ## 第一阶段: 准备工作
 
@@ -25,7 +29,7 @@
 - **状态**: 已完成
 - **负责人**: Frank
 - **团队成员**: Frank, 小智
-- **笔记**: 已创建敏感信息清单文档 (sensitive_information_inventory.md)，包含所有发现的敏感信息，按类型分类，并提供了处理建议。
+- **笔记**: 已创建敏感信息清单文档 (sensitive_information_00_DOC_inventory.md)，包含所有发现的敏感信息，按类型分类，并提供了处理建议。
 
 ### 任务1.2: 设计环境变量结构
 - **描述**: 设计合理的环境变量命名和组织结构，确保易于维护和使用
@@ -38,7 +42,7 @@
 - **状态**: 已完成
 - **负责人**: Frank
 - **团队成员**: Frank, 小智
-- **笔记**: 已创建环境变量结构设计文档 (env_var_structure_design.md)，定义了命名规范、分组和使用方法。
+- **笔记**: 已创建环境变量结构设计文档 (sensitive_information_02_DOC_env_var_structure.md)，定义了命名规范、分组和使用方法。
 
 ### 任务1.3: 创建`.env.example`文件模板
 - **描述**: 创建包含所有必要环境变量但不包含实际值的示例文件

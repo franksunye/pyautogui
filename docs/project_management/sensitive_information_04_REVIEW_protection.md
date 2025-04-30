@@ -12,9 +12,10 @@
 
 **相关文档**:
 - [敏感信息保护计划](./sensitive_information_01_PLAN_protection.md) (sensitive_information-PLAN-001)
-- [敏感信息保护看板](./sensitive_information_02_BOARD_protection.md) (sensitive_information-BOARD-001)
+- [敏感信息清单](./sensitive_information_00_DOC_inventory.md) (sensitive_information-DOC-001)
+- [环境变量结构设计](./sensitive_information_02_DOC_env_var_structure.md) (sensitive_information-DOC-002)
 - [敏感信息保护任务清单](./sensitive_information_03_TASK_protection.md) (sensitive_information-TASK-001)
-- [环境变量结构设计](./env_var_structure_design.md) (sensitive_information-DOC-002)
+- [敏感信息保护计划 - 部署计划](./sensitive_information_05_DEPLOY_plan.md) (sensitive_information-DEPLOY-001)
 
 ## 1. Sprint概述
 

@@ -13,7 +13,11 @@
 **预计工期**: 1个Sprint (2周)
 
 **相关文档**:
-- [敏感信息保护任务清单](./sensitive_information_03_TASK_protection.md) (sensitive_information-TASK-001) [计划中]
+- [敏感信息清单](./sensitive_information_00_DOC_inventory.md) (sensitive_information-DOC-001)
+- [环境变量结构设计](./sensitive_information_02_DOC_env_var_structure.md) (sensitive_information-DOC-002)
+- [敏感信息保护任务清单](./sensitive_information_03_TASK_protection.md) (sensitive_information-TASK-001)
+- [敏感信息保护计划 - Sprint回顾](./sensitive_information_04_REVIEW_protection.md) (sensitive_information-REVIEW-001)
+- [敏感信息保护计划 - 部署计划](./sensitive_information_05_DEPLOY_plan.md) (sensitive_information-DEPLOY-001)
 
 ## 1. 项目概述
 

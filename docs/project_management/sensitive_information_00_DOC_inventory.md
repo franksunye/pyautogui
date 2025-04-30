@@ -13,6 +13,7 @@
 **相关文档**:
 - [敏感信息保护计划](./sensitive_information_01_PLAN_protection.md) (sensitive_information-PLAN-001)
 - [敏感信息保护任务清单](./sensitive_information_03_TASK_protection.md) (sensitive_information-TASK-001)
+- [环境变量结构设计](./sensitive_information_02_DOC_env_var_structure.md) (sensitive_information-DOC-002)
 
 ## 1. 概述
 
@@ -171,12 +172,12 @@ def validate_required_env_vars():
         'WECOM_WEBHOOK_DEFAULT',
         # 其他必需的环境变量
     ]
-    
+
     missing_vars = []
     for var in required_vars:
         if not os.getenv(var):
             missing_vars.append(var)
-    
+
     if missing_vars:
         raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
 ```

@@ -12,9 +12,10 @@
 
 **相关文档**:
 - [敏感信息保护计划](./sensitive_information_01_PLAN_protection.md) (sensitive_information-PLAN-001)
+- [敏感信息清单](./sensitive_information_00_DOC_inventory.md) (sensitive_information-DOC-001)
+- [环境变量结构设计](./sensitive_information_02_DOC_env_var_structure.md) (sensitive_information-DOC-002)
 - [敏感信息保护任务清单](./sensitive_information_03_TASK_protection.md) (sensitive_information-TASK-001)
 - [敏感信息保护计划 - Sprint回顾](./sensitive_information_04_REVIEW_protection.md) (sensitive_information-REVIEW-001)
-- [环境变量结构设计](./env_var_structure_design.md) (sensitive_information-DOC-002)
 
 ## 1. 部署概述
 
@@ -62,7 +63,7 @@
    cp modules/data_processing_module.py.bak modules/data_processing_module.py
    echo "Rollback completed."
    EOF
-   
+
    # 设置执行权限
    chmod +x rollback.sh
    ```
@@ -155,12 +156,12 @@
    ```bash
    python -c "from modules.request_module import send_request_with_managed_session; print(send_request_with_managed_session(os.environ['API_URL_BJ_2025_05']))"
    ```
-   
+
    - 验证数据处理功能
    ```bash
    python -c "from modules.data_processing_module import process_data_may_beijing; print('数据处理功能正常')"
    ```
-   
+
    - 验证通知功能
    ```bash
    python -c "from modules.notification_module import post_text_to_webhook; post_text_to_webhook('测试消息 - 请忽略')"
@@ -180,7 +181,7 @@
    ```bash
    top -b -n 1 | grep python
    ```
-   
+
    - 监控磁盘使用情况
    ```bash
    df -h
@@ -257,7 +258,7 @@
    ```bash
    sudo systemctl status yourapp
    ```
-   
+
    - 验证主要功能
    ```bash
    # 执行简单的功能测试
