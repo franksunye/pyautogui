@@ -275,8 +275,10 @@ def process_data_may_beijing(contract_data, existing_contract_ids, housekeeper_a
             continue
 
         # Debug log for rewards calculation result
-        logging.info(f"Reward types for contract {contract_id[-4:]}: {reward_types}")
-        logging.info(f"Reward names for contract {contract_id[-4:]}: {reward_names}")
+        # 确保合同ID至少有4个字符，否则使用完整ID
+        contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+        logging.info(f"Reward types for contract {contract_id_display}: {reward_types}")
+        logging.info(f"Reward names for contract {contract_id_display}: {reward_names}")
 
         active_status = 1 if reward_types else 0  # 激活状态基于是否有奖励类型
 
@@ -312,12 +314,18 @@ def process_data_may_beijing(contract_data, existing_contract_ids, housekeeper_a
 
         # After processing a contract, add its ID to the existing_contract_ids set
         existing_contract_ids.add(contract_id)
-        logging.info(f"Added contract ID {contract_id[-4:]} to existing_contract_ids.")
+        # 确保合同ID至少有4个字符，否则使用完整ID
+        contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+        logging.info(f"Added contract ID {contract_id_display} to existing_contract_ids.")
 
-        logging.info(f"Processing contract ID: {contract_id[-4:]}, Rewards: {reward_types}")
+        # 确保合同ID至少有4个字符，否则使用完整ID
+        contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+        logging.info(f"Processing contract ID: {contract_id_display}, Rewards: {reward_types}")
         # 添加性能数据记录到列表中
         performance_data.append(performance_entry)
-        logging.info(f"Added performance entry for contract ID {contract_id[-4:]}.")
+        # 确保合同ID至少有4个字符，否则使用完整ID
+        contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+        logging.info(f"Added performance entry for contract ID {contract_id_display}.")
 
         # 更新合同计数器
         contract_count_in_activity += 1

@@ -173,7 +173,10 @@ def notify_awards_apr_beijing(performance_data_filename, status_filename):
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
+            contract_id = record['合同ID(_id)']
+            # 确保合同ID至少有4个字符，否则使用完整ID
+            contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+            logging.info(f"Notification sent for contract ID: {contract_id_display}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
@@ -228,7 +231,10 @@ def notify_awards_july_shanghai(performance_data_filename, status_filename,contr
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
+            contract_id = record['合同ID(_id)']
+            # 确保合同ID至少有4个字符，否则使用完整ID
+            contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+            logging.info(f"Notification sent for contract ID: {contract_id_display}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
@@ -282,7 +288,10 @@ def notify_awards_july_shanghai_generate_message(performance_data_filename, stat
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
+            contract_id = record['合同ID(_id)']
+            # 确保合同ID至少有4个字符，否则使用完整ID
+            contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+            logging.info(f"Notification sent for contract ID: {contract_id_display}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
@@ -338,7 +347,10 @@ def notify_awards_shanghai_generate_message_march(performance_data_filename, sta
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
+            contract_id = record['合同ID(_id)']
+            # 确保合同ID至少有4个字符，否则使用完整ID
+            contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+            logging.info(f"Notification sent for contract ID: {contract_id_display}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
@@ -358,7 +370,10 @@ def notify_awards_shanghai_generate_message_february(performance_data_filename, 
         processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
 
         if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
-            logging.info(f"Processing contract ID: {record['合同ID(_id)'][-4:]}")
+            contract_id = record['合同ID(_id)']
+            # 确保合同ID至少有4个字符，否则使用完整ID
+            contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+            logging.info(f"Processing contract ID: {contract_id_display}")
 
             msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
 恭喜 {record["管家(serviceHousekeeper)"]} 签约合同 {record["合同编号(contractdocNum)"]} 并完成线上收款\U0001F389\U0001F389\U0001F389
@@ -376,7 +391,10 @@ def notify_awards_shanghai_generate_message_february(performance_data_filename, 
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
+            contract_id = record['合同ID(_id)']
+            # 确保合同ID至少有4个字符，否则使用完整ID
+            contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+            logging.info(f"Notification sent for contract ID: {contract_id_display}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
@@ -414,7 +432,10 @@ def notify_awards_shanghai_generate_message_january(performance_data_filename, s
 
             record['是否发送通知'] = 'Y'
             updated = True
-            logging.info(f"Notification sent for contract ID: {record['合同ID(_id)'][-4:]}")
+            contract_id = record['合同ID(_id)']
+            # 确保合同ID至少有4个字符，否则使用完整ID
+            contract_id_display = contract_id[-4:] if len(contract_id) >= 4 else contract_id
+            logging.info(f"Notification sent for contract ID: {contract_id_display}")
 
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
