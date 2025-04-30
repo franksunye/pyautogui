@@ -25,18 +25,31 @@ def parse_args():
 
 # 加载环境变量
 def load_environment(env):
+    # 配置文件目录
+    config_dir = 'config'
+
     if env == 'dev':
-        load_dotenv('.env', override=True)
+        load_dotenv(f'{config_dir}/.env', override=True)
         logging.info('已加载开发环境配置')
     elif env == 'test':
-        load_dotenv('.env.test', override=True)
+        load_dotenv(f'{config_dir}/.env.test', override=True)
         logging.info('已加载测试环境配置')
     elif env == 'prod':
-        load_dotenv('.env.production', override=True)
+        load_dotenv(f'{config_dir}/.env.production', override=True)
         logging.info('已加载生产环境配置')
     else:
-        load_dotenv('.env', override=True)
+        load_dotenv(f'{config_dir}/.env', override=True)
         logging.info('已加载默认环境配置')
+
+    # 验证必需的环境变量
+    try:
+        from modules.config import validate_required_env_vars
+        validate_required_env_vars()
+    except Exception as e:
+        logging.error(f"环境变量验证失败: {str(e)}")
+        # 在生产环境中，可能需要在这里退出程序
+        # import sys
+        # sys.exit(1)
 
 # 设置日志
 setup_logging()

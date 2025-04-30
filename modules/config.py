@@ -313,11 +313,12 @@ BADGE_NAME = f"【{BADGE_EMOJI}精英管家】"
 ELITE_HOUSEKEEPER = ["胡林波", "余金凤", "文刘飞", "李卓", "吕世军"]  # 可以根据需要添加更多管家
 
 # 在程序启动时验证必需的环境变量
-try:
-    validate_required_env_vars()
-except EnvironmentError as e:
-    import logging
-    logging.error(f"环境变量验证失败: {str(e)}")
-    # 在生产环境中，可能需要在这里退出程序
-    # import sys
-    # sys.exit(1)
+# 注意：环境变量验证已移至 main.py 中，在加载环境变量后进行
+# try:
+#     validate_required_env_vars()
+# except EnvironmentError as e:
+#     import logging
+#     logging.error(f"环境变量验证失败: {str(e)}")
+#     # 在生产环境中，可能需要在这里退出程序
+#     # import sys
+#     # sys.exit(1)

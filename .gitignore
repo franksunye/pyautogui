@@ -21,9 +21,9 @@ wheels/
 *.egg
 
 # Environment variables
-.env
-.env.test
-.env.*
+config/.env
+config/.env.test
+config/.env.*
 .venv
 env/
 venv/
@@ -79,8 +79,8 @@ v2-temp/
 *.png
 
 # Make sure template and example files are not ignored
-!.env.example
-!.env.template
+!config/.env.example
+!config/.env.template
 
 # Ignore batch files with credentials
 *.bat
