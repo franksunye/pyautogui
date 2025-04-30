@@ -336,11 +336,11 @@ def notify_awards_shanghai_generate_message_march(performance_data_filename, sta
 
 \U0001F44A {next_msg}。
 '''
-            create_task('send_wecom_message', WECOM_GROUP_NAME_SH_MAY, msg)
+            create_task('send_wecom_message', WECOM_GROUP_NAME_SH_APR, msg)
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping)
-                create_task('send_wechat_message', CAMPAIGN_CONTACT_SH_MAY, jiangli_msg)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_SH_APR, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
             time.sleep(2)
