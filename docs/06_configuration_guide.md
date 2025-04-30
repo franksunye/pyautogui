@@ -71,6 +71,216 @@ from dotenv import load_dotenv
 load_dotenv()
 ```
 
+## 环境设置指南
+
+本章节提供了设置和配置系统环境的详细步骤，帮助开发人员快速搭建开发环境。
+
+### 开发环境设置
+
+#### 1. 安装必要的软件
+
+确保您的系统已安装以下软件：
+
+- Python 3.8+
+- Git
+- SQLite3
+
+#### 2. 克隆代码仓库
+
+```bash
+git clone https://github.com/yourusername/yourrepository.git
+cd yourrepository
+```
+
+#### 3. 创建虚拟环境
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Linux/macOS
+python3 -m venv venv
+source venv/bin/activate
+```
+
+#### 4. 安装依赖
+
+```bash
+pip install -r requirements.txt
+```
+
+#### 5. 配置环境变量
+
+1. 复制环境变量模板文件：
+   ```bash
+   cp .env.template .env
+   ```
+
+2. 编辑 `.env` 文件，填写实际值：
+   ```
+   METABASE_USERNAME=your_username
+   METABASE_PASSWORD=your_password
+   METABASE_URL=http://metabase.example.com:3000
+   WECOM_WEBHOOK_DEFAULT=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key
+   ```
+
+3. 确保 `.env` 文件不会被提交到代码仓库：
+   ```bash
+   echo ".env" >> .gitignore
+   ```
+
+#### 6. 验证环境设置
+
+运行以下命令验证环境设置是否正确：
+
+```bash
+python -m unittest tests/test_env_config.py
+```
+
+### 生产环境设置
+
+#### 1. 服务器要求
+
+- 操作系统：Linux (推荐 Ubuntu 20.04 LTS)
+- Python 3.8+
+- 足够的磁盘空间用于日志和数据文件
+
+#### 2. 部署步骤
+
+1. 在服务器上克隆代码仓库：
+   ```bash
+   git clone https://github.com/yourusername/yourrepository.git
+   cd yourrepository
+   ```
+
+2. 创建虚拟环境并安装依赖：
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+3. 设置环境变量：
+
+   创建一个包含所有必要环境变量的文件，例如 `/etc/yourapp/env.sh`：
+   ```bash
+   export METABASE_USERNAME=your_username
+   export METABASE_PASSWORD=your_password
+   export METABASE_URL=http://metabase.example.com:3000
+   export WECOM_WEBHOOK_DEFAULT=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key
+   # 添加其他环境变量...
+   ```
+
+   在应用启动脚本中加载这些环境变量：
+   ```bash
+   source /etc/yourapp/env.sh
+   ```
+
+4. 创建系统服务：
+
+   创建一个 systemd 服务文件 `/etc/systemd/system/yourapp.service`：
+   ```
+   [Unit]
+   Description=Your Application Service
+   After=network.target
+
+   [Service]
+   User=youruser
+   WorkingDirectory=/path/to/yourrepository
+   EnvironmentFile=/etc/yourapp/env.sh
+   ExecStart=/path/to/yourrepository/venv/bin/python main.py
+   Restart=on-failure
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+   启用并启动服务：
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable yourapp
+   sudo systemctl start yourapp
+   ```
+
+5. 配置日志轮转：
+
+   创建一个 logrotate 配置文件 `/etc/logrotate.d/yourapp`：
+   ```
+   /path/to/yourrepository/logs/*.log {
+       daily
+       missingok
+       rotate 14
+       compress
+       delaycompress
+       notifempty
+       create 0640 youruser yourgroup
+   }
+   ```
+
+### 环境变量参考
+
+详细的环境变量列表和说明请参考[环境变量结构设计](./project_management/env_var_structure_design.md)文档。
+
+### 故障排除
+
+#### 常见问题
+
+1. **环境变量未加载**
+
+   **症状**: 应用启动时报错 `Missing required environment variables`
+
+   **解决方案**:
+   - 确认 `.env` 文件存在并包含所有必需的环境变量
+   - 检查环境变量名称是否正确（注意大小写）
+   - 在 Windows 上，尝试重启命令提示符或 IDE
+   - 在 Linux/macOS 上，确保使用 `source venv/bin/activate` 激活虚拟环境
+
+2. **Metabase 连接失败**
+
+   **症状**: 应用报错 `Error connecting to Metabase`
+
+   **解决方案**:
+   - 确认 `METABASE_URL`, `METABASE_USERNAME` 和 `METABASE_PASSWORD` 环境变量设置正确
+   - 检查网络连接，确保可以访问 Metabase 服务器
+   - 验证 Metabase 凭据是否有效（尝试直接登录 Metabase）
+
+3. **企业微信通知失败**
+
+   **症状**: 应用报错 `Error sending message to Webhook`
+
+   **解决方案**:
+   - 确认 `WECOM_WEBHOOK_DEFAULT` 环境变量设置正确
+   - 检查 Webhook URL 是否有效（可以使用 curl 或 Postman 测试）
+   - 确保消息格式符合企业微信 API 要求
+
+4. **日志文件权限问题**
+
+   **症状**: 应用报错 `Permission denied` 或无法写入日志
+
+   **解决方案**:
+   - 确保应用有权限写入日志目录
+   - 在 Linux/macOS 上，使用 `chmod` 命令设置适当的权限
+   - 在 Windows 上，检查用户账户控制 (UAC) 设置
+
+#### 日志分析
+
+系统日志位于 `logs/` 目录下，包含以下文件：
+
+- `app.log`: 主应用日志
+- `error.log`: 错误日志
+- `debug.log`: 调试日志（仅在开发环境中启用）
+
+使用以下命令查看最近的错误日志：
+
+```bash
+# Linux/macOS
+tail -n 50 logs/error.log
+
+# Windows
+type logs\error.log | Select-Object -Last 50
+```
+
 ## 敏感信息保护措施
 
 系统实施了以下敏感信息保护措施：
