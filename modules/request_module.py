@@ -4,7 +4,7 @@ import json
 import requests
 import datetime
 import logging
-from modules.config import get_metabase_password, get_metabase_session_url, get_metabase_username, get_env
+from modules.config import get_metabase_password, get_metabase_username, get_env, METABASE_SESSION
 from modules.log_config import setup_logging
 
 # 设置日志
@@ -19,7 +19,7 @@ def get_metabase_session():
     # 获取 Metabase 凭据
     username = get_metabase_username()
     password = get_metabase_password()
-    session_url = get_metabase_session_url()
+    session_url = METABASE_SESSION
 
     # 验证必要的环境变量是否存在
     if not username or not password or not session_url:
@@ -32,7 +32,7 @@ def get_metabase_session():
     }
 
     data = {"username": username, "password": password}
-    logging.debug(f"Sending POST request to {session_url} with username: {username}")
+    logging.debug(f"Sending POST request to {session_url} with username: {username} (password hidden)")
 
     try:
         response = requests.post(session_url, headers=headers, json=data, timeout=30)

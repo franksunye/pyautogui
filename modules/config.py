@@ -40,12 +40,13 @@ def get_env(name, default=None, cast=None):
 
 # 验证必需的环境变量
 def validate_required_env_vars():
-    """验证所有必需的环境变量是否已设置"""
+    """验证所有必需的高敏感度环境变量是否已设置"""
     required_vars = [
         'METABASE_USERNAME',
         'METABASE_PASSWORD',
-        'METABASE_URL',
         'WECOM_WEBHOOK_DEFAULT',
+        'WECOM_WEBHOOK_CONTACT_TIMEOUT',
+        'CONTACT_PHONE_NUMBER',
     ]
 
     missing_vars = []
@@ -58,9 +59,9 @@ def validate_required_env_vars():
 
 # 上海的特殊配置选项（提前定义，以便在REWARD_CONFIGS中使用）
 # 业绩金额上限配置
-PERFORMANCE_AMOUNT_CAP = get_env('CONFIG_PERFORMANCE_AMOUNT_CAP', 40000, int)  # 单个合同计入业绩金额上限
+PERFORMANCE_AMOUNT_CAP = 40000  # 单个合同计入业绩金额上限
 # 是否启用业绩金额上限
-ENABLE_PERFORMANCE_AMOUNT_CAP = get_env('CONFIG_ENABLE_PERFORMANCE_AMOUNT_CAP', 'false', bool)
+ENABLE_PERFORMANCE_AMOUNT_CAP = False
 
 # 通用奖励配置
 REWARD_CONFIGS = {
@@ -194,18 +195,14 @@ REWARD_CONFIGS = {
 }
 
 # 归档文件夹
-ARCHIVE_DIR = get_env('ARCHIVE_DIR', 'archive')
+ARCHIVE_DIR = 'archive'
 
 # 业务数据源服务器配置
-def get_metabase_url():
-    """获取 Metabase 服务器 URL"""
-    return get_env('METABASE_URL', 'http://metabase.fsgo365.cn:3000')
+# 中敏感度信息，直接作为常量
+METABASE_URL = 'http://metabase.fsgo365.cn:3000'
+METABASE_SESSION = METABASE_URL + '/api/session/'
 
-def get_metabase_session_url():
-    """获取 Metabase 会话 URL"""
-    return get_metabase_url() + '/api/session/'
-
-# 获取数据 账号密码
+# 获取数据 账号密码（高敏感度信息）
 def get_metabase_username():
     """获取 Metabase 用户名"""
     return get_env('METABASE_USERNAME')
@@ -214,14 +211,11 @@ def get_metabase_password():
     """获取 Metabase 密码"""
     return get_env('METABASE_PASSWORD')
 
-# 为了向后兼容，保留原变量名
-METABASE_URL = get_metabase_url()
-METABASE_SESSION = get_metabase_session_url()
-
-RUN_JOBS_SERIALLY_SCHEDULE = get_env('CONFIG_RUN_JOBS_SERIALLY_SCHEDULE', 3, int)  # 每3分钟执行一次
+# 每3分钟执行一次
+RUN_JOBS_SERIALLY_SCHEDULE = 3
 
 # 任务调度器检查间隔（秒）
-TASK_CHECK_INTERVAL = get_env('CONFIG_TASK_CHECK_INTERVAL', 10, int)
+TASK_CHECK_INTERVAL = 10
 
 # 北京地区
 # 北京运营企微群机器人通讯地址
@@ -238,160 +232,101 @@ WEBHOOK_URL_DEFAULT = get_webhook_url_default()
 PHONE_NUMBER = get_phone_number()
 
 # 第二个任务，北京技师状态检查 JOB check_technician_status
-def get_api_url_ts():
-    return get_env('API_URL_TS')
-
-def get_status_filename_ts():
-    return get_env('FILE_TECHNICIAN_STATUS_RECORD', './state/technician_status_record.json')
+# 中敏感度信息，直接作为常量
+API_URL_TS = METABASE_URL + "/api/card/719/query"
+STATUS_FILENAME_TS = './state/technician_status_record.json'
 
 # 第六个任务，工单联络超时提醒
-def get_api_url_contact_timeout():
-    """获取工单联络超时提醒 API URL"""
-    return get_env('API_URL_CONTACT_TIMEOUT')
+# 中敏感度信息，直接作为常量
+API_URL_CONTACT_TIMEOUT = METABASE_URL + "/api/card/980/query"
 
+# 高敏感度信息，通过函数获取
 def get_webhook_url_contact_timeout():
     """获取工单联络超时提醒 Webhook URL"""
     return get_env('WECOM_WEBHOOK_CONTACT_TIMEOUT')
 
 # 为了向后兼容，保留原变量名
-API_URL_CONTACT_TIMEOUT = get_api_url_contact_timeout()
 WEBHOOK_URL_CONTACT_TIMEOUT = get_webhook_url_contact_timeout()
 
 ## 上海地区，2025年4月活动
-def get_api_url_sh_apr():
-    """获取上海4月活动 API URL"""
-    return get_env('API_URL_SH_2025_04', get_metabase_url() + "/api/card/1617/query")
-
-# 为了向后兼容，保留原变量名
-API_URL_SH_APR = get_api_url_sh_apr()
+# 中敏感度信息，直接作为常量
+API_URL_SH_APR = METABASE_URL + "/api/card/1617/query"
 
 # 销售激励活动 JOB signing_and_sales_incentive_apr_shanghai
-TEMP_CONTRACT_DATA_FILE_SH_APR = get_env('FILE_TEMP_CONTRACT_DATA_SH_2025_04', 'state/ContractData-SH-Apr.csv')
-PERFORMANCE_DATA_FILENAME_SH_APR = get_env('FILE_PERFORMANCE_DATA_SH_2025_04', 'state/PerformanceData-SH-Apr.csv')
-STATUS_FILENAME_SH_APR = get_env('FILE_STATUS_SH_2025_04', 'state/send_status_sh_apr.json')
+TEMP_CONTRACT_DATA_FILE_SH_APR = 'state/ContractData-SH-Apr.csv'
+PERFORMANCE_DATA_FILENAME_SH_APR = 'state/PerformanceData-SH-Apr.csv'
+STATUS_FILENAME_SH_APR = 'state/send_status_sh_apr.json'
 
-# Pro
-def get_wecom_group_name_sh_apr():
-    """获取上海4月活动企业微信群名称"""
-    return get_env('CONTACT_WECOM_GROUP_NAME_SH_2025_04')
-
-def get_campaign_contact_sh_apr():
-    """获取上海4月活动联系人"""
-    return get_env('CONTACT_CAMPAIGN_CONTACT_SH_2025_04')
-
-# 为了向后兼容，保留原变量名
-WECOM_GROUP_NAME_SH_APR = get_wecom_group_name_sh_apr()
-CAMPAIGN_CONTACT_SH_APR = get_campaign_contact_sh_apr()
+# 中敏感度信息，直接作为常量
+WECOM_GROUP_NAME_SH_APR = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_APR = '满浩浩'
 
 ## 上海地区，2025年5月活动
-def get_api_url_sh_may():
-    """获取上海5月活动 API URL"""
-    return get_env('API_URL_SH_2025_05', get_metabase_url() + "/api/card/1694/query")
-
-# 为了向后兼容，保留原变量名
-API_URL_SH_MAY = get_api_url_sh_may()
+# 中敏感度信息，直接作为常量
+API_URL_SH_MAY = METABASE_URL + "/api/card/1694/query"
 
 # 销售激励活动 JOB signing_and_sales_incentive_may_shanghai
-TEMP_CONTRACT_DATA_FILE_SH_MAY = get_env('FILE_TEMP_CONTRACT_DATA_SH_2025_05', 'state/ContractData-SH-May.csv')
-PERFORMANCE_DATA_FILENAME_SH_MAY = get_env('FILE_PERFORMANCE_DATA_SH_2025_05', 'state/PerformanceData-SH-May.csv')
-STATUS_FILENAME_SH_MAY = get_env('FILE_STATUS_SH_2025_05', 'state/send_status_sh_may.json')
+TEMP_CONTRACT_DATA_FILE_SH_MAY = 'state/ContractData-SH-May.csv'
+PERFORMANCE_DATA_FILENAME_SH_MAY = 'state/PerformanceData-SH-May.csv'
+STATUS_FILENAME_SH_MAY = 'state/send_status_sh_may.json'
 
-# Pro
-def get_wecom_group_name_sh_may():
-    """获取上海5月活动企业微信群名称"""
-    return get_env('CONTACT_WECOM_GROUP_NAME_SH_2025_05')
-
-def get_campaign_contact_sh_may():
-    """获取上海5月活动联系人"""
-    return get_env('CONTACT_CAMPAIGN_CONTACT_SH_2025_05')
-
-# 为了向后兼容，保留原变量名
-WECOM_GROUP_NAME_SH_MAY = get_wecom_group_name_sh_may()
-CAMPAIGN_CONTACT_SH_MAY = get_campaign_contact_sh_may()
+# 中敏感度信息，直接作为常量
+WECOM_GROUP_NAME_SH_MAY = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_MAY = '满浩浩'
 
 ## 上海的特殊配置选项
 # 销售激励活动 奖金池计算比例
-BONUS_POOL_RATIO = get_env('CONFIG_BONUS_POOL_RATIO', 0.002, float)  # 默认为0.2%,可根据需要调整
+BONUS_POOL_RATIO = 0.002  # 默认为0.2%,可根据需要调整
 
 # 注意：业绩金额上限配置和是否启用业绩金额上限已移至文件顶部
 
 ## 北京地区，2025年4月活动
-def get_api_url_bj_apr():
-    """获取北京4月活动 API URL"""
-    return get_env('API_URL_BJ_2025_04', get_metabase_url() + "/api/card/1616/query")
-
-# 为了向后兼容，保留原变量名
-API_URL_BJ_APR = get_api_url_bj_apr()
+# 中敏感度信息，直接作为常量
+API_URL_BJ_APR = METABASE_URL + "/api/card/1616/query"
 
 # 北京销售激励活动 JOB signing_and_sales_incentive_apr_beijing
-TEMP_CONTRACT_DATA_FILE_BJ_APR = get_env('FILE_TEMP_CONTRACT_DATA_BJ_2025_04', 'state/ContractData-BJ-Apr.csv')
-PERFORMANCE_DATA_FILENAME_BJ_APR = get_env('FILE_PERFORMANCE_DATA_BJ_2025_04', 'state/PerformanceData-BJ-Apr.csv')
-STATUS_FILENAME_BJ_APR = get_env('FILE_STATUS_BJ_2025_04', 'state/send_status_bj_apr.json')
+TEMP_CONTRACT_DATA_FILE_BJ_APR = 'state/ContractData-BJ-Apr.csv'
+PERFORMANCE_DATA_FILENAME_BJ_APR = 'state/PerformanceData-BJ-Apr.csv'
+STATUS_FILENAME_BJ_APR = 'state/send_status_bj_apr.json'
 
-# Pro
-def get_wecom_group_name_bj_apr():
-    """获取北京4月活动企业微信群名称"""
-    return get_env('CONTACT_WECOM_GROUP_NAME_BJ_2025_04')
-
-def get_campaign_contact_bj_apr():
-    """获取北京4月活动联系人"""
-    return get_env('CONTACT_CAMPAIGN_CONTACT_BJ_2025_04')
-
-# 为了向后兼容，保留原变量名
-WECOM_GROUP_NAME_BJ_APR = get_wecom_group_name_bj_apr()
-CAMPAIGN_CONTACT_BJ_APR = get_campaign_contact_bj_apr()
+# 中敏感度信息，直接作为常量
+WECOM_GROUP_NAME_BJ_APR = '（北京）修链服务运营'
+CAMPAIGN_CONTACT_BJ_APR = '王爽'
 
 ## 北京地区，2025年5月活动
-def get_api_url_bj_may():
-    """获取北京5月活动 API URL"""
-    return get_env('API_URL_BJ_2025_05', get_metabase_url() + "/api/card/1693/query")
-
-# 为了向后兼容，保留原变量名
-API_URL_BJ_MAY = get_api_url_bj_may()
+# 中敏感度信息，直接作为常量
+API_URL_BJ_MAY = METABASE_URL + "/api/card/1693/query"
 
 # 北京销售激励活动 JOB signing_and_sales_incentive_may_beijing
-TEMP_CONTRACT_DATA_FILE_BJ_MAY = get_env('FILE_TEMP_CONTRACT_DATA_BJ_2025_05', 'state/ContractData-BJ-May.csv')
-PERFORMANCE_DATA_FILENAME_BJ_MAY = get_env('FILE_PERFORMANCE_DATA_BJ_2025_05', 'state/PerformanceData-BJ-May.csv')
-STATUS_FILENAME_BJ_MAY = get_env('FILE_STATUS_BJ_2025_05', 'state/send_status_bj_may.json')
+TEMP_CONTRACT_DATA_FILE_BJ_MAY = 'state/ContractData-BJ-May.csv'
+PERFORMANCE_DATA_FILENAME_BJ_MAY = 'state/PerformanceData-BJ-May.csv'
+STATUS_FILENAME_BJ_MAY = 'state/send_status_bj_may.json'
 
-# Pro
-def get_wecom_group_name_bj_may():
-    """获取北京5月活动企业微信群名称"""
-    return get_env('CONTACT_WECOM_GROUP_NAME_BJ_2025_05')
-
-def get_campaign_contact_bj_may():
-    """获取北京5月活动联系人"""
-    return get_env('CONTACT_CAMPAIGN_CONTACT_BJ_2025_05')
-
-# 为了向后兼容，保留原变量名
-WECOM_GROUP_NAME_BJ_MAY = get_wecom_group_name_bj_may()
-CAMPAIGN_CONTACT_BJ_MAY = get_campaign_contact_bj_may()
+# 中敏感度信息，直接作为常量
+WECOM_GROUP_NAME_BJ_MAY = '（北京）修链服务运营'
+CAMPAIGN_CONTACT_BJ_MAY = '王爽'
 
 ## 北京的特殊配置选项
 # 销售激励活动 奖金池计算比例
-BONUS_POOL_RATIO_BJ_FEB = get_env('CONFIG_BONUS_POOL_RATIO_BJ_2025_02', 0.002, float)  # 默认为0.2%,可根据需要调整
+BONUS_POOL_RATIO_BJ_FEB = 0.002  # 默认为0.2%,可根据需要调整
 
 # 单个项目合同金额上限
-SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_FEB = get_env('CONFIG_SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_2025_02', 1000000, int)
+SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_FEB = 1000000
 # 业绩金额上限配置
-PERFORMANCE_AMOUNT_CAP_BJ_FEB = get_env('CONFIG_PERFORMANCE_AMOUNT_CAP_BJ_2025_02', 100000, int)
+PERFORMANCE_AMOUNT_CAP_BJ_FEB = 100000
 # 是否启用业绩金额上限
-ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB = get_env('CONFIG_ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_2025_02', 'true', bool)
+ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB = True
 
 # 昨日指定服务时效规范执行情况日报 JOB generate_daily_service_report
-def get_api_url_daily_service_report():
-    """获取每日服务报告 API URL"""
-    return get_env('API_URL_DAILY_SERVICE_REPORT', get_metabase_url() + "/api/card/1514/query")
-
-# 为了向后兼容，保留原变量名
-API_URL_DAILY_SERVICE_REPORT = get_api_url_daily_service_report()
-TEMP_DAILY_SERVICE_REPORT_FILE = get_env('FILE_TEMP_DAILY_SERVICE_REPORT', 'state/daily_service_report_record.csv')
-DAILY_SERVICE_REPORT_RECORD_FILE = get_env('FILE_DAILY_SERVICE_REPORT_RECORD', 'state/daily_service_report_record.json')
+# 中敏感度信息，直接作为常量
+API_URL_DAILY_SERVICE_REPORT = METABASE_URL + "/api/card/1514/query"
+TEMP_DAILY_SERVICE_REPORT_FILE = 'state/daily_service_report_record.csv'
+DAILY_SERVICE_REPORT_RECORD_FILE = 'state/daily_service_report_record.json'
 # SLA违规记录文件路径
-SLA_VIOLATIONS_RECORDS_FILE = get_env('FILE_SLA_VIOLATIONS_RECORDS', './state/sla_violations.json')
+SLA_VIOLATIONS_RECORDS_FILE = './state/sla_violations.json'
 # SLA监控配置
 SLA_CONFIG = {
-    "FORCE_MONDAY": get_env('FEATURE_SLA_FORCE_MONDAY', 'false', bool),  # 测试时设为 True，正式环境设为 False
+    "FORCE_MONDAY": False,  # 测试时设为 True，正式环境设为 False
 }
 # 服务商名称到接收人名称的映射
 SERVICE_PROVIDER_MAPPING = {
@@ -420,7 +355,7 @@ SERVICE_PROVIDER_MAPPING = {
 
 ##------ 徽章功能 ------##
 # 是否启用徽章，2025年4月新增
-ENABLE_BADGE_MANAGEMENT = get_env('FEATURE_ENABLE_BADGE_MANAGEMENT', 'true', bool)
+ENABLE_BADGE_MANAGEMENT = True
 BADGE_EMOJI = "\U0001F396"  # 奖章
 BADGE_NAME = f"【{BADGE_EMOJI}精英管家】"
 

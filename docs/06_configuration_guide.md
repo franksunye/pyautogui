@@ -1,8 +1,12 @@
 # 配置指南
 
+## 配置系统概述
+
+系统使用混合配置方式，将高敏感度信息（如密码、API密钥）存储在环境变量中，而中低敏感度信息（如API端点、文件路径）直接作为常量存储在代码中。这种方式既保护了关键敏感信息，又保持了代码的简洁性和可维护性。
+
 ## 环境变量配置
 
-系统现在使用环境变量来存储敏感信息和配置项，以提高安全性和灵活性。以下是必须配置的环境变量：
+系统使用环境变量来存储高敏感度信息，以提高安全性。以下是必须配置的环境变量：
 
 ### 必需的环境变量
 
@@ -10,24 +14,9 @@
 |------------|------|--------|
 | `METABASE_USERNAME` | Metabase用户名 | `user@example.com` |
 | `METABASE_PASSWORD` | Metabase密码 | `your_password` |
-| `METABASE_URL` | Metabase服务器URL | `http://metabase.example.com:3000` |
 | `WECOM_WEBHOOK_DEFAULT` | 默认企业微信机器人Webhook URL | `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx` |
-
-### 城市和活动特定的环境变量
-
-对于每个城市和活动月份，需要配置以下环境变量（以北京5月为例）：
-
-| 环境变量名称 | 描述 | 示例值 |
-|------------|------|--------|
-| `API_URL_BJ_2025_05` | 北京5月数据API地址 | `http://metabase.example.com:3000/api/card/1693/query` |
-| `FILE_TEMP_CONTRACT_DATA_BJ_2025_05` | 北京5月合同数据临时文件 | `temp_contract_data_bj_may.csv` |
-| `FILE_PERFORMANCE_DATA_BJ_2025_05` | 北京5月业绩数据文件 | `performance_data_bj_may.csv` |
-| `FILE_STATUS_BJ_2025_05` | 北京5月发送状态文件 | `status_bj_may.json` |
-| `CONTACT_WECOM_GROUP_NAME_BJ_2025_05` | 北京5月企业微信群名称 | `北京5月活动群` |
-| `CONTACT_CAMPAIGN_CONTACT_BJ_2025_05` | 北京5月活动联系人 | `张三` |
-| `CONFIG_PERFORMANCE_AMOUNT_CAP_BJ_2025_05` | 北京5月单个合同计入业绩金额上限 | `100000` |
-| `CONFIG_ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_2025_05` | 北京5月是否启用业绩金额上限 | `true` |
-| `CONFIG_SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_2025_05` | 北京5月单个项目合同金额上限 | `1000000` |
+| `WECOM_WEBHOOK_CONTACT_TIMEOUT` | 工单联络超时提醒Webhook URL | `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx` |
+| `CONTACT_PHONE_NUMBER` | 联系电话 | `12345678901` |
 
 ### 环境变量设置方法
 
@@ -114,20 +103,21 @@ pip install -r requirements.txt
 
 1. 复制环境变量模板文件：
    ```bash
-   cp .env.template .env
+   cp config/.env.example config/.env
    ```
 
-2. 编辑 `.env` 文件，填写实际值：
+2. 编辑 `config/.env` 文件，填写实际值：
    ```
    METABASE_USERNAME=your_username
    METABASE_PASSWORD=your_password
-   METABASE_URL=http://metabase.example.com:3000
    WECOM_WEBHOOK_DEFAULT=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key
+   WECOM_WEBHOOK_CONTACT_TIMEOUT=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key
+   CONTACT_PHONE_NUMBER=your_phone_number
    ```
 
-3. 确保 `.env` 文件不会被提交到代码仓库：
+3. 确保 `config/.env` 文件不会被提交到代码仓库：
    ```bash
-   echo ".env" >> .gitignore
+   echo "config/.env" >> .gitignore
    ```
 
 #### 6. 验证环境设置
@@ -167,8 +157,9 @@ python -m unittest tests/test_env_config.py
    ```bash
    export METABASE_USERNAME=your_username
    export METABASE_PASSWORD=your_password
-   export METABASE_URL=http://metabase.example.com:3000
    export WECOM_WEBHOOK_DEFAULT=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key
+   export WECOM_WEBHOOK_CONTACT_TIMEOUT=https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key
+   export CONTACT_PHONE_NUMBER=your_phone_number
    # 添加其他环境变量...
    ```
 
@@ -285,10 +276,11 @@ type logs\error.log | Select-Object -Last 50
 
 系统实施了以下敏感信息保护措施：
 
-1. **环境变量存储敏感信息**：所有敏感信息（如密码、API密钥）都存储在环境变量中，而不是硬编码在代码中。
-2. **日志脱敏**：日志中的敏感信息（如合同ID、管家姓名、金额）会被脱敏处理，只显示部分信息。
-3. **会话信息安全存储**：Metabase会话信息存储在本地文件中，并定期刷新。
-4. **错误处理增强**：增强了错误处理，确保在环境变量缺失或API调用失败时提供清晰的错误信息，而不泄露敏感信息。
+1. **分级保护策略**：根据敏感度分级保护信息，只将高敏感度信息（如密码、API密钥、Webhook URLs）移至环境变量，保留中低敏感度信息（如API端点、文件路径）在代码中作为常量。
+2. **环境变量存储高敏感度信息**：高敏感度信息（如密码、API密钥）都存储在环境变量中，而不是硬编码在代码中。
+3. **日志脱敏**：日志中的敏感信息（如合同ID、管家姓名、金额）会被脱敏处理，只显示部分信息。
+4. **会话信息安全存储**：Metabase会话信息存储在本地文件中，并定期刷新。
+5. **错误处理增强**：增强了错误处理，确保在环境变量缺失或API调用失败时提供清晰的错误信息，而不泄露敏感信息。
 
 ## 关键配置项说明
 
@@ -390,12 +382,13 @@ REWARD_CONFIGS["BJ-2025-05"]["tiered_rewards"]["tiers"][1]["threshold"] = 70000
 
 ## 环境变量最佳实践
 
-1. **不要在代码仓库中存储敏感信息**: 不要将包含敏感信息的 `.env` 文件提交到代码仓库
-2. **使用环境变量模板**: 提供一个 `.env.template` 文件，列出所有需要的环境变量，但不包含实际值
-3. **限制环境变量访问**: 限制对包含敏感环境变量的生产服务器的访问
-4. **定期轮换密钥**: 定期更改密码和API密钥，并更新相应的环境变量
-5. **使用不同环境的不同值**: 为开发、测试和生产环境使用不同的环境变量值
-6. **记录环境变量**: 在文档中记录所有环境变量的用途和格式，但不记录实际值
+1. **只将高敏感度信息存储在环境变量中**: 只将真正敏感的信息（密码、API密钥、Webhook URLs等）存储在环境变量中，保留中低敏感度信息在代码中作为常量
+2. **不要在代码仓库中存储敏感信息**: 不要将包含敏感信息的 `config/.env` 文件提交到代码仓库
+3. **使用环境变量模板**: 提供一个 `config/.env.example` 文件，列出所有需要的环境变量，但不包含实际值
+4. **限制环境变量访问**: 限制对包含敏感环境变量的生产服务器的访问
+5. **定期轮换密钥**: 定期更改密码和API密钥，并更新相应的环境变量
+6. **使用不同环境的不同值**: 为开发、测试和生产环境使用不同的环境变量值
+7. **记录环境变量**: 在文档中记录所有环境变量的用途和格式，但不记录实际值
 
 ## 日志安全最佳实践
 
@@ -407,21 +400,25 @@ REWARD_CONFIGS["BJ-2025-05"]["tiered_rewards"]["tiers"][1]["threshold"] = 70000
 
 ## 当前配置重点
 
-当前重构工作中，需要重点关注:
+当前敏感信息保护调整工作中，需要重点关注:
 
-1. 添加 `USE_GENERIC_PROCESS_FUNCTION` 功能标志，控制是否使用通用数据处理函数
-2. 确保上海配置 (`SH-2025-04`, `SH-2025-05`) 正确设置，与现有上海奖励规则一致
-3. 确保配置项能够处理北京和上海的所有差异，包括:
-   - 不同的幸运数字
-   - 不同的最低合同数量要求
-   - 不同的奖励等级结构
-   - 不同的性能上限规则
-4. 确保所有敏感信息都使用环境变量存储，包括:
-   - Metabase凭据
+1. 确保只将高敏感度信息移至环境变量，包括:
+   - Metabase凭据（用户名、密码）
    - 企业微信Webhook URL
-   - API URL
-5. 确保日志中不包含敏感信息，特别是:
+   - 联系电话等个人信息
+2. 保留中低敏感度信息在代码中作为常量，包括:
+   - API端点和服务器URL
+   - 文件路径和文件名
+   - 功能标志和开关
+   - 时间间隔和超时设置
+   - 业务规则和参数（如奖励配置）
+3. 确保日志中不包含敏感信息，特别是:
    - 完整的合同ID
    - 管家姓名
    - 合同金额
    - 密码和API密钥
+4. 确保配置项能够处理北京和上海的所有差异，包括:
+   - 不同的幸运数字
+   - 不同的最低合同数量要求
+   - 不同的奖励等级结构
+   - 不同的性能上限规则

@@ -14,9 +14,9 @@ def signing_and_sales_incentive_may_beijing():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_BJ_MAY
     performance_data_filename = PERFORMANCE_DATA_FILENAME_BJ_MAY
     status_filename = STATUS_FILENAME_BJ_MAY
-    # 使用函数获取变量值，确保在环境变量加载后调用
-    from modules.config import get_api_url_bj_may
-    api_url = get_api_url_bj_may()
+    # 直接使用常量
+    from modules.config import API_URL_BJ_MAY
+    api_url = API_URL_BJ_MAY
 
     logging.info('BEIJING 2025 5月, Job started ...')
 
@@ -60,9 +60,9 @@ def signing_and_sales_incentive_apr_beijing():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_BJ_APR
     performance_data_filename = PERFORMANCE_DATA_FILENAME_BJ_APR
     status_filename = STATUS_FILENAME_BJ_APR
-    # 使用函数获取变量值，确保在环境变量加载后调用
-    from modules.config import get_api_url_bj_apr
-    api_url = get_api_url_bj_apr()
+    # 直接使用常量
+    from modules.config import API_URL_BJ_APR
+    api_url = API_URL_BJ_APR
 
     logging.info('BEIJING 2025 4月, Job started ...')
 
@@ -104,9 +104,9 @@ def signing_and_sales_incentive_may_shanghai():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_MAY
     performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_MAY
     status_filename = STATUS_FILENAME_SH_MAY
-    # 使用函数获取变量值，确保在环境变量加载后调用
-    from modules.config import get_api_url_sh_may
-    api_url = get_api_url_sh_may()
+    # 直接使用常量
+    from modules.config import API_URL_SH_MAY
+    api_url = API_URL_SH_MAY
 
     logging.info('SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Job started ...')
     response = send_request_with_managed_session(api_url)
@@ -148,9 +148,9 @@ def signing_and_sales_incentive_apr_shanghai():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_APR
     performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_APR
     status_filename = STATUS_FILENAME_SH_APR
-    # 使用函数获取变量值，确保在环境变量加载后调用
-    from modules.config import get_api_url_sh_apr
-    api_url = get_api_url_sh_apr()
+    # 直接使用常量
+    from modules.config import API_URL_SH_APR
+    api_url = API_URL_SH_APR
 
     logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Job started ...')
     response = send_request_with_managed_session(api_url)
@@ -188,10 +188,10 @@ def signing_and_sales_incentive_apr_shanghai():
     logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Job ended')
 
 def check_technician_status():
-    # 使用函数获取变量值，确保在环境变量加载后调用
-    from modules.config import get_api_url_ts, get_status_filename_ts
-    api_url = get_api_url_ts()
-    status_filename = get_status_filename_ts()
+    # 直接使用常量
+    from modules.config import API_URL_TS, STATUS_FILENAME_TS
+    api_url = API_URL_TS
+    status_filename = STATUS_FILENAME_TS
 
     logging.info('BEIJING, Technician Status Check Job started')
     logging.info(f'API_URL_TS: {api_url}')
@@ -205,9 +205,9 @@ def check_technician_status():
 
 def generate_daily_service_report():
     logging.info('Daily service report generation started...')
-    # 使用函数获取变量值，确保在环境变量加载后调用
-    from modules.config import get_api_url_daily_service_report
-    api_url = get_api_url_daily_service_report()
+    # 直接使用常量
+    from modules.config import API_URL_DAILY_SERVICE_REPORT
+    api_url = API_URL_DAILY_SERVICE_REPORT
     temp_daily_service_report_file = TEMP_DAILY_SERVICE_REPORT_FILE
     # 保存状态文件名（目前未使用，但保留以备将来使用）
     # status_code_filename = DAILY_SERVICE_REPORT_RECORD_FILE
@@ -245,9 +245,9 @@ def generate_daily_service_report():
     logging.info('Daily service report generation completed.')
 
 def check_contact_timeout():
-    # 使用函数获取变量值，确保在环境变量加载后调用
-    from modules.config import get_api_url_contact_timeout
-    api_url = get_api_url_contact_timeout()
+    # 直接使用常量
+    from modules.config import API_URL_CONTACT_TIMEOUT
+    api_url = API_URL_CONTACT_TIMEOUT
     # notify_status_filename = STATUS_FILENAME_CONTACT_TIMEOUT
 
     logging.info('Contact Timeout Check, Job started ...')
