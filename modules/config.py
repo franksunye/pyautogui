@@ -197,6 +197,10 @@ REWARD_CONFIGS = {
 # 归档文件夹
 ARCHIVE_DIR = 'archive'
 
+# 签约台账数据库配置
+# 是否使用数据库存储签约台账数据
+USE_DATABASE_FOR_PERFORMANCE_DATA = False  # 默认使用文件存储，设为True时使用数据库存储
+
 # 业务数据源服务器配置
 # 中敏感度信息，直接作为常量
 METABASE_URL = 'http://metabase.fsgo365.cn:3000'

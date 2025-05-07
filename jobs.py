@@ -7,6 +7,11 @@ from modules.notification_module import *
 from modules.config import *
 from modules.service_provider_sla_monitor import process_sla_violations
 
+# 导入数据库模块
+from modules.data_processing_db_module import *
+from modules.performance_data_manager import *
+from modules.notification_db_module import *
+
 # 2025年5月，北京.
 # 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；
 # 单个项目（工单）签约合同金额大于10万时，参与累计合同金额计算时均按10万计入。
@@ -16,6 +21,8 @@ def signing_and_sales_incentive_may_beijing():
     # 直接使用常量
     from modules.config import API_URL_BJ_MAY
     api_url = API_URL_BJ_MAY
+    campaign_id = "BJ-2025-05"
+    province_code = "110000"
 
     logging.info('BEIJING 2025 5月, Job started ...')
 
@@ -26,26 +33,43 @@ def signing_and_sales_incentive_may_beijing():
     rows = response['data']['rows']
 
     columns = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)", "转化率(conversion)", "平均客单价(average)"]
-    save_to_csv_with_headers(rows,contract_data_filename,columns)
+    save_to_csv_with_headers(rows, contract_data_filename, columns)
 
     logging.info(f'BEIJING 2025 5月, Data saved to {contract_data_filename}')
 
     contract_data = read_contract_data(contract_data_filename)
 
-    existing_contract_ids = collect_unique_contract_ids_from_file(performance_data_filename)
+    # 根据配置决定使用文件存储还是数据库存储
+    if USE_DATABASE_FOR_PERFORMANCE_DATA:
+        # 使用数据库存储
+        logging.info('BEIJING 2025 5月, Using database storage')
 
-    housekeeper_award_lists = get_housekeeper_award_list(performance_data_filename)
+        # 处理数据并保存到数据库
+        processed_count = process_beijing_data_to_db(contract_data, campaign_id, province_code)
+        logging.info(f'BEIJING 2025 5月, {processed_count} records processed and saved to database')
 
-    # 当月的数据处理逻辑
-    processed_data = process_data_may_beijing(contract_data, existing_contract_ids,housekeeper_award_lists)
-    logging.info('BEIJING 2025 5月, Data processed')
+        # 获取数据用于通知
+        performance_data = get_performance_data_by_campaign(campaign_id)
 
-    performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池','计入业绩金额','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+        # 发送通知
+        notify_awards_may_beijing_db(performance_data)
+    else:
+        # 使用文件存储（原有逻辑）
+        logging.info('BEIJING 2025 5月, Using file storage')
 
-    write_performance_data(performance_data_filename, processed_data, performance_data_headers)
+        existing_contract_ids = collect_unique_contract_ids_from_file(performance_data_filename)
+        housekeeper_award_lists = get_housekeeper_award_list(performance_data_filename)
 
-    # 当月的数据处理逻辑
-    notify_awards_may_beijing(performance_data_filename)
+        # 当月的数据处理逻辑
+        processed_data = process_data_may_beijing(contract_data, existing_contract_ids, housekeeper_award_lists)
+        logging.info('BEIJING 2025 5月, Data processed')
+
+        performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池','计入业绩金额','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+
+        write_performance_data(performance_data_filename, processed_data, performance_data_headers)
+
+        # 当月的数据处理逻辑
+        notify_awards_may_beijing(performance_data_filename)
 
     archive_file(contract_data_filename)
     logging.info('BEIJING 2025 5月, Data archived')
@@ -61,6 +85,8 @@ def signing_and_sales_incentive_apr_beijing():
     # 直接使用常量
     from modules.config import API_URL_BJ_APR
     api_url = API_URL_BJ_APR
+    campaign_id = "BJ-2025-04"  # 北京4月活动ID
+    province_code = "110000"    # 北京省份代码
 
     logging.info('BEIJING 2025 4月, Job started ...')
 
@@ -71,26 +97,43 @@ def signing_and_sales_incentive_apr_beijing():
     rows = response['data']['rows']
 
     columns = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)", "转化率(conversion)", "平均客单价(average)"]
-    save_to_csv_with_headers(rows,contract_data_filename,columns)
+    save_to_csv_with_headers(rows, contract_data_filename, columns)
 
     logging.info(f'BEIJING 2025 4月, Data saved to {contract_data_filename}')
 
     contract_data = read_contract_data(contract_data_filename)
 
-    existing_contract_ids = collect_unique_contract_ids_from_file(performance_data_filename)
+    # 根据配置决定使用文件存储还是数据库存储
+    if USE_DATABASE_FOR_PERFORMANCE_DATA:
+        # 使用数据库存储
+        logging.info('BEIJING 2025 4月, Using database storage')
 
-    housekeeper_award_lists = get_housekeeper_award_list(performance_data_filename)
+        # 处理数据并保存到数据库
+        processed_count = process_beijing_data_to_db(contract_data, campaign_id, province_code)
+        logging.info(f'BEIJING 2025 4月, {processed_count} records processed and saved to database')
 
-    # 当月的数据处理逻辑
-    processed_data = process_data_apr_beijing(contract_data, existing_contract_ids,housekeeper_award_lists,use_generic=True)
-    logging.info('BEIJING 2025 4月, Data processed')
+        # 获取数据用于通知
+        performance_data = get_performance_data_by_campaign(campaign_id)
 
-    performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池','计入业绩金额','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+        # 发送通知
+        notify_awards_apr_beijing_db(performance_data)
+    else:
+        # 使用文件存储（原有逻辑）
+        logging.info('BEIJING 2025 4月, Using file storage')
 
-    write_performance_data(performance_data_filename, processed_data, performance_data_headers)
+        existing_contract_ids = collect_unique_contract_ids_from_file(performance_data_filename)
+        housekeeper_award_lists = get_housekeeper_award_list(performance_data_filename)
 
-    # 当月的数据处理逻辑
-    notify_awards_apr_beijing(performance_data_filename)
+        # 当月的数据处理逻辑
+        processed_data = process_data_apr_beijing(contract_data, existing_contract_ids, housekeeper_award_lists, use_generic=True)
+        logging.info('BEIJING 2025 4月, Data processed')
+
+        performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池','计入业绩金额','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+
+        write_performance_data(performance_data_filename, processed_data, performance_data_headers)
+
+        # 当月的数据处理逻辑
+        notify_awards_apr_beijing(performance_data_filename)
 
     archive_file(contract_data_filename)
     logging.info('BEIJING 2025 4月, Data archived')
@@ -104,6 +147,8 @@ def signing_and_sales_incentive_may_shanghai():
     # 直接使用常量
     from modules.config import API_URL_SH_MAY
     api_url = API_URL_SH_MAY
+    campaign_id = "SH-2025-04"  # 上海5月活动ID
+    province_code = "310000"    # 上海省份代码
 
     logging.info('SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Job started ...')
     response = send_request_with_managed_session(api_url)
@@ -112,28 +157,46 @@ def signing_and_sales_incentive_may_shanghai():
     rows = response['data']['rows']
 
     columns = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)", "转化率(conversion)", "平均客单价(average)"]
-    save_to_csv_with_headers(rows,contract_data_filename,columns)
+    save_to_csv_with_headers(rows, contract_data_filename, columns)
 
     logging.info(f'SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Data saved to {contract_data_filename}')
 
     contract_data = read_contract_data(contract_data_filename)
 
-    existing_contract_ids = collect_unique_contract_ids_from_file(performance_data_filename)
+    # 根据配置决定使用文件存储还是数据库存储
+    if USE_DATABASE_FOR_PERFORMANCE_DATA:
+        # 使用数据库存储
+        logging.info('SHANGHAI 2025 5月, Using database storage')
 
-    # 获取管家奖励列表，升级唯一奖励列表
-    housekeeper_award_lists = get_unique_housekeeper_award_list(performance_data_filename)
+        # 处理数据并保存到数据库
+        processed_count = process_shanghai_data_to_db(contract_data, campaign_id, province_code)
+        logging.info(f'SHANGHAI 2025 5月, {processed_count} records processed and saved to database')
 
-    # 当月的数据处理逻辑，奖励规则按照3月份的，与4月保持一致
-    processed_data = process_data_shanghai_apr(contract_data, existing_contract_ids, housekeeper_award_lists)
+        # 获取数据用于通知
+        performance_data = get_performance_data_by_campaign(campaign_id)
 
-    logging.info('SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Data processed')
+        # 发送通知
+        notify_awards_may_shanghai_db(performance_data)
+    else:
+        # 使用文件存储（原有逻辑）
+        logging.info('SHANGHAI 2025 5月, Using file storage')
 
-    performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池', '计入业绩金额','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+        existing_contract_ids = collect_unique_contract_ids_from_file(performance_data_filename)
 
-    write_performance_data(performance_data_filename, processed_data, performance_data_headers)
+        # 获取管家奖励列表，升级唯一奖励列表
+        housekeeper_award_lists = get_unique_housekeeper_award_list(performance_data_filename)
 
-    # 当月的通知数据处理逻辑
-    notify_awards_may_shanghai(performance_data_filename)
+        # 当月的数据处理逻辑，奖励规则按照3月份的，与4月保持一致
+        processed_data = process_data_shanghai_apr(contract_data, existing_contract_ids, housekeeper_award_lists)
+
+        logging.info('SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Data processed')
+
+        performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池', '计入业绩金额','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+
+        write_performance_data(performance_data_filename, processed_data, performance_data_headers)
+
+        # 当月的通知数据处理逻辑
+        notify_awards_may_shanghai(performance_data_filename)
 
     archive_file(contract_data_filename)
     logging.info('SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Data archived')
@@ -147,6 +210,8 @@ def signing_and_sales_incentive_apr_shanghai():
     # 直接使用常量
     from modules.config import API_URL_SH_APR
     api_url = API_URL_SH_APR
+    campaign_id = "SH-2025-03"  # 上海4月活动ID
+    province_code = "310000"    # 上海省份代码
 
     logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Job started ...')
     response = send_request_with_managed_session(api_url)
@@ -155,28 +220,46 @@ def signing_and_sales_incentive_apr_shanghai():
     rows = response['data']['rows']
 
     columns = ["合同ID(_id)", "活动城市(province)", "工单编号(serviceAppointmentNum)", "Status", "管家(serviceHousekeeper)", "合同编号(contractdocNum)", "合同金额(adjustRefundMoney)", "支付金额(paidAmount)", "差额(difference)", "State", "创建时间(createTime)", "服务商(orgName)", "签约时间(signedDate)", "Doorsill", "款项来源类型(tradeIn)", "转化率(conversion)", "平均客单价(average)"]
-    save_to_csv_with_headers(rows,contract_data_filename,columns)
+    save_to_csv_with_headers(rows, contract_data_filename, columns)
 
     logging.info(f'SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Data saved to {contract_data_filename}')
 
     contract_data = read_contract_data(contract_data_filename)
 
-    existing_contract_ids = collect_unique_contract_ids_from_file(performance_data_filename)
+    # 根据配置决定使用文件存储还是数据库存储
+    if USE_DATABASE_FOR_PERFORMANCE_DATA:
+        # 使用数据库存储
+        logging.info('SHANGHAI 2025 4月, Using database storage')
 
-    # 获取管家奖励列表，升级唯一奖励列表
-    housekeeper_award_lists = get_unique_housekeeper_award_list(performance_data_filename)
+        # 处理数据并保存到数据库
+        processed_count = process_shanghai_data_to_db(contract_data, campaign_id, province_code)
+        logging.info(f'SHANGHAI 2025 4月, {processed_count} records processed and saved to database')
 
-    # 当月的数据处理逻辑，奖励规则按照3月份的
-    processed_data = process_data_shanghai_apr(contract_data, existing_contract_ids, housekeeper_award_lists)
+        # 获取数据用于通知
+        performance_data = get_performance_data_by_campaign(campaign_id)
 
-    logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Data processed')
+        # 发送通知
+        notify_awards_apr_shanghai_db(performance_data)
+    else:
+        # 使用文件存储（原有逻辑）
+        logging.info('SHANGHAI 2025 4月, Using file storage')
 
-    performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池', '计入业绩金额','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+        existing_contract_ids = collect_unique_contract_ids_from_file(performance_data_filename)
 
-    write_performance_data(performance_data_filename, processed_data, performance_data_headers)
+        # 获取管家奖励列表，升级唯一奖励列表
+        housekeeper_award_lists = get_unique_housekeeper_award_list(performance_data_filename)
 
-    # 当月的通知数据处理逻辑
-    notify_awards_apr_shanghai(performance_data_filename)
+        # 当月的数据处理逻辑，奖励规则按照3月份的
+        processed_data = process_data_shanghai_apr(contract_data, existing_contract_ids, housekeeper_award_lists)
+
+        logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Data processed')
+
+        performance_data_headers = ['活动编号', '合同ID(_id)', '活动城市(province)', '工单编号(serviceAppointmentNum)', 'Status', '管家(serviceHousekeeper)', '合同编号(contractdocNum)', '合同金额(adjustRefundMoney)', '支付金额(paidAmount)', '差额(difference)', 'State', '创建时间(createTime)', '服务商(orgName)', '签约时间(signedDate)', 'Doorsill', '款项来源类型(tradeIn)', '转化率(conversion)', '平均客单价(average)','活动期内第几个合同','管家累计金额','管家累计单数','奖金池', '计入业绩金额','激活奖励状态', '奖励类型', '奖励名称', '是否发送通知', '备注', '登记时间']
+
+        write_performance_data(performance_data_filename, processed_data, performance_data_headers)
+
+        # 当月的通知数据处理逻辑
+        notify_awards_apr_shanghai(performance_data_filename)
 
     archive_file(contract_data_filename)
     logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Data archived')
