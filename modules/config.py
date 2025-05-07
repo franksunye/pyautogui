@@ -234,7 +234,6 @@ PHONE_NUMBER = get_phone_number()
 # 第二个任务，北京技师状态检查 JOB check_technician_status
 # 中敏感度信息，直接作为常量
 API_URL_TS = METABASE_URL + "/api/card/719/query"
-STATUS_FILENAME_TS = './state/technician_status_record.json'
 
 # 第六个任务，工单联络超时提醒
 # 中敏感度信息，直接作为常量
@@ -255,7 +254,6 @@ API_URL_SH_APR = METABASE_URL + "/api/card/1617/query"
 # 销售激励活动 JOB signing_and_sales_incentive_apr_shanghai
 TEMP_CONTRACT_DATA_FILE_SH_APR = 'state/ContractData-SH-Apr.csv'
 PERFORMANCE_DATA_FILENAME_SH_APR = 'state/PerformanceData-SH-Apr.csv'
-STATUS_FILENAME_SH_APR = 'state/send_status_sh_apr.json'
 
 # 中敏感度信息，直接作为常量
 WECOM_GROUP_NAME_SH_APR = '（上海）运营群'
@@ -268,7 +266,6 @@ API_URL_SH_MAY = METABASE_URL + "/api/card/1694/query"
 # 销售激励活动 JOB signing_and_sales_incentive_may_shanghai
 TEMP_CONTRACT_DATA_FILE_SH_MAY = 'state/ContractData-SH-May.csv'
 PERFORMANCE_DATA_FILENAME_SH_MAY = 'state/PerformanceData-SH-May.csv'
-STATUS_FILENAME_SH_MAY = 'state/send_status_sh_may.json'
 
 # 中敏感度信息，直接作为常量
 WECOM_GROUP_NAME_SH_MAY = '（上海）运营群'
@@ -287,7 +284,6 @@ API_URL_BJ_APR = METABASE_URL + "/api/card/1616/query"
 # 北京销售激励活动 JOB signing_and_sales_incentive_apr_beijing
 TEMP_CONTRACT_DATA_FILE_BJ_APR = 'state/ContractData-BJ-Apr.csv'
 PERFORMANCE_DATA_FILENAME_BJ_APR = 'state/PerformanceData-BJ-Apr.csv'
-STATUS_FILENAME_BJ_APR = 'state/send_status_bj_apr.json'
 
 # 中敏感度信息，直接作为常量
 WECOM_GROUP_NAME_BJ_APR = '（北京）修链服务运营'
@@ -300,7 +296,6 @@ API_URL_BJ_MAY = METABASE_URL + "/api/card/1693/query"
 # 北京销售激励活动 JOB signing_and_sales_incentive_may_beijing
 TEMP_CONTRACT_DATA_FILE_BJ_MAY = 'state/ContractData-BJ-May.csv'
 PERFORMANCE_DATA_FILENAME_BJ_MAY = 'state/PerformanceData-BJ-May.csv'
-STATUS_FILENAME_BJ_MAY = 'state/send_status_bj_may.json'
 
 # 中敏感度信息，直接作为常量
 WECOM_GROUP_NAME_BJ_MAY = '（北京）修链服务运营'

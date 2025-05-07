@@ -13,7 +13,6 @@ from modules.service_provider_sla_monitor import process_sla_violations
 def signing_and_sales_incentive_may_beijing():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_BJ_MAY
     performance_data_filename = PERFORMANCE_DATA_FILENAME_BJ_MAY
-    status_filename = STATUS_FILENAME_BJ_MAY
     # 直接使用常量
     from modules.config import API_URL_BJ_MAY
     api_url = API_URL_BJ_MAY
@@ -46,7 +45,7 @@ def signing_and_sales_incentive_may_beijing():
     write_performance_data(performance_data_filename, processed_data, performance_data_headers)
 
     # 当月的数据处理逻辑
-    notify_awards_may_beijing(performance_data_filename, status_filename)
+    notify_awards_may_beijing(performance_data_filename)
 
     archive_file(contract_data_filename)
     logging.info('BEIJING 2025 5月, Data archived')
@@ -59,7 +58,6 @@ def signing_and_sales_incentive_may_beijing():
 def signing_and_sales_incentive_apr_beijing():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_BJ_APR
     performance_data_filename = PERFORMANCE_DATA_FILENAME_BJ_APR
-    status_filename = STATUS_FILENAME_BJ_APR
     # 直接使用常量
     from modules.config import API_URL_BJ_APR
     api_url = API_URL_BJ_APR
@@ -92,7 +90,7 @@ def signing_and_sales_incentive_apr_beijing():
     write_performance_data(performance_data_filename, processed_data, performance_data_headers)
 
     # 当月的数据处理逻辑
-    notify_awards_apr_beijing(performance_data_filename, status_filename)
+    notify_awards_apr_beijing(performance_data_filename)
 
     archive_file(contract_data_filename)
     logging.info('BEIJING 2025 4月, Data archived')
@@ -103,7 +101,6 @@ def signing_and_sales_incentive_apr_beijing():
 def signing_and_sales_incentive_may_shanghai():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_MAY
     performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_MAY
-    status_filename = STATUS_FILENAME_SH_MAY
     # 直接使用常量
     from modules.config import API_URL_SH_MAY
     api_url = API_URL_SH_MAY
@@ -135,8 +132,8 @@ def signing_and_sales_incentive_may_shanghai():
 
     write_performance_data(performance_data_filename, processed_data, performance_data_headers)
 
-    # 当月的通知数据处理逻辑（与三月一致），与4月保持一致
-    notify_awards_shanghai_generate_message_march(performance_data_filename, status_filename, contract_data)
+    # 当月的通知数据处理逻辑
+    notify_awards_may_shanghai(performance_data_filename)
 
     archive_file(contract_data_filename)
     logging.info('SHANGHAI 2025 5月 Conq & triumph, take 1 more city, Data archived')
@@ -147,7 +144,6 @@ def signing_and_sales_incentive_may_shanghai():
 def signing_and_sales_incentive_apr_shanghai():
     contract_data_filename = TEMP_CONTRACT_DATA_FILE_SH_APR
     performance_data_filename = PERFORMANCE_DATA_FILENAME_SH_APR
-    status_filename = STATUS_FILENAME_SH_APR
     # 直接使用常量
     from modules.config import API_URL_SH_APR
     api_url = API_URL_SH_APR
@@ -179,8 +175,8 @@ def signing_and_sales_incentive_apr_shanghai():
 
     write_performance_data(performance_data_filename, processed_data, performance_data_headers)
 
-    # 当月的通知数据处理逻辑（与三月一致）
-    notify_awards_shanghai_generate_message_march(performance_data_filename, status_filename, contract_data)
+    # 当月的通知数据处理逻辑
+    notify_awards_apr_shanghai(performance_data_filename)
 
     archive_file(contract_data_filename)
     logging.info('SHANGHAI 2025 4月 Conq & triumph, take 1 more city, Data archived')
@@ -189,9 +185,8 @@ def signing_and_sales_incentive_apr_shanghai():
 
 def check_technician_status():
     # 直接使用常量
-    from modules.config import API_URL_TS, STATUS_FILENAME_TS
+    from modules.config import API_URL_TS
     api_url = API_URL_TS
-    status_filename = STATUS_FILENAME_TS
 
     logging.info('BEIJING, Technician Status Check Job started')
     logging.info(f'API_URL_TS: {api_url}')
@@ -199,7 +194,7 @@ def check_technician_status():
     response = send_request_with_managed_session(api_url)
     status_changes = response['data']['rows']
 
-    notify_technician_status_changes(status_changes, status_filename)
+    notify_technician_status_changes(status_changes)
 
     logging.info('BEIJING, Technician Status Check Job ended')
 
@@ -210,7 +205,7 @@ def generate_daily_service_report():
     api_url = API_URL_DAILY_SERVICE_REPORT
     temp_daily_service_report_file = TEMP_DAILY_SERVICE_REPORT_FILE
     # 保存状态文件名（目前未使用，但保留以备将来使用）
-    # status_code_filename = DAILY_SERVICE_REPORT_RECORD_FILE
+    status_code_filename = DAILY_SERVICE_REPORT_RECORD_FILE
 
     try:
         # 1. 发送请求以获取日报数据

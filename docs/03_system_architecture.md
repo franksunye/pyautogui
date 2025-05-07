@@ -48,26 +48,44 @@
   - `notify_awards_apr_beijing`: 发送北京4月奖励通知
   - `notify_awards_shanghai_generate_message_march`: 发送上海奖励通知
 
-### 5. 任务调度器 (task_scheduler.py)
-- **功能**: 管理和执行任务队列
+### 5. 任务管理系统 (task_manager.py)
+- **功能**: 管理消息发送任务的创建和状态更新
 - **关键组件**:
-  - 任务检查循环
-  - 任务执行线程
-  - 任务状态管理
+  - Task类：表示一个消息发送任务
+  - 数据库交互函数：创建、更新和查询任务
+  - 任务状态管理：跟踪任务的执行状态
+- **关键函数**:
+  - `create_task()`: 创建新的消息发送任务
+  - `update_task()`: 更新任务状态
+  - `get_pending_tasks()`: 获取待处理的任务
 
-### 6. 请求模块 (modules/request_module.py)
+### 6. 任务调度器 (task_scheduler.py)
+- **功能**: 调度和执行任务队列中的任务
+- **关键组件**:
+  - 任务检查循环：定期检查待处理任务
+  - 任务执行线程：在后台执行任务
+  - 任务锁机制：确保任务顺序执行
+
+### 7. 请求模块 (modules/request_module.py)
 - **功能**: 处理与外部系统的HTTP请求
 - **关键函数**:
   - `get_metabase_session`: 获取Metabase会话
   - `send_request_with_managed_session`: 发送带会话管理的请求
 
-### 7. 文件工具 (modules/file_utils.py)
+### 8. 文件工具 (modules/file_utils.py)
 - **功能**: 处理文件读写操作
 - **关键函数**:
   - `get_all_records_from_csv`: 从CSV文件读取记录
   - `write_data_to_csv`: 将数据写入CSV文件
+  - `write_performance_data_to_csv`: 将业绩数据写入CSV文件
 
-### 8. 日志配置 (modules/log_config.py)
+### 9. 消息发送模块 (modules/message_sender.py)
+- **功能**: 处理实际的消息发送操作
+- **关键函数**:
+  - `send_wechat_message`: 发送微信消息
+  - `send_wecom_message`: 发送企业微信消息
+
+### 10. 日志配置 (modules/log_config.py)
 - **功能**: 配置日志系统
 - **关键功能**:
   - 设置日志级别
@@ -88,7 +106,7 @@ Metabase API -> request_module.py -> 临时CSV文件
 
 ### 3. 通知发送流程
 ```
-业绩数据CSV文件 -> notification_module.py -> 企业微信API
+业绩数据CSV文件 -> notification_module.py -> task_manager.py -> task_scheduler.py -> message_sender.py -> 企业微信API/微信
 ```
 
 ### 4. 任务调度流程
@@ -100,15 +118,19 @@ main.py -> jobs.py -> task_scheduler.py -> 各功能模块
 
 ### 1. 文件存储
 - **合同数据**: 存储在CSV文件中
-- **业绩数据**: 存储在CSV文件中
-- **发送状态**: 存储在JSON文件中
+- **业绩数据**: 存储在CSV文件中，包含消息发送状态标记
 
 ### 2. 数据库存储
-- **SQLite数据库**: 用于存储历史数据和统计信息
+- **SQLite数据库**: 用于存储任务和历史数据
 - **表结构**:
-  - `contracts`: 存储合同信息
-  - `rewards`: 存储奖励信息
-  - `notifications`: 存储通知信息
+  - `tasks`: 存储消息发送任务
+    - `id`: 任务ID
+    - `task_type`: 任务类型（如'send_wechat_message'或'send_wecom_message'）
+    - `recipient`: 接收者
+    - `message`: 消息内容
+    - `status`: 任务状态（'pending'、'completed'等）
+    - `created_at`: 创建时间
+    - `updated_at`: 更新时间
 
 ## 外部依赖
 
