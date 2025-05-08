@@ -3,9 +3,9 @@
 ## 文档信息
 **文档类型**: 项目计划
 **文档编号**: reward_system-PLAN-001
-**版本**: 1.0.0
+**版本**: 1.1.0
 **创建日期**: 2025-04-29
-**最后更新**: 2025-04-29
+**最后更新**: 2025-05-15
 **状态**: 草稿
 **负责人**: Frank
 **团队成员**: Frank, 小智
@@ -20,19 +20,23 @@
 
 当前的奖励系统中，北京和上海的数据处理函数采用了不同的实现方式。北京已经使用了通用奖励确定函数，而上海仍然使用特定的奖励确定函数。这种不一致性增加了维护成本，并可能导致功能差异。
 
+此外，系统现在支持两种存储方式：文件存储和数据库存储，通过配置项 `USE_DATABASE_FOR_PERFORMANCE_DATA` 控制。奖励计算功能需要在这两种存储方式下保持一致，确保无论数据来源是文件还是数据库，都能使用相同的奖励计算逻辑。
+
 ### 1.2 目标
 
 1. 统一北京和上海的数据处理函数，创建一个通用的数据处理框架
 2. 确保新实现与原始实现功能完全一致
 3. 提高代码可维护性和可扩展性
-4. 在整个过程中保持系统稳定运行
+4. 确保奖励计算功能在文件存储和数据库存储两种模式下都能正常工作
+5. 在整个过程中保持系统稳定运行
 
 ### 1.3 范围
 
 - 重构 `process_data_apr_beijing` 和 `process_data_shanghai_apr` 函数
-- 创建通用数据处理函数 `process_data_generic`
-- 添加上海的配置到 `REWARD_CONFIGS` 字典
-- 创建上海的通用奖励确定函数包装函数
+- 创建通用数据处理函数 `process_data_generic`，支持文件和数据库两种存储方式
+- 添加上海的配置到 `REWARD_CONFIGS` 字典（已完成）
+- 创建上海的通用奖励确定函数包装函数（已完成）
+- 确保 `determine_rewards_generic` 函数在文件和数据库处理流程中都能被正确调用
 - 添加必要的测试和文档
 
 ### 1.4 非范围
@@ -40,6 +44,7 @@
 - 不修改现有的业务逻辑和奖励规则
 - 不修改通知模块和其他系统组件
 - 不修改用户界面或API
+- 不修改数据库表结构
 
 ## 2. 实施计划
 
@@ -77,8 +82,16 @@
 #### 2.2.1 创建通用数据处理函数
 
 - **任务**: 实现 `process_data_generic` 函数
-- **详情**: 支持所有现有功能，处理北京和上海的所有差异，添加详细的文档和注释
-- **验收标准**: 函数已实现并通过代码审查
+- **详情**:
+  - 支持所有现有功能，处理北京和上海的所有差异
+  - 支持文件存储和数据库存储两种模式
+  - 通过参数控制输出目标（文件或数据库）
+  - 确保调用 `determine_rewards_generic` 函数进行奖励计算
+  - 添加详细的文档和注释
+- **验收标准**:
+  - 函数已实现并通过代码审查
+  - 函数在文件和数据库两种模式下都能正常工作
+  - 奖励计算逻辑与原始实现一致
 - **状态**: 未开始
 - **负责人**: [待定]
 - **截止日期**: [待定]
@@ -95,8 +108,15 @@
 #### 2.2.3 创建包装函数
 
 - **任务**: 实现 `process_data_apr_beijing_generic` 和 `process_data_shanghai_apr_generic`
-- **详情**: 这些函数调用通用函数并传入相应的参数
-- **验收标准**: 函数已实现并通过代码审查
+- **详情**:
+  - 这些函数调用通用函数并传入相应的参数
+  - 支持文件存储和数据库存储两种模式
+  - 通过参数 `use_database` 控制存储模式
+  - 确保与数据库处理函数（如 `process_beijing_data_to_db`）功能等价
+- **验收标准**:
+  - 函数已实现并通过代码审查
+  - 函数在文件和数据库两种模式下都能正常工作
+  - 与原始实现功能等价
 - **状态**: 未开始
 - **负责人**: [待定]
 - **截止日期**: [待定]
@@ -327,8 +347,11 @@
 ### 10.2 术语表
 
 - **通用奖励确定函数**: `determine_rewards_generic` 函数，基于配置确定奖励类型和名称
-- **功能标志**: 用于控制是否使用新实现的配置项
-- **包装函数**: 调用通用函数并传入特定参数的函数
+- **通用数据处理函数**: `process_data_generic` 函数，支持所有城市和存储方式的通用数据处理逻辑
+- **功能标志**: 用于控制是否使用新实现的配置项，如 `USE_GENERIC_PROCESS_FUNCTION`
+- **包装函数**: 调用通用函数并传入特定参数的函数，如 `process_data_apr_beijing_generic`
+- **存储模式**: 系统支持的数据存储方式，包括文件存储和数据库存储
+- **REWARD_CONFIGS**: 配置字典，包含不同城市和月份的奖励规则配置
 
 ### 10.3 代码示例
 
@@ -340,9 +363,28 @@ def process_data_generic(
     existing_contract_ids,
     housekeeper_award_lists,
     config_key,  # 例如 "BJ-2025-04", "SH-2025-04"
-    use_generic=True,
+    use_database=False,  # 是否使用数据库存储
+    campaign_id=None,  # 活动ID，用于数据库存储
+    province_code=None,  # 省份代码，用于数据库存储
     use_combined_key=False  # 是否使用组合键（上海特有）
 ):
+    """
+    通用数据处理函数，处理合同数据并返回结果。
+
+    Args:
+        contract_data: 合同数据列表
+        existing_contract_ids: 已存在的合同ID集合
+        housekeeper_award_lists: 管家奖励列表
+        config_key: 配置键名，用于从REWARD_CONFIGS中获取对应配置
+        use_database: 是否使用数据库存储
+        campaign_id: 活动ID，用于数据库存储
+        province_code: 省份代码，用于数据库存储
+        use_combined_key: 是否使用组合键（上海特有）
+
+    Returns:
+        如果use_database为False，返回处理后的性能数据列表
+        如果use_database为True，返回处理的合同数量
+    """
     # 从配置中获取相关参数
     city_code = config_key.split("-")[0]  # 例如 "BJ", "SH"
 
@@ -367,29 +409,142 @@ def process_data_generic(
     for contract in contract_data:
         # 处理逻辑...
 
-    return performance_data
+        # 计算奖励类型和名称
+        reward_types, reward_names, next_reward_gap = determine_rewards_generic(
+            contract_number,
+            housekeeper_data,
+            current_contract_amount,
+            config_key
+        )
+
+        # 根据存储方式选择不同的处理逻辑
+        if use_database:
+            # 数据库存储逻辑
+            db_utils.save_performance_data_to_db(
+                contract_id,
+                city_code,
+                month,
+                housekeeper_name,
+                contract_amount,
+                performance_amount,
+                contract_number,
+                service_appointment,
+                service_provider,
+                reward_types,
+                reward_names
+            )
+            processed_count += 1
+        else:
+            # 文件存储逻辑
+            performance_data.append({
+                'contract_id': contract_id,
+                'housekeeper': housekeeper_name,
+                'contract_amount': contract_amount,
+                'performance_amount': performance_amount,
+                'contract_number': contract_number,
+                'service_appointment': service_appointment,
+                'service_provider': service_provider,
+                'lucky_reward': reward_types[0] if reward_types else '',
+                'progressive_reward': reward_types[1] if len(reward_types) > 1 else ''
+            })
+
+    # 根据存储方式返回不同的结果
+    if use_database:
+        return processed_count
+    else:
+        return performance_data
 ```
 
-#### 10.3.2 并行运行逻辑示例
+#### 10.3.2 包装函数示例
 
 ```python
-def process_data_apr_beijing(contract_data, existing_contract_ids, housekeeper_award_lists, use_generic=False):
+def process_data_apr_beijing_generic(contract_data, existing_contract_ids, housekeeper_award_lists, use_database=False):
+    """
+    使用通用数据处理函数处理2025年4月北京活动的数据。
+
+    Args:
+        contract_data: 合同数据列表
+        existing_contract_ids: 已存在的合同ID集合
+        housekeeper_award_lists: 管家奖励列表
+        use_database: 是否使用数据库存储
+
+    Returns:
+        如果use_database为False，返回处理后的性能数据列表
+        如果use_database为True，返回处理的合同数量
+    """
+    return process_data_generic(
+        contract_data,
+        existing_contract_ids,
+        housekeeper_award_lists,
+        "BJ-2025-04",
+        use_database,
+        "BJ-2025-04" if use_database else None,
+        "110000" if use_database else None,
+        False  # 北京不使用组合键
+    )
+```
+
+#### 10.3.3 数据库处理函数简化示例
+
+```python
+def process_beijing_data_to_db(contract_data, campaign_id="BJ-2025-05", province_code="110000"):
+    """
+    处理北京合同数据并将结果保存到数据库中。
+
+    Args:
+        contract_data: 合同数据列表
+        campaign_id: 活动ID，默认为"BJ-2025-05"
+        province_code: 省份代码，默认为"110000"
+
+    Returns:
+        处理的合同数量
+    """
+    config_key = campaign_id  # 使用活动ID作为配置键
+    return process_data_generic(
+        contract_data,
+        get_unique_contract_ids(),  # 从数据库获取已存在的合同ID
+        {},  # 空的管家奖励列表，将在函数内部初始化
+        config_key,
+        True,  # 使用数据库存储
+        campaign_id,
+        province_code
+    )
+```
+
+#### 10.3.4 并行运行逻辑示例
+
+```python
+def process_data_apr_beijing(contract_data, existing_contract_ids, housekeeper_award_lists):
+    """
+    处理2025年4月北京活动的数据。
+
+    Args:
+        contract_data: 合同数据列表
+        existing_contract_ids: 已存在的合同ID集合
+        housekeeper_award_lists: 管家奖励列表
+
+    Returns:
+        处理后的性能数据列表
+    """
     # 原始逻辑
     original_result = original_process_logic(...)
 
     if config.USE_GENERIC_PROCESS_FUNCTION:
         # 新逻辑
-        new_result = process_data_generic(
+        use_database = config.USE_DATABASE_FOR_PERFORMANCE_DATA
+        new_result = process_data_apr_beijing_generic(
             contract_data,
             existing_contract_ids.copy(),  # 使用副本避免影响原始逻辑
             housekeeper_award_lists,
-            "BJ-2025-04",
-            use_generic,
-            use_combined_key=False
+            use_database
         )
 
-        # 比较结果
-        compare_results(original_result, new_result, "BJ-2025-04")
+        # 如果使用数据库，需要将结果转换为与原始结果相同的格式进行比较
+        if use_database:
+            new_result_converted = convert_db_result_to_file_format(new_result)
+            compare_results(original_result, new_result_converted, "BJ-2025-04")
+        else:
+            compare_results(original_result, new_result, "BJ-2025-04")
 
     return original_result
 ```
@@ -401,3 +556,4 @@ def process_data_apr_beijing(contract_data, existing_contract_ids, housekeeper_a
 | 版本 | 日期 | 更新者 | 更新内容 |
 |------|------|--------|----------|
 | 1.0.0 | 2025-04-29 | Frank | 初始版本 |
+| 1.1.0 | 2025-05-15 | Frank | 更新计划以反映数据库存储支持需求；添加更详细的通用数据处理函数设计；更新代码示例 |
