@@ -79,13 +79,21 @@
   - `write_data_to_csv`: 将数据写入CSV文件
   - `write_performance_data_to_csv`: 将业绩数据写入CSV文件
 
-### 9. 消息发送模块 (modules/message_sender.py)
+### 9. 数据库工具 (modules/db_utils.py)
+- **功能**: 处理数据库操作
+- **关键函数**:
+  - `init_db`: 初始化数据库和表结构
+  - `save_performance_data_to_db`: 将业绩数据保存到数据库
+  - `get_performance_data_from_db`: 从数据库获取业绩数据
+  - `check_contract_exists`: 检查合同是否已存在于数据库
+
+### 10. 消息发送模块 (modules/message_sender.py)
 - **功能**: 处理实际的消息发送操作
 - **关键函数**:
   - `send_wechat_message`: 发送微信消息
   - `send_wecom_message`: 发送企业微信消息
 
-### 10. 日志配置 (modules/log_config.py)
+### 11. 日志配置 (modules/log_config.py)
 - **功能**: 配置日志系统
 - **关键功能**:
   - 设置日志级别
@@ -99,17 +107,27 @@
 Metabase API -> request_module.py -> 临时CSV文件
 ```
 
-### 2. 数据处理流程
+### 2. 数据处理流程（文件存储模式）
 ```
 临时CSV文件 -> data_processing_module.py -> 业绩数据CSV文件
 ```
 
-### 3. 通知发送流程
+### 3. 数据处理流程（数据库存储模式）
+```
+临时CSV文件 -> data_processing_module.py -> SQLite数据库(performance_data表)
+```
+
+### 4. 通知发送流程（文件存储模式）
 ```
 业绩数据CSV文件 -> notification_module.py -> task_manager.py -> task_scheduler.py -> message_sender.py -> 企业微信API/微信
 ```
 
-### 4. 任务调度流程
+### 5. 通知发送流程（数据库存储模式）
+```
+SQLite数据库(performance_data表) -> notification_module.py -> task_manager.py -> task_scheduler.py -> message_sender.py -> 企业微信API/微信
+```
+
+### 6. 任务调度流程
 ```
 main.py -> jobs.py -> task_scheduler.py -> 各功能模块
 ```
@@ -117,11 +135,11 @@ main.py -> jobs.py -> task_scheduler.py -> 各功能模块
 ## 数据存储
 
 ### 1. 文件存储
-- **合同数据**: 存储在CSV文件中
-- **业绩数据**: 存储在CSV文件中，包含消息发送状态标记
+- **合同数据**: 存储在CSV文件中（传统方式）
+- **业绩数据**: 存储在CSV文件中，包含消息发送状态标记（传统方式）
 
 ### 2. 数据库存储
-- **SQLite数据库**: 用于存储任务和历史数据
+- **SQLite数据库**: 用于存储任务和历史数据以及签约台账数据
 - **表结构**:
   - `tasks`: 存储消息发送任务
     - `id`: 任务ID
@@ -129,6 +147,21 @@ main.py -> jobs.py -> task_scheduler.py -> 各功能模块
     - `recipient`: 接收者
     - `message`: 消息内容
     - `status`: 任务状态（'pending'、'completed'等）
+    - `created_at`: 创建时间
+    - `updated_at`: 更新时间
+  - `performance_data`: 存储签约台账数据
+    - `id`: 记录ID
+    - `contract_id`: 合同ID
+    - `city`: 城市（如'北京'、'上海'）
+    - `month`: 月份（如'2025-04'、'2025-05'）
+    - `housekeeper`: 管家姓名
+    - `contract_amount`: 合同金额
+    - `performance_amount`: 计入业绩的金额
+    - `contract_number`: 合同编号
+    - `service_appointment`: 工单编号
+    - `service_provider`: 服务商
+    - `lucky_reward`: 幸运数字奖励
+    - `progressive_reward`: 节节高奖励
     - `created_at`: 创建时间
     - `updated_at`: 更新时间
 
@@ -175,7 +208,12 @@ main.py -> jobs.py -> task_scheduler.py -> 各功能模块
 - **配置驱动**: 通过配置文件添加新城市或活动
 - **通用函数**: 使用通用处理函数支持不同规则
 
-### 2. 新功能集成
+### 2. 存储方式选择
+- **配置驱动**: 通过配置项选择文件存储或数据库存储
+- **功能等价**: 确保两种存储方式功能完全等价
+- **平滑过渡**: 支持在不同存储方式间平滑切换
+
+### 3. 新功能集成
 - **模块化设计**: 便于添加新功能模块
 - **插件架构**: 支持功能扩展
 
@@ -184,7 +222,14 @@ main.py -> jobs.py -> task_scheduler.py -> 各功能模块
 ### 1. 资源使用
 - **内存管理**: 控制数据处理的内存使用
 - **CPU使用**: 优化计算密集型操作
+- **存储效率**: 数据库存储比文件存储更节省空间
 
 ### 2. 响应时间
 - **异步处理**: 使用异步方式处理耗时操作
 - **批处理**: 批量处理数据减少API调用
+- **查询优化**: 数据库索引提高查询性能
+
+### 3. 数据库性能
+- **索引优化**: 为常用查询字段创建索引
+- **批量操作**: 使用事务和批量插入提高性能
+- **连接池**: 管理数据库连接减少开销

@@ -130,24 +130,49 @@
 
 ## 实现考虑
 
-虽然当前项目采用函数式编程方法实现，但可以考虑以下改进：
+虽然当前项目主要采用函数式编程方法实现，但已经在数据库存储方面引入了部分面向对象的概念，并可以考虑以下进一步改进：
 
 1. **引入类结构**:
    - 将上述业务对象实现为类
    - 使用继承和组合简化代码
 
 2. **数据持久化**:
-   - 使用SQLite存储业务对象数据
-   - 实现对象关系映射
+   - 已实现使用SQLite存储签约台账数据
+   - 可进一步扩展实现完整的对象关系映射
+   - 当前数据库表结构：
+     ```sql
+     CREATE TABLE IF NOT EXISTS performance_data (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         contract_id TEXT NOT NULL,
+         city TEXT NOT NULL,
+         month TEXT NOT NULL,
+         housekeeper TEXT NOT NULL,
+         contract_amount REAL NOT NULL,
+         performance_amount REAL NOT NULL,
+         contract_number TEXT NOT NULL,
+         service_appointment TEXT,
+         service_provider TEXT,
+         lucky_reward TEXT,
+         progressive_reward TEXT,
+         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     );
+     ```
 
 3. **接口设计**:
    - 为每个业务对象定义清晰的接口
    - 降低组件间耦合
+   - 已实现数据库访问接口，支持文件存储和数据库存储的无缝切换
 
 4. **配置管理**:
    - 将活动参数和奖励规则外部化配置
    - 支持动态加载不同活动配置
+   - 已实现存储方式配置，支持在文件存储和数据库存储之间切换
 
 ## 结论
 
-通过面向对象的设计思路分析现有系统，可以更清晰地理解业务逻辑和数据流，为后续的系统升级和重构提供指导。虽然当前实现采用函数式方法，但引入面向对象的概念可以提高代码的可维护性和可扩展性。
+通过面向对象的设计思路分析现有系统，可以更清晰地理解业务逻辑和数据流，为后续的系统升级和重构提供指导。虽然当前实现主要采用函数式方法，但已经在数据库存储方面引入了部分面向对象的概念，并证明了这种混合方法的有效性。
+
+签约台账数据库化项目的成功完成表明，系统正在逐步向更结构化、更可维护的架构演进。通过将业务对象映射到数据库表，我们实现了更高效的数据管理和查询能力，同时保持了与现有功能的完全兼容性。
+
+未来的重构工作可以进一步扩展这种方法，将更多业务对象实现为类，并完善对象关系映射，最终实现一个更加模块化、可扩展的系统架构。
