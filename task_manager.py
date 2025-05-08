@@ -61,3 +61,24 @@ def get_pending_tasks():
     tasks = cursor.fetchall()
     conn.close()
     return tasks
+
+def get_task_status(task_id):
+    """
+    获取任务状态
+
+    Args:
+        task_id: 任务ID
+
+    Returns:
+        str: 任务状态
+    """
+    conn = sqlite3.connect('tasks.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT status FROM tasks WHERE id = ?", (task_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        return row[0]
+    else:
+        return None

@@ -8,6 +8,9 @@ from modules.file_utils import get_all_records_from_csv, write_performance_data_
 from datetime import datetime, timezone
 from task_manager import create_task
 
+# 定义默认性能数据文件路径
+PERFORMANCE_DATA_FILE = 'data/PerformanceData.csv'
+
 # 配置日志
 setup_logging()
 # 使用专门的发送消息日志记录器
@@ -64,8 +67,10 @@ def preprocess_amount(amount):
         return "0"
 
 # 2025年5月，北京. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额10万封顶
-def notify_awards_may_beijing(performance_data_filename):
+def notify_awards_may_beijing(performance_data_filename=None):
     """通知奖励并更新性能数据文件"""
+    if performance_data_filename is None:
+        performance_data_filename = PERFORMANCE_DATA_FILE
     records = get_all_records_from_csv(performance_data_filename)
     updated = False
 
@@ -115,8 +120,10 @@ def notify_awards_may_beijing(performance_data_filename):
         logging.info("PerformanceData.csv updated with notification status.")
 
 # 2025年4月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额10万封顶
-def notify_awards_apr_beijing(performance_data_filename):
+def notify_awards_apr_beijing(performance_data_filename=None):
     """通知奖励并更新性能数据文件"""
+    if performance_data_filename is None:
+        performance_data_filename = PERFORMANCE_DATA_FILE
     records = get_all_records_from_csv(performance_data_filename)
     updated = False
 
@@ -171,8 +178,10 @@ def notify_awards_apr_beijing(performance_data_filename):
 
 # 旧的上海通知函数已被移除，使用新的notify_awards_apr_shanghai和notify_awards_may_shanghai函数
 
-def notify_awards_apr_shanghai(performance_data_filename):
+def notify_awards_apr_shanghai(performance_data_filename=None):
     """通知奖励并更新性能数据文件"""
+    if performance_data_filename is None:
+        performance_data_filename = PERFORMANCE_DATA_FILE
     records = get_all_records_from_csv(performance_data_filename)
     updated = False
 
@@ -228,8 +237,10 @@ def notify_awards_apr_shanghai(performance_data_filename):
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
 
-def notify_awards_may_shanghai(performance_data_filename):
+def notify_awards_may_shanghai(performance_data_filename=None):
     """通知奖励并更新性能数据文件"""
+    if performance_data_filename is None:
+        performance_data_filename = PERFORMANCE_DATA_FILE
     records = get_all_records_from_csv(performance_data_filename)
     updated = False
 

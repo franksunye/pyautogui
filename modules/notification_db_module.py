@@ -8,7 +8,7 @@
 
 import logging
 from modules.log_config import setup_logging
-from task_manager import create_task
+from task_manager import create_task, get_task_status
 
 def format_award_message(housekeeper, contract_doc_num, org_name, contract_amount, reward_type, reward_name, campaign_contact):
     """

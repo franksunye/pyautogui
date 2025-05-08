@@ -8,17 +8,19 @@
 
 import logging
 from datetime import datetime
-import sys
 import os
 from modules.log_config import setup_logging
 from modules.performance_data_manager import (
-    PerformanceData, get_performance_data_by_contract_id, get_unique_contract_ids
+    PerformanceData, get_unique_contract_ids
 )
 
 # 设置日志
 setup_logging()
 
-def process_data_to_db(contract_data, campaign_id, province_code, existing_contract_ids=None):
+# 注意：我们不再使用从合同ID中提取数字的方法，而是使用合同在活动中的序号作为合同编号
+# 这样可以与文件版本保持一致，确保幸运数字奖励判断逻辑的一致性
+
+def process_data_to_db(contract_data, campaign_id, province_code, existing_contract_ids=None, ignore_existing=False):
     """
     处理合同数据并将结果保存到数据库中
 
@@ -27,6 +29,7 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
         campaign_id: 活动ID，如"BJ-2025-05"
         province_code: 省份代码，如"110000"
         existing_contract_ids: 已存在的合同ID集合
+        ignore_existing: 是否忽略已存在的合同ID检查，用于测试
 
     Returns:
         processed_count: 处理的合同数量
@@ -61,8 +64,8 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
             logging.debug(f"Skipping duplicate contract ID: {contract_id}")
             continue
 
-        # 如果合同ID已经存在于已存在的合同ID集合中，则跳过此合同的处理
-        if contract_id in existing_contract_ids:
+        # 如果合同ID已经存在于已存在的合同ID集合中，且不忽略已存在的合同ID检查，则跳过此合同的处理
+        if not ignore_existing and contract_id in existing_contract_ids:
             logging.debug(f"Skipping existing contract ID: {contract_id}")
             continue
 
@@ -87,7 +90,8 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
                 'count': 0,
                 'total_amount': 0.0,
                 'performance_amount': 0.0,
-                'contracts': []
+                'contracts': [],
+                'awarded': []  # 添加awarded字段，用于记录已获得的奖励
             }
 
         # 更新管家合同数据
@@ -99,17 +103,113 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
         performance_amount = min(contract_amount, 100000)  # 假设上限为10万
         housekeeper_contracts[housekeeper]['performance_amount'] += performance_amount
 
-        # 计算奖励状态、类型和名称（这里简化处理，实际应根据业务规则计算）
-        reward_status = 0
-        reward_type = ""
-        reward_name = ""
+        # 计算奖励状态、类型和名称
+        # 导入相应的奖励计算函数
+        if campaign_id.startswith("BJ-2025-05"):
+            from modules.data_processing_module import determine_rewards_may_beijing_generic
+
+            # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
+            contract_number = contract_count_in_activity
+            logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
+
+            # 检查合同编号是否包含幸运数字
+            lucky_number = "6"  # 北京5月的幸运数字是6
+            if str(contract_number % 10) == lucky_number:
+                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，匹配幸运数字 {lucky_number}")
+            else:
+                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，不匹配幸运数字 {lucky_number}")
+
+            reward_types, reward_names, next_reward_gap = determine_rewards_may_beijing_generic(
+                contract_number,
+                housekeeper_contracts[housekeeper],
+                contract_amount
+            )
+
+            logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
+
+        elif campaign_id.startswith("SH-2025-05"):
+            from modules.data_processing_module import determine_rewards_may_shanghai_generic
+
+            # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
+            contract_number = contract_count_in_activity
+            logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
+
+            # 检查合同编号是否包含幸运数字
+            lucky_number = "6"  # 上海5月的幸运数字是6
+            if str(contract_number % 10) == lucky_number:
+                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，匹配幸运数字 {lucky_number}")
+            else:
+                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，不匹配幸运数字 {lucky_number}")
+
+            reward_types, reward_names, next_reward_gap = determine_rewards_may_shanghai_generic(
+                contract_number,
+                housekeeper_contracts[housekeeper],
+                contract_amount
+            )
+
+            logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
+
+        elif campaign_id.startswith("BJ-2025-04"):
+            from modules.data_processing_module import determine_rewards_apr_beijing_generic
+
+            # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
+            contract_number = contract_count_in_activity
+            logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
+
+            # 检查合同编号是否包含幸运数字
+            lucky_number = "8"  # 北京4月的幸运数字是8
+            if str(contract_number % 10) == lucky_number:
+                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，匹配幸运数字 {lucky_number}")
+            else:
+                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，不匹配幸运数字 {lucky_number}")
+
+            reward_types, reward_names, next_reward_gap = determine_rewards_apr_beijing_generic(
+                contract_number,
+                housekeeper_contracts[housekeeper],
+                contract_amount
+            )
+
+            logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
+
+        elif campaign_id.startswith("SH-2025-04"):
+            from modules.data_processing_module import determine_rewards_apr_shanghai_generic
+
+            # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
+            contract_number = contract_count_in_activity
+            logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
+
+            # 检查合同编号是否包含幸运数字
+            lucky_number = "6"  # 上海4月的幸运数字是6
+            if str(contract_number % 10) == lucky_number:
+                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，匹配幸运数字 {lucky_number}")
+            else:
+                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，不匹配幸运数字 {lucky_number}")
+
+            reward_types, reward_names, next_reward_gap = determine_rewards_apr_shanghai_generic(
+                contract_number,
+                housekeeper_contracts[housekeeper],
+                contract_amount
+            )
+
+            logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
+
+        else:
+            reward_types = ""
+            reward_names = ""
+            next_reward_gap = ""
+            logging.warning(f"未找到活动 {campaign_id} 的奖励计算函数")
+
+        # 设置奖励状态
+        reward_status = 1 if reward_types else 0
+        reward_type = reward_types
+        reward_name = reward_names
 
         # 计算奖金池（这里简化处理，实际应根据业务规则计算）
         # 上海使用0.2%的比例计算奖金池
         bonus_pool = contract_amount * 0.002 if campaign_id.startswith("SH-") else 0.0
 
-        # 计算备注（这里简化处理，实际应根据业务规则计算）
-        remark = f"距离达成节节高奖励条件还需 {max(5 - housekeeper_contracts[housekeeper]['count'], 0)} 单"
+        # 计算备注
+        remark = next_reward_gap if next_reward_gap else '无'
 
         # 获取转化率和平均客单价
         conversion = float(contract['转化率(conversion)']) if contract['转化率(conversion)'] else 0.0
@@ -139,7 +239,7 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
             housekeeper_total_amount=housekeeper_contracts[housekeeper]['total_amount'],
             housekeeper_contract_count=housekeeper_contracts[housekeeper]['count'],
             bonus_pool=bonus_pool,
-            performance_amount=performance_amount,
+            performance_amount=housekeeper_contracts[housekeeper]['performance_amount'],  # 计入业绩金额（累计）
             reward_status=reward_status,
             reward_type=reward_type,
             reward_name=reward_name,

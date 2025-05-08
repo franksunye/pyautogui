@@ -393,6 +393,140 @@ def determine_rewards_may_shanghai_generic(contract_number, housekeeper_data, cu
         "SH-2025-05"
     )
 
+# 2025年5月，上海. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高四档；
+def process_data_may_shanghai(contract_data, existing_contract_ids, housekeeper_award_lists):
+    """
+    处理5月上海合同数据
+
+    Args:
+        contract_data: 合同数据列表
+        existing_contract_ids: 已存在的合同ID集合
+        housekeeper_award_lists: 管家奖励列表
+
+    Returns:
+        performance_data: 处理后的性能数据列表
+    """
+    logging.info(f"Starting data processing with {len(existing_contract_ids)} existing contract IDs.")
+
+    logging.debug(f"Existing contract IDs: {existing_contract_ids}")
+
+    # 初始化性能数据列表
+    performance_data = []
+    # 初始化合同计数器，从已存在的合同ID数量开始
+    contract_count_in_activity = len(existing_contract_ids) + 1
+    # 初始化管家合同数据字典
+    housekeeper_contracts = {}
+
+    # 初始化已处理的合同ID集合
+    processed_contract_ids = set()
+
+    # 遍历合同数据
+    logging.info("Starting to process contract data...")
+
+    for contract in contract_data:
+        # 获取合同ID并转换为字符串
+        contract_id = str(contract['合同ID(_id)'])
+        # 检查合同ID是否已处理过，如果已经处理过，则跳过当前循环的剩余部分，进入下一次循环
+        if contract_id in processed_contract_ids:
+            logging.debug(f"Skipping duplicate contract ID: {contract_id}")
+            continue
+
+        # 获取管家信息和服务商信息
+        housekeeper = contract['管家(serviceHousekeeper)']
+        service_provider = contract['服务商(orgName)']
+        unique_housekeeper_key = f"{housekeeper}_{service_provider}"
+
+        # 如果管家信息不存在，则初始化管家数据
+        if unique_housekeeper_key not in housekeeper_contracts:
+            housekeeper_award = []
+            if unique_housekeeper_key in housekeeper_award_lists:
+                housekeeper_award = housekeeper_award_lists[unique_housekeeper_key]
+            housekeeper_contracts[unique_housekeeper_key] = {'count': 0, 'total_amount': 0, 'awarded': housekeeper_award, 'performance_amount': 0}
+
+        # 更新管家合同数量和当前合同的金额
+        housekeeper_contracts[unique_housekeeper_key]['count'] += 1
+        current_contract_amount = float(contract['合同金额(adjustRefundMoney)'])
+
+        # 单项目合同金额上限
+        performance_amount = min(current_contract_amount, config.PERFORMANCE_AMOUNT_CAP)
+
+        # 更新管家合同总金额与计入的金额
+        housekeeper_contracts[unique_housekeeper_key]['total_amount'] += current_contract_amount
+        housekeeper_contracts[unique_housekeeper_key]['performance_amount'] += performance_amount
+
+        # 记录计算过程日志
+        logging.debug(f"Housekeeper {unique_housekeeper_key} count: {housekeeper_contracts[unique_housekeeper_key]['count']}")
+        logging.debug(f"Housekeeper {unique_housekeeper_key} total amount: {housekeeper_contracts[unique_housekeeper_key]['total_amount']}")
+
+        # 添加合同ID到已处理集合
+        processed_contract_ids.add(contract_id)
+
+        # 计算奖励类型和名称
+        reward_types, reward_names, next_reward_gap = determine_rewards_may_shanghai_generic(
+            contract_count_in_activity,
+            housekeeper_contracts[unique_housekeeper_key],
+            current_contract_amount
+        )
+
+        if contract_id in existing_contract_ids:
+            # 如果合同ID已经存在于已处理的合同ID集合中，则跳过此合同的处理
+            logging.debug(f"Skipping existing contract ID: {contract_id}")
+            continue
+
+        # Debug log for rewards calculation result
+        logging.info(f"Reward types for contract {contract_id}: {reward_types}")
+        logging.info(f"Reward names for contract {contract_id}: {reward_names}")
+
+        active_status = 1 if reward_types else 0  # 激活状态基于是否有奖励类型
+
+        # 构建性能数据记录
+        performance_entry = {
+            '活动编号': 'SH-2025-05',
+            '合同ID(_id)': contract_id,
+            '活动城市(province)': contract['活动城市(province)'],
+            '工单编号(serviceAppointmentNum)': contract['工单编号(serviceAppointmentNum)'],
+            'Status': contract['Status'],
+            '管家(serviceHousekeeper)': housekeeper,
+            '合同编号(contractdocNum)': contract['合同编号(contractdocNum)'],
+            '合同金额(adjustRefundMoney)': contract['合同金额(adjustRefundMoney)'],
+            '支付金额(paidAmount)': contract['支付金额(paidAmount)'],
+            '差额(difference)': contract['差额(difference)'],
+            'State': contract['State'],
+            '创建时间(createTime)': contract['创建时间(createTime)'],
+            '服务商(orgName)': service_provider,
+            '签约时间(signedDate)': contract['签约时间(signedDate)'],
+            'Doorsill': contract['Doorsill'],
+            '款项来源类型(tradeIn)': contract['款项来源类型(tradeIn)'],
+            '转化率(conversion)': contract['转化率(conversion)'],
+            '平均客单价(average)': contract['平均客单价(average)'],
+            '活动期内第几个合同': contract_count_in_activity,
+            '管家累计单数': housekeeper_contracts[unique_housekeeper_key]['count'],
+            '管家累计金额': housekeeper_contracts[unique_housekeeper_key]['total_amount'],
+            '奖金池': float(contract['合同金额(adjustRefundMoney)']) * config.BONUS_POOL_RATIO,
+            '计入业绩金额': housekeeper_contracts[unique_housekeeper_key]['performance_amount'],
+            '激活奖励状态': active_status,
+            '奖励类型': reward_types,
+            '奖励名称': reward_names,
+            '是否发送通知': 'N',
+            '备注': next_reward_gap if next_reward_gap else '无',  # 添加下一级奖项所需金额差信息
+            '登记时间': date.today().strftime("%Y-%m-%d"),  # 新增字段
+        }
+
+        # After processing a contract, add its ID to the existing_contract_ids set
+        existing_contract_ids.add(contract_id)
+        logging.info(f"Added contract ID {contract_id} to existing_contract_ids.")
+
+        logging.info(f"Processing contract ID: {contract_id}, Rewards: {reward_types}")
+        # 添加性能数据记录到列表中
+        performance_data.append(performance_entry)
+        logging.info(f"Added performance entry for contract ID {contract_id}.")
+
+        # 更新合同计数器
+        contract_count_in_activity += 1
+
+    # 返回处理后的性能数据列表
+    return performance_data
+
 # 2025年4月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同金额10万以上按10万计算
 def determine_rewards_apr_beijing(contract_number, housekeeper_data, current_contract_amount):
 
