@@ -3,9 +3,9 @@
 ## 文档信息
 **文档类型**: 项目计划
 **文档编号**: reward_system-PLAN-001
-**版本**: 1.1.0
+**版本**: 1.3.0
 **创建日期**: 2025-04-29
-**最后更新**: 2025-05-15
+**最后更新**: 2025-05-16
 **状态**: 草稿
 **负责人**: Frank
 **团队成员**: Frank, 小智
@@ -22,21 +22,27 @@
 
 此外，系统现在支持两种存储方式：文件存储和数据库存储，通过配置项 `USE_DATABASE_FOR_PERFORMANCE_DATA` 控制。奖励计算功能需要在这两种存储方式下保持一致，确保无论数据来源是文件还是数据库，都能使用相同的奖励计算逻辑。
 
+我们还发现，数据库处理模块直接导入了文件处理模块中的奖励计算函数，这导致了模块间的紧耦合和结构混乱。例如，在 `data_processing_db_module.py` 中有类似 `from modules.data_processing_module import determine_rewards_may_beijing_generic` 的导入语句，这使得两个模块之间产生了不必要的依赖关系，降低了代码的可维护性和可扩展性。
+
 ### 1.2 目标
 
 1. 统一北京和上海的数据处理函数，创建一个通用的数据处理框架
-2. 确保新实现与原始实现功能完全一致
-3. 提高代码可维护性和可扩展性
-4. 确保奖励计算功能在文件存储和数据库存储两种模式下都能正常工作
-5. 在整个过程中保持系统稳定运行
+2. 创建独立的奖励计算模块，解耦文件处理和数据库处理模块
+3. 确保新实现与原始实现功能完全一致
+4. 提高代码可维护性和可扩展性
+5. 确保奖励计算功能在文件存储和数据库存储两种模式下都能正常工作
+6. 在整个过程中保持系统稳定运行
 
 ### 1.3 范围
 
+- 创建独立的奖励计算模块 `reward_calculation.py`，将所有奖励计算函数移至该模块
+- 保持函数接口简单明了，避免引入不必要的复杂性
 - 重构 `process_data_apr_beijing` 和 `process_data_shanghai_apr` 函数
 - 创建通用数据处理函数 `process_data_generic`，支持文件和数据库两种存储方式
 - 添加上海的配置到 `REWARD_CONFIGS` 字典（已完成）
 - 创建上海的通用奖励确定函数包装函数（已完成）
 - 确保 `determine_rewards_generic` 函数在文件和数据库处理流程中都能被正确调用
+- 修改数据库处理模块，使用新的奖励计算模块而非直接导入文件处理模块
 - 添加必要的测试和文档
 
 ### 1.4 非范围
@@ -55,31 +61,95 @@
 - **任务**: 在 `config.py` 中为上海添加配置项
 - **详情**: 添加 "SH-2025-04" 和 "SH-2025-05" 配置，确保与现有的上海奖励规则一致
 - **验收标准**: 配置项已添加并通过代码审查
-- **状态**: 未开始
-- **负责人**: [待定]
-- **截止日期**: [待定]
+- **状态**: 已完成
+- **负责人**: 小智
+- **截止日期**: 2025-04-29
 
 #### 2.1.2 创建上海的通用奖励确定函数包装函数
 
 - **任务**: 实现 `determine_rewards_apr_shanghai_generic` 和 `determine_rewards_may_shanghai_generic`
 - **详情**: 这些函数调用通用函数 `determine_rewards_generic` 并传入相应的配置键
 - **验收标准**: 函数已实现并通过单元测试
-- **状态**: 未开始
-- **负责人**: [待定]
-- **截止日期**: [待定]
+- **状态**: 已完成
+- **负责人**: 小智
+- **截止日期**: 2025-04-29
 
 #### 2.1.3 添加单元测试
 
 - **任务**: 为新添加的函数创建单元测试
 - **详情**: 确保测试覆盖所有边界情况和特殊场景
 - **验收标准**: 测试已实现并通过
+- **状态**: 已完成
+- **负责人**: 小智
+- **截止日期**: 2025-04-29
+
+### 2.2 第二阶段：创建独立的奖励计算模块（1-2周）
+
+#### 2.2.1 创建奖励计算模块
+
+- **任务**: 创建 `reward_calculation.py` 模块
+- **详情**:
+  - 将所有奖励计算函数移至该模块
+  - 包括 `determine_rewards_generic` 和所有城市/月份特定的包装函数
+  - 确保函数接口保持一致
+  - 添加详细的文档和注释
+- **验收标准**:
+  - 模块已创建并通过代码审查
+  - 所有函数都有清晰的文档
+  - 单元测试通过
 - **状态**: 未开始
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-### 2.2 第二阶段：实现通用数据处理函数（2-3周）
+#### 2.2.2 确保函数接口简单明了
 
-#### 2.2.1 创建通用数据处理函数
+- **任务**: 审查奖励计算函数接口
+- **详情**:
+  - 确保所有函数接口简单明了
+  - 添加清晰的文档字符串
+  - 避免引入不必要的抽象层
+- **验收标准**:
+  - 函数接口已审查并通过代码审查
+  - 所有函数都有清晰的文档
+  - 代码简洁易懂
+- **状态**: 未开始
+- **负责人**: [待定]
+- **截止日期**: [待定]
+
+#### 2.2.3 修改数据库处理模块
+
+- **任务**: 更新 `data_processing_db_module.py`
+- **详情**:
+  - 修改导入语句，直接从奖励计算模块导入所需函数
+  - 移除函数内部的导入语句
+  - 使用简单条件判断选择合适的奖励计算函数
+- **验收标准**:
+  - 修改已完成并通过代码审查
+  - 没有直接导入文件处理模块
+  - 代码简洁明了
+  - 功能与原始实现一致
+- **状态**: 未开始
+- **负责人**: [待定]
+- **截止日期**: [待定]
+
+#### 2.2.4 添加单元测试
+
+- **任务**: 为新模块和修改的模块添加单元测试
+- **详情**:
+  - 测试奖励计算模块的所有函数
+  - 测试工厂函数的所有分支
+  - 测试修改后的数据库处理模块
+- **验收标准**:
+  - 测试已实现并通过
+  - 测试覆盖率高
+  - 边界情况都有测试
+- **状态**: 未开始
+- **负责人**: [待定]
+- **截止日期**: [待定]
+
+### 2.3 第三阶段：实现通用数据处理函数（2-3周）
+
+#### 2.3.1 创建通用数据处理函数
 
 - **任务**: 实现 `process_data_generic` 函数
 - **详情**:
@@ -96,7 +166,7 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-#### 2.2.2 添加功能标志
+#### 2.3.2 添加功能标志
 
 - **任务**: 在 `config.py` 中添加功能标志
 - **详情**: 添加 `USE_GENERIC_PROCESS_FUNCTION = False` 标志，允许在运行时控制是否使用新函数
@@ -105,7 +175,7 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-#### 2.2.3 创建包装函数
+#### 2.3.3 创建包装函数
 
 - **任务**: 实现 `process_data_apr_beijing_generic` 和 `process_data_shanghai_apr_generic`
 - **详情**:
@@ -121,9 +191,9 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-### 2.3 第三阶段：并行运行和验证（2-4周）
+### 2.4 第四阶段：并行运行和验证（2-4周）
 
-#### 2.3.1 修改现有的处理函数
+#### 2.4.1 修改现有的处理函数
 
 - **任务**: 在 `process_data_apr_beijing` 和 `process_data_shanghai_apr` 中添加并行运行逻辑
 - **详情**: 同时调用原始逻辑和新逻辑，但只返回原始结果，添加日志记录比较两种方法的结果
@@ -132,7 +202,7 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-#### 2.3.2 添加结果比较函数
+#### 2.4.2 添加结果比较函数
 
 - **任务**: 实现 `compare_results` 函数
 - **详情**: 详细比较两种方法的结果，记录任何差异
@@ -141,7 +211,7 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-#### 2.3.3 在测试环境中启用功能标志
+#### 2.4.3 在测试环境中启用功能标志
 
 - **任务**: 在测试环境中设置 `USE_GENERIC_PROCESS_FUNCTION = True`
 - **详情**: 收集并分析比较结果，确保新实现与原始实现一致
@@ -150,9 +220,9 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-### 2.4 第四阶段：切换到新实现（1-2周）
+### 2.5 第五阶段：切换到新实现（1-2周）
 
-#### 2.4.1 修改包装函数
+#### 2.5.1 修改包装函数
 
 - **任务**: 更新 `process_data_apr_beijing` 和 `process_data_shanghai_apr` 以使用新逻辑
 - **详情**: 根据功能标志选择使用新逻辑或原始逻辑
@@ -161,7 +231,7 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-#### 2.4.2 在生产环境中启用功能标志
+#### 2.5.2 在生产环境中启用功能标志
 
 - **任务**: 在生产环境中设置 `USE_GENERIC_PROCESS_FUNCTION = True`
 - **详情**: 监控系统，确保一切正常运行
@@ -170,7 +240,7 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-#### 2.4.3 添加监控和警报
+#### 2.5.3 添加监控和警报
 
 - **任务**: 实现监控机制，设置警报
 - **详情**: 检测新实现的任何问题，在出现问题时通知团队
@@ -179,9 +249,9 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-### 2.5 第五阶段：清理和完成（1-2周）
+### 2.6 第六阶段：清理和完成（1-2周）
 
-#### 2.5.1 移除原始实现
+#### 2.6.1 移除原始实现
 
 - **任务**: 一旦确认新实现稳定可靠，移除原始逻辑
 - **详情**: 保留包装函数，以维持向后兼容性
@@ -190,7 +260,7 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-#### 2.5.2 移除功能标志
+#### 2.6.2 移除功能标志
 
 - **任务**: 移除 `USE_GENERIC_PROCESS_FUNCTION` 标志
 - **详情**: 直接使用新实现
@@ -199,7 +269,7 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-#### 2.5.3 更新文档
+#### 2.6.3 更新文档
 
 - **任务**: 更新所有相关文档
 - **详情**: 反映新的实现，提供迁移指南
@@ -208,7 +278,7 @@
 - **负责人**: [待定]
 - **截止日期**: [待定]
 
-#### 2.5.4 代码审查和最终测试
+#### 2.6.4 代码审查和最终测试
 
 - **任务**: 进行全面的代码审查和测试
 - **详情**: 运行完整的测试套件，确保一切正常
@@ -323,18 +393,20 @@
 
 | 阶段 | 开始日期 | 结束日期 | 持续时间 | 状态 |
 |------|----------|----------|----------|------|
-| 第一阶段：准备工作 | [待定] | [待定] | 1-2周 | 未开始 |
-| 第二阶段：实现通用数据处理函数 | [待定] | [待定] | 2-3周 | 未开始 |
-| 第三阶段：并行运行和验证 | [待定] | [待定] | 2-4周 | 未开始 |
-| 第四阶段：切换到新实现 | [待定] | [待定] | 1-2周 | 未开始 |
-| 第五阶段：清理和完成 | [待定] | [待定] | 1-2周 | 未开始 |
-| 总计 | [待定] | [待定] | 7-13周 | 未开始 |
+| 第一阶段：准备工作 | 2025-04-29 | 2025-04-29 | 1周 | 已完成 |
+| 第二阶段：创建独立的奖励计算模块 | 2025-05-15 | 2025-05-29 | 1-2周 | 未开始 |
+| 第三阶段：实现通用数据处理函数 | [待定] | [待定] | 2-3周 | 未开始 |
+| 第四阶段：并行运行和验证 | [待定] | [待定] | 2-4周 | 未开始 |
+| 第五阶段：切换到新实现 | [待定] | [待定] | 1-2周 | 未开始 |
+| 第六阶段：清理和完成 | [待定] | [待定] | 1-2周 | 未开始 |
+| 总计 | 2025-04-29 | [待定] | 8-14周 | 进行中 |
 
 ## 9. 进度跟踪
 
 | 日期 | 完成的任务 | 遇到的问题 | 解决方案 | 下一步计划 |
 |------|------------|------------|----------|------------|
-| 2025-04-29 | 创建项目计划文档 | 无 | 无 | 开始第一阶段 |
+| 2025-04-29 | 创建项目计划文档；完成第一阶段所有任务 | 无 | 无 | 开始第二阶段 |
+| 2025-05-15 | 更新项目计划，添加奖励计算模块重构 | 发现数据库处理模块直接导入文件处理模块中的奖励计算函数，导致模块间紧耦合 | 计划创建独立的奖励计算模块，解耦文件处理和数据库处理模块 | 开始实现奖励计算模块 |
 
 ## 10. 附录
 
@@ -352,6 +424,7 @@
 - **包装函数**: 调用通用函数并传入特定参数的函数，如 `process_data_apr_beijing_generic`
 - **存储模式**: 系统支持的数据存储方式，包括文件存储和数据库存储
 - **REWARD_CONFIGS**: 配置字典，包含不同城市和月份的奖励规则配置
+- **奖励计算模块**: 独立的模块 `reward_calculation.py`，包含所有奖励计算函数，设计简洁明了
 
 ### 10.3 代码示例
 
@@ -484,7 +557,141 @@ def process_data_apr_beijing_generic(contract_data, existing_contract_ids, house
     )
 ```
 
-#### 10.3.3 数据库处理函数简化示例
+#### 10.3.3 奖励计算模块示例
+
+```python
+# modules/reward_calculation.py
+
+def determine_rewards_generic(contract_number, housekeeper_data, contract_amount, config_key):
+    """
+    通用奖励确定函数，基于配置确定奖励类型和名称。
+
+    Args:
+        contract_number: 合同编号
+        housekeeper_data: 管家数据
+        contract_amount: 合同金额
+        config_key: 配置键名，用于从REWARD_CONFIGS中获取对应配置
+
+    Returns:
+        tuple: (奖励类型列表, 奖励名称列表, 下一级奖励差距)
+    """
+    # 通用奖励计算逻辑...
+    pass
+
+def determine_rewards_apr_beijing_generic(contract_number, housekeeper_data, contract_amount):
+    """
+    北京4月奖励确定函数。
+
+    Args:
+        contract_number: 合同编号
+        housekeeper_data: 管家数据
+        contract_amount: 合同金额
+
+    Returns:
+        tuple: (奖励类型列表, 奖励名称列表, 下一级奖励差距)
+    """
+    return determine_rewards_generic(contract_number, housekeeper_data, contract_amount, "BJ-2025-04")
+
+def determine_rewards_may_beijing_generic(contract_number, housekeeper_data, contract_amount):
+    """
+    北京5月奖励确定函数。
+
+    Args:
+        contract_number: 合同编号
+        housekeeper_data: 管家数据
+        contract_amount: 合同金额
+
+    Returns:
+        tuple: (奖励类型列表, 奖励名称列表, 下一级奖励差距)
+    """
+    return determine_rewards_generic(contract_number, housekeeper_data, contract_amount, "BJ-2025-05")
+
+def determine_rewards_apr_shanghai_generic(contract_number, housekeeper_data, contract_amount):
+    """
+    上海4月奖励确定函数。
+
+    Args:
+        contract_number: 合同编号
+        housekeeper_data: 管家数据
+        contract_amount: 合同金额
+
+    Returns:
+        tuple: (奖励类型列表, 奖励名称列表, 下一级奖励差距)
+    """
+    return determine_rewards_generic(contract_number, housekeeper_data, contract_amount, "SH-2025-04")
+
+def determine_rewards_may_shanghai_generic(contract_number, housekeeper_data, contract_amount):
+    """
+    上海5月奖励确定函数。
+
+    Args:
+        contract_number: 合同编号
+        housekeeper_data: 管家数据
+        contract_amount: 合同金额
+
+    Returns:
+        tuple: (奖励类型列表, 奖励名称列表, 下一级奖励差距)
+    """
+    return determine_rewards_generic(contract_number, housekeeper_data, contract_amount, "SH-2025-05")
+```
+
+#### 10.3.4 数据库处理模块示例
+
+```python
+# modules/data_processing_db_module.py
+
+from modules.reward_calculation import (
+    determine_rewards_apr_beijing_generic,
+    determine_rewards_may_beijing_generic,
+    determine_rewards_apr_shanghai_generic,
+    determine_rewards_may_shanghai_generic
+)
+
+def process_beijing_data_to_db(contract_data, campaign_id="BJ-2025-05", province_code="110000"):
+    """
+    处理北京合同数据并将结果保存到数据库。
+
+    Args:
+        contract_data: 合同数据列表
+        campaign_id: 活动ID，默认为"BJ-2025-05"
+        province_code: 省份代码，默认为"110000"
+
+    Returns:
+        int: 处理的合同数量
+    """
+    # 解析城市和月份
+    parts = campaign_id.split("-")
+    city_code = parts[0]
+    year_month = parts[1] + "-" + parts[2]
+    month_code = parts[2]
+
+    # 选择合适的奖励计算函数
+    if city_code == "BJ" and month_code == "04":
+        reward_calculator = determine_rewards_apr_beijing_generic
+    elif city_code == "BJ" and month_code == "05":
+        reward_calculator = determine_rewards_may_beijing_generic
+    elif city_code == "SH" and month_code == "04":
+        reward_calculator = determine_rewards_apr_shanghai_generic
+    elif city_code == "SH" and month_code == "05":
+        reward_calculator = determine_rewards_may_shanghai_generic
+    else:
+        raise ValueError(f"不支持的城市和月份组合: {city_code}-{month_code}")
+
+    # 处理合同数据
+    for contract in contract_data:
+        # 处理逻辑...
+
+        # 使用奖励计算函数
+        reward_types, reward_names, next_reward_gap = reward_calculator(
+            contract_number, housekeeper_data, contract_amount
+        )
+
+        # 保存到数据库...
+
+    return processed_count
+```
+
+#### 10.3.5 数据库处理函数简化示例
 
 ```python
 def process_beijing_data_to_db(contract_data, campaign_id="BJ-2025-05", province_code="110000"):
@@ -557,3 +764,5 @@ def process_data_apr_beijing(contract_data, existing_contract_ids, housekeeper_a
 |------|------|--------|----------|
 | 1.0.0 | 2025-04-29 | Frank | 初始版本 |
 | 1.1.0 | 2025-05-15 | Frank | 更新计划以反映数据库存储支持需求；添加更详细的通用数据处理函数设计；更新代码示例 |
+| 1.2.0 | 2025-05-16 | Frank | 添加奖励计算模块重构计划；增加新的第二阶段；更新项目时间线；添加奖励计算模块和工厂函数的代码示例 |
+| 1.3.0 | 2025-05-16 | Frank | 简化设计，移除工厂模式；更新代码示例以使用简单条件判断；遵循"保持简洁，保持敏捷，避免过度工程化"的原则 |
