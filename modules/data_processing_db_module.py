@@ -13,6 +13,12 @@ from modules.log_config import setup_logging
 from modules.performance_data_manager import (
     PerformanceData, get_unique_contract_ids
 )
+from modules.reward_calculation import (
+    determine_rewards_apr_beijing_generic,
+    determine_rewards_may_beijing_generic,
+    determine_rewards_apr_shanghai_generic,
+    determine_rewards_may_shanghai_generic
+)
 
 # 设置日志
 setup_logging()
@@ -104,10 +110,8 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
         housekeeper_contracts[housekeeper]['performance_amount'] += performance_amount
 
         # 计算奖励状态、类型和名称
-        # 导入相应的奖励计算函数
+        # 选择合适的奖励计算函数
         if campaign_id.startswith("BJ-2025-05"):
-            from modules.data_processing_module import determine_rewards_may_beijing_generic
-
             # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
             contract_number = contract_count_in_activity
             logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
@@ -128,8 +132,6 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
             logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
 
         elif campaign_id.startswith("SH-2025-05"):
-            from modules.data_processing_module import determine_rewards_may_shanghai_generic
-
             # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
             contract_number = contract_count_in_activity
             logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
@@ -150,8 +152,6 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
             logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
 
         elif campaign_id.startswith("BJ-2025-04"):
-            from modules.data_processing_module import determine_rewards_apr_beijing_generic
-
             # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
             contract_number = contract_count_in_activity
             logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
@@ -172,8 +172,6 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
             logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
 
         elif campaign_id.startswith("SH-2025-04"):
-            from modules.data_processing_module import determine_rewards_apr_shanghai_generic
-
             # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
             contract_number = contract_count_in_activity
             logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")

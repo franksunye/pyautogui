@@ -4,14 +4,14 @@ import os
 import logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import modules.config
-from modules.data_processing_module import (
+from modules.reward_calculation import (
     determine_rewards_generic,
     determine_rewards_may_beijing_generic,
     determine_rewards_apr_beijing_generic,
-    determine_rewards_apr_beijing,
     determine_rewards_apr_shanghai_generic,
     determine_rewards_may_shanghai_generic
 )
+from modules.data_processing_module import determine_rewards_apr_beijing
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
