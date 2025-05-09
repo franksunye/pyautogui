@@ -29,26 +29,50 @@
   - `check_technician_status`: 技师状态检查
   - `generate_daily_service_report`: 生成日常服务报告
 
-### 2. 数据处理模块 (modules/data_processing_module.py)
-- **功能**: 处理合同数据，计算奖励
+### 2. 数据处理模块
+#### 2.1 传统数据处理 (modules/data_processing_module.py)
+- **功能**: 处理合同数据，计算奖励（传统实现）
 - **关键函数**:
-  - `determine_rewards_generic`: 通用奖励确定函数
   - `process_data_apr_beijing`: 处理北京4月数据
+  - `process_data_may_beijing`: 处理北京5月数据
   - `process_data_shanghai_apr`: 处理上海4月数据
+  - `process_data_may_shanghai`: 处理上海5月数据
 
-### 3. 配置系统 (modules/config.py)
+#### 2.2 通用数据处理 (modules/data_processing_generic.py)
+- **功能**: 提供通用的数据处理框架，支持所有城市和月份
+- **关键函数**:
+  - `process_data_generic`: 通用数据处理函数，支持文件存储和数据库存储
+  - `process_data_apr_beijing_generic`: 北京4月包装函数
+  - `process_data_may_beijing_generic`: 北京5月包装函数
+  - `process_data_apr_shanghai_generic`: 上海4月包装函数
+  - `process_data_may_shanghai_generic`: 上海5月包装函数
+  - `process_beijing_data_to_db_generic`: 北京数据库处理包装函数
+  - `process_shanghai_data_to_db_generic`: 上海数据库处理包装函数
+
+### 3. 奖励计算模块 (modules/reward_calculation.py)
+- **功能**: 独立的奖励计算模块，提供通用的奖励计算功能
+- **关键函数**:
+  - `determine_rewards_generic`: 通用奖励确定函数，基于配置确定奖励类型和名称
+  - `determine_rewards_apr_beijing_generic`: 北京4月奖励确定函数
+  - `determine_rewards_may_beijing_generic`: 北京5月奖励确定函数
+  - `determine_rewards_apr_shanghai_generic`: 上海4月奖励确定函数
+  - `determine_rewards_may_shanghai_generic`: 上海5月奖励确定函数
+
+### 4. 配置系统 (modules/config.py)
 - **功能**: 集中管理所有配置项
 - **关键配置**:
   - `REWARD_CONFIGS`: 各城市各月份的奖励规则配置
+  - `USE_DATABASE_FOR_PERFORMANCE_DATA`: 控制是否使用数据库存储签约台账数据
+  - `USE_GENERIC_PROCESS_FUNCTION`: 控制是否使用通用数据处理函数
   - 性能上限和阈值配置
 
-### 4. 通知模块 (modules/notification_module.py)
+### 5. 通知模块 (modules/notification_module.py)
 - **功能**: 发送奖励通知到企业微信
 - **关键函数**:
   - `notify_awards_apr_beijing`: 发送北京4月奖励通知
   - `notify_awards_shanghai_generate_message_march`: 发送上海奖励通知
 
-### 5. 任务管理系统 (task_manager.py)
+### 6. 任务管理系统 (task_manager.py)
 - **功能**: 管理消息发送任务的创建和状态更新
 - **关键组件**:
   - Task类：表示一个消息发送任务
@@ -59,27 +83,27 @@
   - `update_task()`: 更新任务状态
   - `get_pending_tasks()`: 获取待处理的任务
 
-### 6. 任务调度器 (task_scheduler.py)
+### 7. 任务调度器 (task_scheduler.py)
 - **功能**: 调度和执行任务队列中的任务
 - **关键组件**:
   - 任务检查循环：定期检查待处理任务
   - 任务执行线程：在后台执行任务
   - 任务锁机制：确保任务顺序执行
 
-### 7. 请求模块 (modules/request_module.py)
+### 8. 请求模块 (modules/request_module.py)
 - **功能**: 处理与外部系统的HTTP请求
 - **关键函数**:
   - `get_metabase_session`: 获取Metabase会话
   - `send_request_with_managed_session`: 发送带会话管理的请求
 
-### 8. 文件工具 (modules/file_utils.py)
+### 9. 文件工具 (modules/file_utils.py)
 - **功能**: 处理文件读写操作
 - **关键函数**:
   - `get_all_records_from_csv`: 从CSV文件读取记录
   - `write_data_to_csv`: 将数据写入CSV文件
   - `write_performance_data_to_csv`: 将业绩数据写入CSV文件
 
-### 9. 数据库工具 (modules/db_utils.py)
+### 10. 数据库工具 (modules/db_utils.py)
 - **功能**: 处理数据库操作
 - **关键函数**:
   - `init_db`: 初始化数据库和表结构
@@ -87,13 +111,13 @@
   - `get_performance_data_from_db`: 从数据库获取业绩数据
   - `check_contract_exists`: 检查合同是否已存在于数据库
 
-### 10. 消息发送模块 (modules/message_sender.py)
+### 11. 消息发送模块 (modules/message_sender.py)
 - **功能**: 处理实际的消息发送操作
 - **关键函数**:
   - `send_wechat_message`: 发送微信消息
   - `send_wecom_message`: 发送企业微信消息
 
-### 11. 日志配置 (modules/log_config.py)
+### 12. 日志配置 (modules/log_config.py)
 - **功能**: 配置日志系统
 - **关键功能**:
   - 设置日志级别
@@ -107,27 +131,37 @@
 Metabase API -> request_module.py -> 临时CSV文件
 ```
 
-### 2. 数据处理流程（文件存储模式）
+### 2. 数据处理流程（传统文件存储模式）
 ```
 临时CSV文件 -> data_processing_module.py -> 业绩数据CSV文件
 ```
 
-### 3. 数据处理流程（数据库存储模式）
+### 3. 数据处理流程（传统数据库存储模式）
 ```
 临时CSV文件 -> data_processing_module.py -> SQLite数据库(performance_data表)
 ```
 
-### 4. 通知发送流程（文件存储模式）
+### 4. 数据处理流程（通用文件存储模式）
+```
+临时CSV文件 -> data_processing_generic.py -> reward_calculation.py -> 业绩数据CSV文件
+```
+
+### 5. 数据处理流程（通用数据库存储模式）
+```
+临时CSV文件 -> data_processing_generic.py -> reward_calculation.py -> SQLite数据库(performance_data表)
+```
+
+### 6. 通知发送流程（文件存储模式）
 ```
 业绩数据CSV文件 -> notification_module.py -> task_manager.py -> task_scheduler.py -> message_sender.py -> 企业微信API/微信
 ```
 
-### 5. 通知发送流程（数据库存储模式）
+### 7. 通知发送流程（数据库存储模式）
 ```
 SQLite数据库(performance_data表) -> notification_module.py -> task_manager.py -> task_scheduler.py -> message_sender.py -> 企业微信API/微信
 ```
 
-### 6. 任务调度流程
+### 8. 任务调度流程
 ```
 main.py -> jobs.py -> task_scheduler.py -> 各功能模块
 ```
@@ -205,17 +239,21 @@ main.py -> jobs.py -> task_scheduler.py -> 各功能模块
 ## 扩展性设计
 
 ### 1. 新城市/活动支持
-- **配置驱动**: 通过配置文件添加新城市或活动
-- **通用函数**: 使用通用处理函数支持不同规则
+- **配置驱动**: 通过在 `REWARD_CONFIGS` 中添加新城市或活动的配置
+- **通用函数**: 使用 `determine_rewards_generic` 和 `process_data_generic` 支持不同规则
+- **包装函数**: 创建新的包装函数，如 `process_data_jun_beijing_generic`，调用通用函数并传入特定参数
 
 ### 2. 存储方式选择
-- **配置驱动**: 通过配置项选择文件存储或数据库存储
-- **功能等价**: 确保两种存储方式功能完全等价
+- **配置驱动**: 通过配置项 `USE_DATABASE_FOR_PERFORMANCE_DATA` 选择文件存储或数据库存储
+- **功能等价**: 通过 `process_data_generic` 确保两种存储方式功能完全等价
 - **平滑过渡**: 支持在不同存储方式间平滑切换
+- **并行验证**: 通过并行测试验证两种存储方式的功能等价性
 
 ### 3. 新功能集成
 - **模块化设计**: 便于添加新功能模块
 - **插件架构**: 支持功能扩展
+- **功能标志**: 通过配置项 `USE_GENERIC_PROCESS_FUNCTION` 控制是否使用新实现
+- **独立模块**: 奖励计算和数据处理功能分离，便于单独升级和测试
 
 ## 性能考虑
 
