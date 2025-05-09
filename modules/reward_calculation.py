@@ -90,24 +90,29 @@ def determine_rewards_generic(
 
     # 幸运数字奖励逻辑
     lucky_number = reward_config.get("lucky_number", "")
-    if lucky_number and str(contract_number % 10) == lucky_number:
-        reward_types.append("幸运数字")
-
-        # 获取幸运奖励配置
+    if lucky_number:
         lucky_rewards = reward_config.get("lucky_rewards", {})
-        base_reward = lucky_rewards.get("base", {})
-        high_reward = lucky_rewards.get("high", {})
 
-        # 根据合同金额确定具体奖励
-        if high_reward and current_contract_amount >= high_reward.get("threshold", 0):
-            reward_names.append(high_reward.get("name", ""))
-        elif base_reward:
-            reward_names.append(base_reward.get("name", ""))
+        # 检查幸运数字
+        if lucky_number in str(contract_number % 10):
+            reward_types.append("幸运数字")
+
+            # 根据合同金额确定奖励名称
+            high_threshold = lucky_rewards.get("high", {}).get("threshold", 10000)
+            if current_contract_amount >= high_threshold:
+                reward_name = lucky_rewards.get("high", {}).get("name", "接好运万元以上")
+                reward_names.append(reward_name)
+            else:
+                reward_name = lucky_rewards.get("base", {}).get("name", "接好运")
+                reward_names.append(reward_name)
 
     # 节节高奖励逻辑
     tiered_rewards = reward_config.get("tiered_rewards", {})
     min_contracts = tiered_rewards.get("min_contracts", 0)
     tiers = tiered_rewards.get("tiers", [])
+
+    # 记录所有奖励名称，用于后续检查
+    all_tier_names = [tier.get("name", "") for tier in tiers]
 
     if housekeeper_data['count'] >= min_contracts:
         # 根据配置决定使用哪个金额字段
@@ -121,41 +126,66 @@ def determine_rewards_generic(
 
         logging.info(f"使用金额: {amount} (enable_cap={enable_cap})")
 
-        # 确定当前达到的奖励等级
-        current_tier = None
         next_reward = None
-        all_tier_names = []
 
-        for tier in sorted(tiers, key=lambda x: x.get("threshold", 0)):
+        # 按照阈值从高到低排序奖励等级
+        sorted_tiers = sorted(tiers, key=lambda x: x.get("threshold", 0), reverse=True)
+
+        # 第一阶段：检查是否达到奖励条件，并添加奖励
+        for i, tier in enumerate(sorted_tiers):
             tier_name = tier.get("name", "")
-            all_tier_names.append(tier_name)
+            tier_threshold = tier.get("threshold", 0)
 
-            if amount >= tier.get("threshold", 0):
-                current_tier = tier
-            elif not next_reward:
-                next_reward = tier_name
-
-        # 如果达到了某个奖励等级
-        if current_tier:
-            tier_name = current_tier.get("name", "")
-
-            # 检查是否已经获得过该奖励
-            if tier_name not in housekeeper_data.get('awarded', []):
+            if amount >= tier_threshold and tier_name not in housekeeper_data.get('awarded', []):
                 reward_types.append("节节高")
                 reward_names.append(tier_name)
+                housekeeper_data.setdefault('awarded', []).append(tier_name)
 
-            # 计算距离下一级奖励所需的金额差
-            if next_reward:
-                next_reward_threshold = next(
-                    (tier["threshold"] for tier in tiers if tier["name"] == next_reward),
-                    0
-                )
-                if next_reward_threshold > 0:
-                    next_reward_gap = f"距离 {next_reward} 还需 {round(next_reward_threshold - amount, 2):,} 元"
-        else:
-            # 如果未达到最低合同数量要求
-            if not set(all_tier_names).intersection(housekeeper_data['awarded']):
-                next_reward_gap = f"距离达成节节高奖励条件还需 {min_contracts - housekeeper_data['count']} 单"
+                # 如果不是最高级别的奖励，设置下一个奖励
+                if i > 0:
+                    next_reward = sorted_tiers[i-1].get("name", "")
+                break
+
+        # 如果未达到任何奖励阈值，设置下一个奖励为最低等级
+        if not set(all_tier_names).intersection(housekeeper_data.get('awarded', [])):
+            if sorted_tiers:
+                next_reward = sorted_tiers[-1].get("name", "")
+
+        # 第二阶段：自动发放所有低级别奖项（如果之前未获得）
+        for tier in sorted(tiers, key=lambda x: x.get("threshold", 0)):
+            tier_name = tier.get("name", "")
+            tier_threshold = tier.get("threshold", 0)
+
+            if tier_name not in housekeeper_data.get('awarded', []) and amount >= tier_threshold:
+                reward_types.append("节节高")
+                reward_names.append(tier_name)
+                housekeeper_data.setdefault('awarded', []).append(tier_name)
+
+        # 第三阶段：确定下一个奖励
+        if not next_reward:
+            for i in range(len(sorted_tiers) - 1):
+                if i + 1 < len(sorted_tiers):
+                    current_tier = sorted_tiers[i+1]
+                    next_tier = sorted_tiers[i]
+
+                    if (current_tier.get("name", "") in housekeeper_data.get('awarded', []) and
+                        amount < next_tier.get("threshold", 0) and
+                        next_tier.get("name", "") not in housekeeper_data.get('awarded', [])):
+                        next_reward = next_tier.get("name", "")
+                        break
+
+        # 计算距离下一级奖励所需的金额差
+        if next_reward:
+            next_reward_threshold = next(
+                (tier.get("threshold", 0) for tier in tiers if tier.get("name", "") == next_reward),
+                0
+            )
+            if next_reward_threshold > 0:
+                next_reward_gap = f"距离 {next_reward} 还需 {round(next_reward_threshold - amount, 2):,} 元"
+    else:
+        # 如果未达到最低合同数量要求
+        if not set(all_tier_names).intersection(housekeeper_data.get('awarded', [])):
+            next_reward_gap = f"距离达成节节高奖励条件还需 {min_contracts - housekeeper_data['count']} 单"
 
     return ', '.join(reward_types), ', '.join(reward_names), next_reward_gap
 
