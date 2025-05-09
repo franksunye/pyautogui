@@ -201,6 +201,11 @@ ARCHIVE_DIR = 'archive'
 # 是否使用数据库存储签约台账数据
 USE_DATABASE_FOR_PERFORMANCE_DATA = False  # 默认使用文件存储，设为True时使用数据库存储
 
+# 是否使用通用数据处理函数
+# 设为True时使用通用数据处理函数，设为False时使用原始数据处理函数
+# 此标志用于在重构过程中平滑过渡，确保新实现与原始实现功能等价
+USE_GENERIC_PROCESS_FUNCTION = False
+
 # 业务数据源服务器配置
 # 中敏感度信息，直接作为常量
 METABASE_URL = 'http://metabase.fsgo365.cn:3000'
