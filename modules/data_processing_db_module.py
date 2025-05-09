@@ -23,22 +23,66 @@ from modules.reward_calculation import (
 # 设置日志
 setup_logging()
 
+# 活动ID到奖励计算函数的映射
+REWARD_CALCULATOR_MAP = {
+    "BJ-2025-04": {
+        "function": determine_rewards_apr_beijing_generic,
+        "lucky_number": "8"
+    },
+    "BJ-2025-05": {
+        "function": determine_rewards_may_beijing_generic,
+        "lucky_number": "6"
+    },
+    "SH-2025-04": {
+        "function": determine_rewards_apr_shanghai_generic,
+        "lucky_number": "6"
+    },
+    "SH-2025-05": {
+        "function": determine_rewards_may_shanghai_generic,
+        "lucky_number": "6"
+    }
+}
+
 # 注意：我们不再使用从合同ID中提取数字的方法，而是使用合同在活动中的序号作为合同编号
 # 这样可以与文件版本保持一致，确保幸运数字奖励判断逻辑的一致性
+
+def check_lucky_number(contract_number, lucky_number):
+    """
+    检查合同编号是否包含幸运数字
+
+    Args:
+        contract_number (int): 合同编号
+        lucky_number (str): 幸运数字
+
+    Returns:
+        bool: 是否包含幸运数字
+    """
+    is_lucky = str(contract_number % 10) == lucky_number
+    if is_lucky:
+        logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，匹配幸运数字 {lucky_number}")
+    else:
+        logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，不匹配幸运数字 {lucky_number}")
+    return is_lucky
 
 def process_data_to_db(contract_data, campaign_id, province_code, existing_contract_ids=None, ignore_existing=False):
     """
     处理合同数据并将结果保存到数据库中
 
+    该函数处理合同数据，计算奖励，并将结果保存到数据库中。
+    它使用活动ID来确定使用哪个奖励计算函数，并根据合同编号和幸运数字计算奖励。
+
     Args:
-        contract_data: 合同数据列表
-        campaign_id: 活动ID，如"BJ-2025-05"
-        province_code: 省份代码，如"110000"
-        existing_contract_ids: 已存在的合同ID集合
-        ignore_existing: 是否忽略已存在的合同ID检查，用于测试
+        contract_data (list): 合同数据列表，每个元素是一个包含合同信息的字典
+        campaign_id (str): 活动ID，如"BJ-2025-05"，用于确定使用哪个奖励计算函数
+        province_code (str): 省份代码，如"110000"，用于保存到数据库
+        existing_contract_ids (set, optional): 已存在的合同ID集合，用于避免重复处理
+        ignore_existing (bool, optional): 是否忽略已存在的合同ID检查，用于测试
 
     Returns:
-        processed_count: 处理的合同数量
+        int: 处理的合同数量
+
+    Raises:
+        ValueError: 当找不到活动ID对应的奖励计算函数时抛出
     """
     if existing_contract_ids is None:
         # 如果没有提供已存在的合同ID集合，则从数据库中获取
@@ -111,86 +155,30 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
 
         # 计算奖励状态、类型和名称
         # 选择合适的奖励计算函数
-        if campaign_id.startswith("BJ-2025-05"):
+        # 从活动ID中提取前缀（如"BJ-2025-05"）
+        campaign_prefix = campaign_id.split("-")[0] + "-" + campaign_id.split("-")[1] + "-" + campaign_id.split("-")[2]
+
+        # 查找对应的奖励计算函数和幸运数字
+        if campaign_prefix in REWARD_CALCULATOR_MAP:
+            # 获取奖励计算函数和幸运数字
+            reward_calculator = REWARD_CALCULATOR_MAP[campaign_prefix]["function"]
+            lucky_number = REWARD_CALCULATOR_MAP[campaign_prefix]["lucky_number"]
+
             # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
             contract_number = contract_count_in_activity
             logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
 
             # 检查合同编号是否包含幸运数字
-            lucky_number = "6"  # 北京5月的幸运数字是6
-            if str(contract_number % 10) == lucky_number:
-                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，匹配幸运数字 {lucky_number}")
-            else:
-                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，不匹配幸运数字 {lucky_number}")
+            check_lucky_number(contract_number, lucky_number)
 
-            reward_types, reward_names, next_reward_gap = determine_rewards_may_beijing_generic(
+            # 计算奖励
+            reward_types, reward_names, next_reward_gap = reward_calculator(
                 contract_number,
                 housekeeper_contracts[housekeeper],
                 contract_amount
             )
 
             logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
-
-        elif campaign_id.startswith("SH-2025-05"):
-            # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
-            contract_number = contract_count_in_activity
-            logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
-
-            # 检查合同编号是否包含幸运数字
-            lucky_number = "6"  # 上海5月的幸运数字是6
-            if str(contract_number % 10) == lucky_number:
-                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，匹配幸运数字 {lucky_number}")
-            else:
-                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，不匹配幸运数字 {lucky_number}")
-
-            reward_types, reward_names, next_reward_gap = determine_rewards_may_shanghai_generic(
-                contract_number,
-                housekeeper_contracts[housekeeper],
-                contract_amount
-            )
-
-            logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
-
-        elif campaign_id.startswith("BJ-2025-04"):
-            # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
-            contract_number = contract_count_in_activity
-            logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
-
-            # 检查合同编号是否包含幸运数字
-            lucky_number = "8"  # 北京4月的幸运数字是8
-            if str(contract_number % 10) == lucky_number:
-                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，匹配幸运数字 {lucky_number}")
-            else:
-                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，不匹配幸运数字 {lucky_number}")
-
-            reward_types, reward_names, next_reward_gap = determine_rewards_apr_beijing_generic(
-                contract_number,
-                housekeeper_contracts[housekeeper],
-                contract_amount
-            )
-
-            logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
-
-        elif campaign_id.startswith("SH-2025-04"):
-            # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
-            contract_number = contract_count_in_activity
-            logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
-
-            # 检查合同编号是否包含幸运数字
-            lucky_number = "6"  # 上海4月的幸运数字是6
-            if str(contract_number % 10) == lucky_number:
-                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，匹配幸运数字 {lucky_number}")
-            else:
-                logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，不匹配幸运数字 {lucky_number}")
-
-            reward_types, reward_names, next_reward_gap = determine_rewards_apr_shanghai_generic(
-                contract_number,
-                housekeeper_contracts[housekeeper],
-                contract_amount
-            )
-
-            logging.info(f"计算得到的奖励类型: {reward_types}, 奖励名称: {reward_names}")
-
         else:
             reward_types = ""
             reward_names = ""
@@ -266,13 +254,16 @@ def process_beijing_data_to_db(contract_data, campaign_id="BJ-2025-05", province
     """
     处理北京合同数据并将结果保存到数据库中
 
+    这是一个便捷函数，调用通用的process_data_to_db函数处理北京的合同数据。
+    它使用默认的活动ID和省份代码，简化调用。
+
     Args:
-        contract_data: 合同数据列表
-        campaign_id: 活动ID，默认为"BJ-2025-05"
-        province_code: 省份代码，默认为"110000"
+        contract_data (list): 合同数据列表，每个元素是一个包含合同信息的字典
+        campaign_id (str, optional): 活动ID，默认为"BJ-2025-05"
+        province_code (str, optional): 省份代码，默认为"110000"（北京）
 
     Returns:
-        processed_count: 处理的合同数量
+        int: 处理的合同数量
     """
     logging.info(f"Processing Beijing data to DB with campaign_id={campaign_id}, province_code={province_code}")
     return process_data_to_db(contract_data, campaign_id, province_code)
@@ -281,13 +272,16 @@ def process_shanghai_data_to_db(contract_data, campaign_id="SH-2025-04", provinc
     """
     处理上海合同数据并将结果保存到数据库中
 
+    这是一个便捷函数，调用通用的process_data_to_db函数处理上海的合同数据。
+    它使用默认的活动ID和省份代码，简化调用。
+
     Args:
-        contract_data: 合同数据列表
-        campaign_id: 活动ID，默认为"SH-2025-04"
-        province_code: 省份代码，默认为"310000"
+        contract_data (list): 合同数据列表，每个元素是一个包含合同信息的字典
+        campaign_id (str, optional): 活动ID，默认为"SH-2025-04"
+        province_code (str, optional): 省份代码，默认为"310000"（上海）
 
     Returns:
-        processed_count: 处理的合同数量
+        int: 处理的合同数量
     """
     return process_data_to_db(contract_data, campaign_id, province_code)
 
@@ -295,13 +289,20 @@ def import_csv_to_db(csv_file, campaign_id, province_code):
     """
     从CSV文件导入数据到数据库
 
+    读取CSV文件中的合同数据，并调用process_data_to_db函数处理数据并保存到数据库。
+    CSV文件应包含所有必需的合同信息字段。
+
     Args:
-        csv_file: CSV文件路径
-        campaign_id: 活动ID，如"BJ-2025-05"
-        province_code: 省份代码，如"110000"
+        csv_file (str): CSV文件路径
+        campaign_id (str): 活动ID，如"BJ-2025-05"，用于确定使用哪个奖励计算函数
+        province_code (str): 省份代码，如"110000"，用于保存到数据库
 
     Returns:
-        success: 是否成功
+        bool: 是否成功导入数据
+
+    Raises:
+        FileNotFoundError: 当CSV文件不存在时抛出
+        Exception: 当导入过程中发生错误时抛出
     """
     import csv
 
