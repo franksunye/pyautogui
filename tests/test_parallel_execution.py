@@ -18,6 +18,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 # 导入项目模块
 from modules.log_config import setup_logging
+from modules import config
+
+# 添加测试活动的配置
+config.REWARD_CONFIGS["BJ-PARALLEL-TEST"] = config.REWARD_CONFIGS["BJ-2025-04"].copy()
+config.REWARD_CONFIGS["SH-PARALLEL-TEST"] = config.REWARD_CONFIGS["SH-2025-04"].copy()
 from modules.data_processing_module import (
     process_data_apr_beijing,
     process_data_may_beijing,
