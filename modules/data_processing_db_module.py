@@ -26,43 +26,21 @@ setup_logging()
 # 活动ID到奖励计算函数的映射
 REWARD_CALCULATOR_MAP = {
     "BJ-2025-04": {
-        "function": determine_rewards_apr_beijing_generic,
-        "lucky_number": "8"
+        "function": determine_rewards_apr_beijing_generic
     },
     "BJ-2025-05": {
-        "function": determine_rewards_may_beijing_generic,
-        "lucky_number": "6"
+        "function": determine_rewards_may_beijing_generic
     },
     "SH-2025-04": {
-        "function": determine_rewards_apr_shanghai_generic,
-        "lucky_number": "6"
+        "function": determine_rewards_apr_shanghai_generic
     },
     "SH-2025-05": {
-        "function": determine_rewards_may_shanghai_generic,
-        "lucky_number": "6"
+        "function": determine_rewards_may_shanghai_generic
     }
 }
 
 # 注意：我们不再使用从合同ID中提取数字的方法，而是使用合同在活动中的序号作为合同编号
 # 这样可以与文件版本保持一致，确保幸运数字奖励判断逻辑的一致性
-
-def check_lucky_number(contract_number, lucky_number):
-    """
-    检查合同编号是否包含幸运数字
-
-    Args:
-        contract_number (int): 合同编号
-        lucky_number (str): 幸运数字
-
-    Returns:
-        bool: 是否包含幸运数字
-    """
-    is_lucky = str(contract_number % 10) == lucky_number
-    if is_lucky:
-        logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，匹配幸运数字 {lucky_number}")
-    else:
-        logging.info(f"合同编号 {contract_number} 的个位数是 {contract_number % 10}，不匹配幸运数字 {lucky_number}")
-    return is_lucky
 
 def process_data_to_db(contract_data, campaign_id, province_code, existing_contract_ids=None, ignore_existing=False):
     """
@@ -158,18 +136,14 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
         # 从活动ID中提取前缀（如"BJ-2025-05"）
         campaign_prefix = campaign_id.split("-")[0] + "-" + campaign_id.split("-")[1] + "-" + campaign_id.split("-")[2]
 
-        # 查找对应的奖励计算函数和幸运数字
+        # 查找对应的奖励计算函数
         if campaign_prefix in REWARD_CALCULATOR_MAP:
-            # 获取奖励计算函数和幸运数字
+            # 获取奖励计算函数
             reward_calculator = REWARD_CALCULATOR_MAP[campaign_prefix]["function"]
-            lucky_number = REWARD_CALCULATOR_MAP[campaign_prefix]["lucky_number"]
 
             # 与文件版本保持一致，使用合同在活动中的序号作为合同编号
             contract_number = contract_count_in_activity
             logging.info(f"使用合同在活动中的序号作为合同编号: {contract_number}")
-
-            # 检查合同编号是否包含幸运数字
-            check_lucky_number(contract_number, lucky_number)
 
             # 计算奖励
             reward_types, reward_names, next_reward_gap = reward_calculator(
