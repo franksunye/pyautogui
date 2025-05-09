@@ -20,7 +20,7 @@ DB_FILE = 'tasks.db'
 
 class PerformanceData:
     """签约台账数据类"""
-    
+
     def __init__(self, **kwargs):
         """初始化签约台账数据对象"""
         self.id = kwargs.get('id')
@@ -55,12 +55,12 @@ class PerformanceData:
         self.register_time = kwargs.get('register_time')
         self.created_at = kwargs.get('created_at', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         self.updated_at = kwargs.get('updated_at', self.created_at)
-    
+
     def save(self):
         """保存签约台账数据到数据库"""
         conn = sqlite3.connect(DB_FILE)
         cursor = conn.cursor()
-        
+
         if self.id:
             # 更新现有记录
             self.updated_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -111,7 +111,7 @@ class PerformanceData:
                 self.register_time, self.created_at, self.updated_at
             ))
             self.id = cursor.lastrowid
-        
+
         conn.commit()
         conn.close()
         return self.id
@@ -121,12 +121,12 @@ def get_performance_data_by_id(data_id):
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    
+
     cursor.execute('SELECT * FROM performance_data WHERE id = ?', (data_id,))
     row = cursor.fetchone()
-    
+
     conn.close()
-    
+
     if row:
         return PerformanceData(**dict(row))
     return None
@@ -136,12 +136,12 @@ def get_performance_data_by_contract_id(contract_id):
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    
+
     cursor.execute('SELECT * FROM performance_data WHERE contract_id = ?', (contract_id,))
     row = cursor.fetchone()
-    
+
     conn.close()
-    
+
     if row:
         return PerformanceData(**dict(row))
     return None
@@ -151,20 +151,24 @@ def get_performance_data_by_campaign(campaign_id):
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    
+
     cursor.execute('SELECT * FROM performance_data WHERE campaign_id = ? ORDER BY signed_date', (campaign_id,))
     rows = cursor.fetchall()
-    
+
     conn.close()
-    
+
     return [PerformanceData(**dict(row)) for row in rows]
+
+def get_performance_data_by_campaign_id(campaign_id):
+    """根据活动ID获取签约台账数据列表（别名函数）"""
+    return get_performance_data_by_campaign(campaign_id)
 
 def get_performance_data_by_housekeeper(housekeeper, campaign_id=None):
     """根据管家获取签约台账数据列表"""
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    
+
     if campaign_id:
         cursor.execute(
             'SELECT * FROM performance_data WHERE housekeeper = ? AND campaign_id = ? ORDER BY signed_date',
@@ -175,11 +179,11 @@ def get_performance_data_by_housekeeper(housekeeper, campaign_id=None):
             'SELECT * FROM performance_data WHERE housekeeper = ? ORDER BY signed_date',
             (housekeeper,)
         )
-    
+
     rows = cursor.fetchall()
-    
+
     conn.close()
-    
+
     return [PerformanceData(**dict(row)) for row in rows]
 
 def get_all_performance_data():
@@ -187,46 +191,46 @@ def get_all_performance_data():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    
+
     cursor.execute('SELECT * FROM performance_data ORDER BY signed_date')
     rows = cursor.fetchall()
-    
+
     conn.close()
-    
+
     return [PerformanceData(**dict(row)) for row in rows]
 
 def delete_performance_data(data_id):
     """删除签约台账数据"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    
+
     cursor.execute('DELETE FROM performance_data WHERE id = ?', (data_id,))
-    
+
     conn.commit()
     conn.close()
-    
+
     return cursor.rowcount > 0
 
 def get_unique_contract_ids():
     """获取所有唯一的合同ID"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    
+
     cursor.execute('SELECT contract_id FROM performance_data')
     rows = cursor.fetchall()
-    
+
     conn.close()
-    
+
     return set(row[0] for row in rows)
 
 def get_performance_data_count():
     """获取签约台账数据总数"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    
+
     cursor.execute('SELECT COUNT(*) FROM performance_data')
     count = cursor.fetchone()[0]
-    
+
     conn.close()
-    
+
     return count
