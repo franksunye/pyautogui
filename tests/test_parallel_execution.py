@@ -21,7 +21,7 @@ from modules.log_config import setup_logging
 from modules.data_processing_module import (
     process_data_apr_beijing,
     process_data_may_beijing,
-    process_data_apr_shanghai,
+    process_data_shanghai_apr,
     process_data_may_shanghai
 )
 from modules.data_processing_db_module import (
@@ -52,16 +52,16 @@ setup_logging()
 
 class TestParallelExecution(unittest.TestCase):
     """并行运行测试"""
-    
+
     @classmethod
     def setUpClass(cls):
         """测试前的准备工作"""
         # 确保数据库表存在
         create_performance_data_table()
-        
+
         # 创建测试数据目录
         os.makedirs('tests/test_data', exist_ok=True)
-        
+
         # 创建测试数据
         cls.test_data_beijing = [
             {
@@ -103,7 +103,7 @@ class TestParallelExecution(unittest.TestCase):
                 '平均客单价(average)': '20000'
             }
         ]
-        
+
         cls.test_data_shanghai = [
             {
                 '合同ID(_id)': 'test_parallel_sh_001',
@@ -125,7 +125,7 @@ class TestParallelExecution(unittest.TestCase):
                 '平均客单价(average)': '25000'
             }
         ]
-    
+
     @classmethod
     def tearDownClass(cls):
         """测试后的清理工作"""
@@ -138,14 +138,14 @@ class TestParallelExecution(unittest.TestCase):
             data = get_performance_data_by_contract_id(contract_id)
             if data:
                 delete_performance_data(data.id)
-        
+
         # 删除测试活动的数据
         campaign_ids = ['BJ-PARALLEL-TEST', 'SH-PARALLEL-TEST']
         for campaign_id in campaign_ids:
             data_list = get_performance_data_by_campaign_id(campaign_id)
             for data in data_list:
                 delete_performance_data(data.id)
-    
+
     def test_01_parallel_execution_file_mode_beijing(self):
         """测试并行运行文件存储模式（北京）"""
         # 运行原始实现
@@ -154,7 +154,7 @@ class TestParallelExecution(unittest.TestCase):
             set(),  # 空的已存在合同ID集合
             {}  # 空的管家奖励列表
         )
-        
+
         # 运行新实现
         new_results = process_data_apr_beijing_generic(
             self.test_data_beijing,
@@ -162,29 +162,29 @@ class TestParallelExecution(unittest.TestCase):
             {},  # 空的管家奖励列表
             False  # 使用文件存储
         )
-        
+
         # 比较结果
         is_equal, differences = compare_results(original_results, new_results)
-        
+
         # 保存比较结果
         save_comparison_results(
             original_results,
             new_results,
             'tests/test_data/parallel_execution_file_mode_beijing.json'
         )
-        
+
         # 验证结果
         self.assertTrue(is_equal, f"原始实现和新实现的结果不一致，存在 {len(differences)} 处差异")
-    
+
     def test_02_parallel_execution_file_mode_shanghai(self):
         """测试并行运行文件存储模式（上海）"""
         # 运行原始实现
-        original_results = process_data_apr_shanghai(
+        original_results = process_data_shanghai_apr(
             self.test_data_shanghai,
             set(),  # 空的已存在合同ID集合
             {}  # 空的管家奖励列表
         )
-        
+
         # 运行新实现
         new_results = process_data_apr_shanghai_generic(
             self.test_data_shanghai,
@@ -192,20 +192,20 @@ class TestParallelExecution(unittest.TestCase):
             {},  # 空的管家奖励列表
             False  # 使用文件存储
         )
-        
+
         # 比较结果
         is_equal, differences = compare_results(original_results, new_results)
-        
+
         # 保存比较结果
         save_comparison_results(
             original_results,
             new_results,
             'tests/test_data/parallel_execution_file_mode_shanghai.json'
         )
-        
+
         # 验证结果
         self.assertTrue(is_equal, f"原始实现和新实现的结果不一致，存在 {len(differences)} 处差异")
-    
+
     def test_03_parallel_execution_db_mode_beijing(self):
         """测试并行运行数据库存储模式（北京）"""
         # 修改测试数据，确保合同ID不重复
@@ -213,36 +213,36 @@ class TestParallelExecution(unittest.TestCase):
         for i, contract in enumerate(test_data):
             test_data[i] = contract.copy()
             test_data[i]['合同ID(_id)'] = f"{contract['合同ID(_id)']}_db"
-        
+
         # 运行原始实现
         original_count = process_beijing_data_to_db(
             test_data,
             "BJ-PARALLEL-TEST",  # 活动ID
             "110000"  # 省份代码
         )
-        
+
         # 获取原始实现的结果
         original_results = get_performance_data_by_campaign_id("BJ-PARALLEL-TEST")
-        
+
         # 运行新实现
         new_count = process_beijing_data_to_db_generic(
             test_data,
             "BJ-PARALLEL-TEST",  # 活动ID
             "110000"  # 省份代码
         )
-        
+
         # 获取新实现的结果
         new_results = get_performance_data_by_campaign_id("BJ-PARALLEL-TEST")
-        
+
         # 比较结果数量
         self.assertEqual(original_count, new_count, "原始实现和新实现处理的合同数量不同")
-        
+
         # 比较数据库结果
         is_equal, differences = compare_db_results(original_results, new_results)
-        
+
         # 验证结果
         self.assertTrue(is_equal, f"原始实现和新实现的结果不一致，存在 {len(differences)} 处差异")
-    
+
     def test_04_parallel_execution_db_mode_shanghai(self):
         """测试并行运行数据库存储模式（上海）"""
         # 修改测试数据，确保合同ID不重复
@@ -250,33 +250,33 @@ class TestParallelExecution(unittest.TestCase):
         for i, contract in enumerate(test_data):
             test_data[i] = contract.copy()
             test_data[i]['合同ID(_id)'] = f"{contract['合同ID(_id)']}_db"
-        
+
         # 运行原始实现
         original_count = process_shanghai_data_to_db(
             test_data,
             "SH-PARALLEL-TEST",  # 活动ID
             "310000"  # 省份代码
         )
-        
+
         # 获取原始实现的结果
         original_results = get_performance_data_by_campaign_id("SH-PARALLEL-TEST")
-        
+
         # 运行新实现
         new_count = process_shanghai_data_to_db_generic(
             test_data,
             "SH-PARALLEL-TEST",  # 活动ID
             "310000"  # 省份代码
         )
-        
+
         # 获取新实现的结果
         new_results = get_performance_data_by_campaign_id("SH-PARALLEL-TEST")
-        
+
         # 比较结果数量
         self.assertEqual(original_count, new_count, "原始实现和新实现处理的合同数量不同")
-        
+
         # 比较数据库结果
         is_equal, differences = compare_db_results(original_results, new_results)
-        
+
         # 验证结果
         self.assertTrue(is_equal, f"原始实现和新实现的结果不一致，存在 {len(differences)} 处差异")
 
