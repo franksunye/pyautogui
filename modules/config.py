@@ -248,51 +248,7 @@ CAMPAIGN_CONFIGS = {
             "performance_file": PERFORMANCE_DATA_FILENAME_BJ_MAY
         }
     },
-    # 上海2025年4月活动配置
-    "SH-2025-04": {
-        # 奖励计算相关配置
-        "reward": {
-            "lucky_number": "6",
-            "lucky_rewards": {
-                "base": {"name": "接好运", "threshold": 0},
-                "high": {"name": "接好运万元以上", "threshold": 10000}
-            },
-            "performance_limits": {
-                "single_project_limit": None,  # 上海没有工单金额上限
-                "enable_cap": ENABLE_PERFORMANCE_AMOUNT_CAP,
-                "single_contract_cap": PERFORMANCE_AMOUNT_CAP
-            },
-            "tiered_rewards": {
-                "min_contracts": 5,  # 上海需要5个合同
-                "tiers": [
-                    {"name": "基础奖", "threshold": 40000},
-                    {"name": "达标奖", "threshold": 60000},
-                    {"name": "优秀奖", "threshold": 80000},
-                    {"name": "精英奖", "threshold": 120000}
-                ]
-            }
-        },
-        # 通知相关配置
-        "notification": {
-            "group_name": WECOM_GROUP_NAME_SH_APR,
-            "contact_name": CAMPAIGN_CONTACT_SH_APR,
-            "awards_mapping": {
-                "接好运": "36",
-                "接好运万元以上": "66",
-                "基础奖": "200",
-                "达标奖": "300",
-                "优秀奖": "400",
-                "精英奖": "800"
-            },
-            "delay_seconds": 2
-        },
-        # 数据源配置
-        "data_source": {
-            "api_url": API_URL_SH_APR,
-            "temp_file": TEMP_CONTRACT_DATA_FILE_SH_APR,
-            "performance_file": PERFORMANCE_DATA_FILENAME_SH_APR
-        }
-    },
+
     # 上海2025年5月活动配置
     "SH-2025-05": {
         # 奖励计算相关配置
@@ -383,7 +339,6 @@ def get_reward_config_from_campaign_config(campaign_id):
 REWARD_CONFIGS = {
     "BJ-2025-04": get_reward_config_from_campaign_config("BJ-2025-04"),
     "BJ-2025-05": get_reward_config_from_campaign_config("BJ-2025-05"),
-    "SH-2025-04": get_reward_config_from_campaign_config("SH-2025-04"),
     "SH-2025-05": get_reward_config_from_campaign_config("SH-2025-05")
 }
 
