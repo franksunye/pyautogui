@@ -383,71 +383,8 @@ def get_reward_config_from_campaign_config(campaign_id):
 REWARD_CONFIGS = {
     "BJ-2025-04": get_reward_config_from_campaign_config("BJ-2025-04"),
     "BJ-2025-05": get_reward_config_from_campaign_config("BJ-2025-05"),
+    "SH-2025-04": get_reward_config_from_campaign_config("SH-2025-04"),
     "SH-2025-05": get_reward_config_from_campaign_config("SH-2025-05")
-}
-
-# 添加历史活动的配置（直接定义，不从CAMPAIGN_CONFIGS获取）
-REWARD_CONFIGS["BJ-2024-11"] = {
-    "lucky_number": "6",
-    "lucky_rewards": {
-        "base": {"name": "接好运", "threshold": 0},
-        "high": {"name": "接好运万元以上", "threshold": 10000}
-    },
-    "performance_limits": {
-        "single_project_limit": 50000,
-        "enable_cap": False
-    },
-    "tiered_rewards": {
-        "min_contracts": 6,
-        "tiers": [
-            {"name": "达标奖", "threshold": 40000},
-            {"name": "优秀奖", "threshold": 60000},
-            {"name": "精英奖", "threshold": 100000}
-        ]
-    }
-}
-
-REWARD_CONFIGS["BJ-2025-02"] = {
-    "lucky_number": "6",
-    "lucky_rewards": {
-        "base": {"name": "接好运", "threshold": 0},
-        "high": {"name": "接好运万元以上", "threshold": 10000}
-    },
-    "performance_limits": {
-        "single_project_limit": 100000,
-        "enable_cap": True,
-        "single_contract_cap": 100000
-    },
-    "tiered_rewards": {
-        "min_contracts": 6,
-        "tiers": [
-            {"name": "达标奖", "threshold": 60000},
-            {"name": "优秀奖", "threshold": 100000},
-            {"name": "精英奖", "threshold": 160000}
-        ]
-    }
-}
-
-REWARD_CONFIGS["SH-2025-04"] = {
-    "lucky_number": "6",
-    "lucky_rewards": {
-        "base": {"name": "接好运", "threshold": 0},
-        "high": {"name": "接好运万元以上", "threshold": 10000}
-    },
-    "performance_limits": {
-        "single_project_limit": None,  # 上海没有工单金额上限
-        "enable_cap": ENABLE_PERFORMANCE_AMOUNT_CAP,
-        "single_contract_cap": PERFORMANCE_AMOUNT_CAP
-    },
-    "tiered_rewards": {
-        "min_contracts": 5,  # 上海需要5个合同
-        "tiers": [
-            {"name": "基础奖", "threshold": 40000},
-            {"name": "达标奖", "threshold": 60000},
-            {"name": "优秀奖", "threshold": 80000},
-            {"name": "精英奖", "threshold": 120000}
-        ]
-    }
 }
 
 # 归档文件夹
