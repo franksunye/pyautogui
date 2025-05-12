@@ -1,4 +1,4 @@
-# Python
+# Python bytecode files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -20,67 +20,75 @@ wheels/
 .installed.cfg
 *.egg
 
-# Environment variables
+# Log files
+*.log
+logs/
+app.log
+send_messages.log
+monitor_log.txt
+
+# Data files
+*.csv
+state/
+archive/
+奖励统计.csv
+本地合同数据.csv
+output.csv
+
+# Environment files
+.env
+.env.*
+!.env.example
 config/.env
 config/.env.test
 config/.env.*
+!config/.env.example
+!config/.env.template
 .venv
 env/
 venv/
 ENV/
 
-# Logs
-logs/
-*.log
-app.log
-send_messages.log
-monitor_log.txt
-
-# Session files
-metabase_session.json
-
-# State files
-state/
-archive/
-
-# Database
+# Database files
 *.db
+*.sqlite
 *.sqlite3
 tasks.db
 
-# IDE
-.idea/
-.vscode/
+# Session files
+metabase_session.json
+*_session.json
+
+# Temporary files
+*.tmp
+*.bak
 *.swp
 *.swo
+v2-temp/
+
+# IDE files
+.vscode/
+.idea/
 .VSCodeCounter/
 
 # OS specific
 .DS_Store
 Thumbs.db
 
-# Project specific
-*.csv
-奖励统计.csv
-本地合同数据.csv
-output.csv
-queryData.py
+# Test files
+test_*.py
+tests/data/
+tests/test_utils/
 
-# Weekly reports
+# Report files
 weekly_reports/
-
-# Temporary files
-v2-temp/
 
 # Specific files to exclude
 *.zip
 *.xls
 *.xlsx
 *.png
-
-# Make sure template and example files are not ignored
-!config/.env.example
-!config/.env.template
+queryData.py
 
 # Ignore batch files with credentials
 *.bat

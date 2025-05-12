@@ -16,25 +16,46 @@ setup_logging()
 # 使用专门的发送消息日志记录器
 send_logger = logging.getLogger('sendLogger')
 
-def generate_award_message(record, awards_mapping):
+def generate_award_message(record, awards_mapping, city="BJ"):
     service_housekeeper = record["管家(serviceHousekeeper)"]
     contract_number = record["合同编号(contractdocNum)"]
     award_messages = []
 
-    if ENABLE_BADGE_MANAGEMENT and (service_housekeeper in ELITE_HOUSEKEEPER):
-        # 如果管家在精英管家列表里面，添加徽章和进行精英连击双倍奖励计算与提示
-        # logging.info(f'Generating award message for {service_housekeeper}, ENABLE_BADGE_MANAGEMENT={ENABLE_BADGE_MANAGEMENT}, ELITE_HOUSEKEEPER={ELITE_HOUSEKEEPER}...')
+    # 只有北京的精英管家才能获得奖励翻倍和显示徽章，上海的管家不参与奖励翻倍也不显示徽章
+    if ENABLE_BADGE_MANAGEMENT and (service_housekeeper in ELITE_HOUSEKEEPER) and city == "BJ":
+        # 如果是北京的精英管家，添加徽章
         service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
-        for award in record["奖励名称"].split(', '):
+
+        # 获取奖励类型和名称列表
+        reward_types = record["奖励类型"].split(', ') if record["奖励类型"] else []
+        reward_names = record["奖励名称"].split(', ') if record["奖励名称"] else []
+
+        # 创建奖励类型到奖励名称的映射
+        reward_type_map = {}
+        if len(reward_types) == len(reward_names):
+            for i in range(len(reward_types)):
+                if i < len(reward_names):
+                    reward_type_map[reward_names[i]] = reward_types[i]
+
+        for award in reward_names:
             if award in awards_mapping:
                 award_info = awards_mapping[award]
-                try:
-                    award_info_double = str(int(award_info) * 2)
-                except ValueError:
-                    pass
-                award_messages.append(f'达成 {award} 奖励条件，奖励金额 {award_info} 元，同时触发“精英连击双倍奖励”，奖励金额\U0001F680直升至 {award_info_double} 元！\U0001F9E7\U0001F9E7\U0001F9E7')
+                # 检查奖励类型，只有节节高奖励才翻倍
+                reward_type = reward_type_map.get(award, "")
+
+                if reward_type == "节节高":
+                    # 节节高奖励翻倍
+                    try:
+                        award_info_double = str(int(award_info) * 2)
+                        award_messages.append(f'达成 {award} 奖励条件，奖励金额 {award_info} 元，同时触发"精英连击双倍奖励"，奖励金额\U0001F680直升至 {award_info_double} 元！\U0001F9E7\U0001F9E7\U0001F9E7')
+                    except ValueError:
+                        award_messages.append(f'达成{award}奖励条件，获得签约奖励{award_info}元 \U0001F9E7\U0001F9E7\U0001F9E7')
+                else:
+                    # 幸运数字奖励不翻倍
+                    award_messages.append(f'达成{award}奖励条件，获得签约奖励{award_info}元 \U0001F9E7\U0001F9E7\U0001F9E7')
     else:
-        # 不启用徽章功能
+        # 不启用徽章功能或非北京管家
+        # 上海的管家不添加徽章，北京的普通管家也不添加徽章
         for award in record["奖励名称"].split(', '):
             if award in awards_mapping:
                 award_info = awards_mapping[award]
@@ -89,7 +110,7 @@ def notify_awards_may_beijing(performance_data_filename=None):
         processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
         service_housekeeper = record["管家(serviceHousekeeper)"]
 
-        # 添加是否启用徽章管理的判断，如果启用则在管家名称前添加徽章名称
+        # 添加是否启用徽章管理的判断，如果启用则在北京的精英管家名称前添加徽章名称
         if ENABLE_BADGE_MANAGEMENT and service_housekeeper in ELITE_HOUSEKEEPER:
             service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
 
@@ -108,7 +129,7 @@ def notify_awards_may_beijing(performance_data_filename=None):
             time.sleep(3)
 
             if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
+                jiangli_msg = generate_award_message(record, awards_mapping, "BJ")
                 create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_MAY, jiangli_msg)
 
             record['是否发送通知'] = 'Y'
@@ -142,7 +163,7 @@ def notify_awards_apr_beijing(performance_data_filename=None):
         processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
         service_housekeeper = record["管家(serviceHousekeeper)"]
 
-        # 添加徽章
+        # 添加徽章 - 只有北京的精英管家才显示徽章
         if ENABLE_BADGE_MANAGEMENT and service_housekeeper in ELITE_HOUSEKEEPER:
             service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
 
@@ -163,7 +184,7 @@ def notify_awards_apr_beijing(performance_data_filename=None):
             time.sleep(3)  # 添加3秒的延迟
 
             if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
+                jiangli_msg = generate_award_message(record, awards_mapping, "BJ")
                 create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_APR, jiangli_msg)
 
             record['是否发送通知'] = 'Y'
@@ -176,13 +197,10 @@ def notify_awards_apr_beijing(performance_data_filename=None):
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
 
-# 旧的上海通知函数已被移除，使用新的notify_awards_apr_shanghai和notify_awards_may_shanghai函数
-
-def notify_awards_apr_shanghai(performance_data_filename=None):
-    """通知奖励并更新性能数据文件"""
-    if performance_data_filename is None:
-        performance_data_filename = PERFORMANCE_DATA_FILE
+def notify_awards_shanghai_generate_message_march(performance_data_filename, status_filename, contract_data):
+    """通知奖励并更新性能数据文件，同时跟踪发送状态"""
     records = get_all_records_from_csv(performance_data_filename)
+    send_status = load_send_status(status_filename)
     updated = False
 
     awards_mapping = {
@@ -202,7 +220,7 @@ def notify_awards_apr_shanghai(performance_data_filename=None):
 
         processed_conversion_rate = preprocess_rate(record["转化率(conversion)"])
 
-        if record['是否发送通知'] == 'N':
+        if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
             next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
             msg = f'''\U0001F9E8\U0001F9E8\U0001F9E8 签约喜报 \U0001F9E8\U0001F9E8\U0001F9E8
 
@@ -282,7 +300,7 @@ def notify_awards_may_shanghai(performance_data_filename=None):
             create_task('send_wecom_message', WECOM_GROUP_NAME_SH_MAY, msg)
 
             if record['激活奖励状态'] == '1':
-                jiangli_msg = generate_award_message(record, awards_mapping)
+                jiangli_msg = generate_award_message(record, awards_mapping, "SH")
                 create_task('send_wechat_message', CAMPAIGN_CONTACT_SH_MAY, jiangli_msg)
 
             time.sleep(2)
@@ -296,10 +314,7 @@ def notify_awards_may_shanghai(performance_data_filename=None):
     if updated:
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
-
-# 旧的上海通知函数已被移除，使用新的notify_awards_apr_shanghai和notify_awards_may_shanghai函数
-
-def notify_technician_status_changes(status_changes):
+def notify_technician_status_changes(status_changes, status_filename):
     """
     通知技师的状态变更信息。
 
@@ -315,9 +330,6 @@ def notify_technician_status_changes(status_changes):
         company_name = change[3]
         update_content = change[5]
 
-        # 如果已经处理过这个变更，则跳过
-        if change_id in processed_changes:
-            continue
 
         parsed_time = datetime.strptime(change_time, "%Y-%m-%dT%H:%M:%S.%f%z")
         simplified_time = parsed_time.strftime("%Y-%m-%d %H:%M")
@@ -338,15 +350,15 @@ def notify_technician_status_changes(status_changes):
         # message = f"技师状态变更：\n技师姓名：{technician_name}\n公司名称：{company_name}\n更新时间：{change_time}\n更新内容：{update_content}"
         message = f"您好，公司的管家：{technician_name}，在{simplified_time} {status_icon} {update_content} 了。"
 
-        create_task('send_wechat_message', company_name, message)
-        # send_wechat_message('文件传输助手', message)
+        if change_id not in send_status:
+            create_task('send_wechat_message', company_name, message)
+            # send_wechat_message('文件传输助手', message)
 
-        post_text_to_webhook(message)
+            post_text_to_webhook(message)
 
-        # 将变更ID添加到已处理集合中
-        processed_changes.add(change_id)
+            update_send_status(status_filename, change_id, '通知成功')
 
-        logging.info(f"Notification sent for technician status change: {change_id}")
+            logging.info(f"Notification sent for technician status change: {change_id}")
 
 
 def notify_daily_service_report(report_data):
@@ -462,9 +474,7 @@ def notify_contact_timeout_changes(contact_timeout_data):
     if messages:
         full_message = "\n".join(messages)
         # print(full_message)  # 打印完整的消息
-
         post_text_to_webhook(full_message, WEBHOOK_URL_CONTACT_TIMEOUT)
-
 def notify_contact_timeout_changes_markdown(contact_timeout_data):
     """
     通知工单联络超时的信息。
