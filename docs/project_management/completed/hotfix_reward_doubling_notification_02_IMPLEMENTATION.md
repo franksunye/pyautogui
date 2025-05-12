@@ -24,24 +24,24 @@
    if ENABLE_BADGE_MANAGEMENT and (service_housekeeper in ELITE_HOUSEKEEPER) and city == "BJ":
        # 如果是北京的精英管家，添加徽章
        service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
-
+       
        # 获取奖励类型和名称列表
        reward_types = record["奖励类型"].split(', ') if record["奖励类型"] else []
        reward_names = record["奖励名称"].split(', ') if record["奖励名称"] else []
-
+       
        # 创建奖励类型到奖励名称的映射
        reward_type_map = {}
        if len(reward_types) == len(reward_names):
            for i in range(len(reward_types)):
                if i < len(reward_names):
                    reward_type_map[reward_names[i]] = reward_types[i]
-
+       
        for award in reward_names:
            if award in awards_mapping:
                award_info = awards_mapping[award]
                # 检查奖励类型，只有节节高奖励才翻倍
                reward_type = reward_type_map.get(award, "")
-
+               
                if reward_type == "节节高":
                    # 节节高奖励翻倍
                    try:
@@ -65,7 +65,7 @@
    ```python
    # 北京
    jiangli_msg = generate_award_message(record, awards_mapping, "BJ")
-
+   
    # 上海
    jiangli_msg = generate_award_message(record, awards_mapping, "SH")
    ```
@@ -76,7 +76,7 @@
 
 1. **test_elite_bj_reward_doubling**：验证北京精英管家的节节高奖励正确翻倍，而幸运数字奖励不翻倍
 2. **test_normal_bj_no_doubling**：验证北京普通管家的奖励不会翻倍
-3. **test_elite_sh_no_doubling**：验证上海精英管家的奖励不会翻倍
+3. **test_elite_sh_no_doubling**：验证上海精英管家的奖励不会翻倍，也不会显示徽章
 
 所有测试用例均已通过，证明修复有效。
 
