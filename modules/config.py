@@ -1,21 +1,6 @@
 # config.py
 """
 配置模块，负责管理应用程序的所有配置项。
-
-重要说明：
-----------
-1. 环境变量加载机制：
-   - 环境变量在 main.py 中的 load_environment 函数中加载
-   - 这发生在程序启动后，命令行参数解析完成后
-
-2. 敏感信息处理机制：
-   - 所有敏感信息（API URL、密码、密钥等）都通过函数获取
-   - 这确保了这些值在环境变量加载后才被获取
-   - 使用这些敏感信息时，应调用相应的函数，而不是直接使用变量
-
-3. 非敏感配置：
-   - 非敏感配置（如文件路径、功能标志等）可以直接使用变量
-   - 这些变量通常有默认值，即使环境变量未加载也不会导致严重问题
 """
 
 import os
@@ -58,7 +43,6 @@ def validate_required_env_vars():
         raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
 # 业务数据源服务器配置
-# 中敏感度信息，直接作为常量
 METABASE_URL = 'http://metabase.fsgo365.cn:3000'
 METABASE_SESSION = METABASE_URL + '/api/session/'
 
@@ -178,91 +162,6 @@ ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB = True
 
 # 统一的活动配置
 CAMPAIGN_CONFIGS = {
-    # 北京2024年11月活动配置
-    "BJ-2024-11": {
-        # 奖励计算相关配置
-        "reward": {
-            "lucky_number": "6",
-            "lucky_rewards": {
-                "base": {"name": "接好运", "threshold": 0},
-                "high": {"name": "接好运万元以上", "threshold": 10000}
-            },
-            "performance_limits": {
-                "single_project_limit": 50000,
-                "enable_cap": False
-            },
-            "tiered_rewards": {
-                "min_contracts": 6,
-                "tiers": [
-                    {"name": "达标奖", "threshold": 40000},
-                    {"name": "优秀奖", "threshold": 60000},
-                    {"name": "精英奖", "threshold": 100000}
-                ]
-            }
-        },
-        # 通知相关配置
-        "notification": {
-            "group_name": "（北京）修链服务运营",
-            "contact_name": "王爽",
-            "awards_mapping": {
-                "接好运": "28",
-                "接好运万元以上": "58",
-                "达标奖": "200",
-                "优秀奖": "400",
-                "精英奖": "600"
-            },
-            "delay_seconds": 3
-        },
-        # 数据源配置
-        "data_source": {
-            "api_url": METABASE_URL + "/api/card/1616/query",
-            "temp_file": "state/ContractData-BJ-Nov.csv",
-            "performance_file": "state/PerformanceData-BJ-Nov.csv"
-        }
-    },
-    # 北京2025年2月活动配置
-    "BJ-2025-02": {
-        # 奖励计算相关配置
-        "reward": {
-            "lucky_number": "6",
-            "lucky_rewards": {
-                "base": {"name": "接好运", "threshold": 0},
-                "high": {"name": "接好运万元以上", "threshold": 10000}
-            },
-            "performance_limits": {
-                "single_project_limit": 100000,
-                "enable_cap": True,
-                "single_contract_cap": 100000
-            },
-            "tiered_rewards": {
-                "min_contracts": 6,
-                "tiers": [
-                    {"name": "达标奖", "threshold": 60000},
-                    {"name": "优秀奖", "threshold": 100000},
-                    {"name": "精英奖", "threshold": 160000}
-                ]
-            }
-        },
-        # 通知相关配置
-        "notification": {
-            "group_name": "（北京）修链服务运营",
-            "contact_name": "王爽",
-            "awards_mapping": {
-                "接好运": "28",
-                "接好运万元以上": "58",
-                "达标奖": "200",
-                "优秀奖": "400",
-                "精英奖": "600"
-            },
-            "delay_seconds": 3
-        },
-        # 数据源配置
-        "data_source": {
-            "api_url": METABASE_URL + "/api/card/1616/query",
-            "temp_file": "state/ContractData-BJ-Feb.csv",
-            "performance_file": "state/PerformanceData-BJ-Feb.csv"
-        }
-    },
     # 北京2025年4月活动配置
     "BJ-2025-04": {
         # 奖励计算相关配置
@@ -480,13 +379,75 @@ def get_reward_config_from_campaign_config(campaign_id):
     return campaign_config["reward"]
 
 # 为了向后兼容，保留原有的REWARD_CONFIGS结构
+# 只保留当前活跃的活动配置
 REWARD_CONFIGS = {
-    "BJ-2024-11": get_reward_config_from_campaign_config("BJ-2024-11"),
-    "BJ-2025-02": get_reward_config_from_campaign_config("BJ-2025-02"),
     "BJ-2025-04": get_reward_config_from_campaign_config("BJ-2025-04"),
     "BJ-2025-05": get_reward_config_from_campaign_config("BJ-2025-05"),
-    "SH-2025-04": get_reward_config_from_campaign_config("SH-2025-04"),
     "SH-2025-05": get_reward_config_from_campaign_config("SH-2025-05")
+}
+
+# 添加历史活动的配置（直接定义，不从CAMPAIGN_CONFIGS获取）
+REWARD_CONFIGS["BJ-2024-11"] = {
+    "lucky_number": "6",
+    "lucky_rewards": {
+        "base": {"name": "接好运", "threshold": 0},
+        "high": {"name": "接好运万元以上", "threshold": 10000}
+    },
+    "performance_limits": {
+        "single_project_limit": 50000,
+        "enable_cap": False
+    },
+    "tiered_rewards": {
+        "min_contracts": 6,
+        "tiers": [
+            {"name": "达标奖", "threshold": 40000},
+            {"name": "优秀奖", "threshold": 60000},
+            {"name": "精英奖", "threshold": 100000}
+        ]
+    }
+}
+
+REWARD_CONFIGS["BJ-2025-02"] = {
+    "lucky_number": "6",
+    "lucky_rewards": {
+        "base": {"name": "接好运", "threshold": 0},
+        "high": {"name": "接好运万元以上", "threshold": 10000}
+    },
+    "performance_limits": {
+        "single_project_limit": 100000,
+        "enable_cap": True,
+        "single_contract_cap": 100000
+    },
+    "tiered_rewards": {
+        "min_contracts": 6,
+        "tiers": [
+            {"name": "达标奖", "threshold": 60000},
+            {"name": "优秀奖", "threshold": 100000},
+            {"name": "精英奖", "threshold": 160000}
+        ]
+    }
+}
+
+REWARD_CONFIGS["SH-2025-04"] = {
+    "lucky_number": "6",
+    "lucky_rewards": {
+        "base": {"name": "接好运", "threshold": 0},
+        "high": {"name": "接好运万元以上", "threshold": 10000}
+    },
+    "performance_limits": {
+        "single_project_limit": None,  # 上海没有工单金额上限
+        "enable_cap": ENABLE_PERFORMANCE_AMOUNT_CAP,
+        "single_contract_cap": PERFORMANCE_AMOUNT_CAP
+    },
+    "tiered_rewards": {
+        "min_contracts": 5,  # 上海需要5个合同
+        "tiers": [
+            {"name": "基础奖", "threshold": 40000},
+            {"name": "达标奖", "threshold": 60000},
+            {"name": "优秀奖", "threshold": 80000},
+            {"name": "精英奖", "threshold": 120000}
+        ]
+    }
 }
 
 # 归档文件夹
