@@ -68,8 +68,9 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
 
     logging.info(f"Starting data processing with {len(existing_contract_ids)} existing contract IDs.")
 
-    # 初始化合同计数器，从已存在的合同ID数量开始
-    contract_count_in_activity = len(existing_contract_ids) + 1
+    # 初始化合同计数器，从1开始，与文件存储方式保持一致
+    # 修改：不再使用已存在的合同ID数量作为起始值，而是从1开始计数
+    contract_count_in_activity = 1
 
     # 初始化管家合同数据字典
     housekeeper_contracts = {}
@@ -127,8 +128,18 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
         housekeeper_contracts[housekeeper]['total_amount'] += contract_amount
 
         # 计算计入业绩金额（根据业务规则，可能有上限）
-        # 北京和上海的业绩金额上限可能不同，这里使用通用的10万上限
-        performance_amount = min(contract_amount, 100000)  # 假设上限为10万
+        # 北京和上海的业绩金额上限不同
+        from modules.config import PERFORMANCE_AMOUNT_CAP, PERFORMANCE_AMOUNT_CAP_BJ_FEB
+
+        # 根据活动ID选择合适的上限
+        if campaign_id.startswith("BJ-"):
+            # 北京使用10万上限
+            performance_cap = PERFORMANCE_AMOUNT_CAP_BJ_FEB
+        else:
+            # 上海使用4万上限
+            performance_cap = PERFORMANCE_AMOUNT_CAP
+
+        performance_amount = min(contract_amount, performance_cap)
         housekeeper_contracts[housekeeper]['performance_amount'] += performance_amount
 
         # 计算奖励状态、类型和名称
