@@ -103,13 +103,22 @@
   - `write_data_to_csv`: 将数据写入CSV文件
   - `write_performance_data_to_csv`: 将业绩数据写入CSV文件
 
-### 10. 数据库工具 (modules/db_utils.py)
-- **功能**: 处理数据库操作
+### 10. 数据库工具和签约台账数据管理
+#### 10.1 数据库工具 (modules/db_utils.py)
+- **功能**: 处理基础数据库操作
 - **关键函数**:
   - `init_db`: 初始化数据库和表结构
-  - `save_performance_data_to_db`: 将业绩数据保存到数据库
-  - `get_performance_data_from_db`: 从数据库获取业绩数据
-  - `check_contract_exists`: 检查合同是否已存在于数据库
+  - `get_db_connection`: 获取数据库连接
+  - `execute_query`: 执行SQL查询
+  - `execute_update`: 执行SQL更新
+
+#### 10.2 签约台账数据管理 (modules/performance_data_manager.py)
+- **功能**: 管理签约台账数据的存储和检索
+- **关键函数**:
+  - `get_unique_contract_ids`: 获取所有已存在的合同ID，用于避免重复处理
+  - `get_performance_data_by_contract_id`: 根据合同ID获取签约台账数据
+  - `get_performance_data_by_campaign`: 根据活动ID获取签约台账数据
+  - `get_performance_data_by_housekeeper`: 根据管家获取签约台账数据
 
 ### 11. 消息发送模块 (modules/message_sender.py)
 - **功能**: 处理实际的消息发送操作
@@ -138,7 +147,7 @@ Metabase API -> request_module.py -> 临时CSV文件
 
 ### 3. 数据处理流程（传统数据库存储模式）
 ```
-临时CSV文件 -> data_processing_module.py -> SQLite数据库(performance_data表)
+临时CSV文件 -> data_processing_db_module.py -> SQLite数据库(performance_data表)
 ```
 
 ### 4. 数据处理流程（通用文件存储模式）
@@ -151,17 +160,36 @@ Metabase API -> request_module.py -> 临时CSV文件
 临时CSV文件 -> data_processing_generic.py -> reward_calculation.py -> SQLite数据库(performance_data表)
 ```
 
-### 6. 通知发送流程（文件存储模式）
+### 6. 合同处理逻辑
+在文件模式和数据库模式下，系统使用相同的逻辑来避免重复处理合同：
+
+1. **获取已存在合同ID**:
+   - 文件模式: 从CSV文件中读取已处理的合同ID
+   - 数据库模式: 通过 `get_unique_contract_ids()` 函数从数据库中查询所有唯一的合同ID
+
+2. **合同计数器初始化**:
+   - 两种模式都将合同计数器 `contract_count_in_activity` 初始化为 `len(existing_contract_ids) + 1`
+   - 这确保了新处理的合同编号从已存在合同数量的下一个开始
+
+3. **重复检查**:
+   - 检查当前批次中是否已处理过该合同ID: `if contract_id in processed_contract_ids`
+   - 检查历史数据中是否已处理过该合同ID: `if contract_id in existing_contract_ids`
+
+4. **幸运奖计算**:
+   - 使用合同计数器 `contract_count_in_activity` 作为合同编号参数传递给奖励计算函数
+   - 幸运数字奖励基于 `contract_number % 10` 计算，确保两种模式下计算结果一致
+
+### 7. 通知发送流程（文件存储模式）
 ```
 业绩数据CSV文件 -> notification_module.py -> task_manager.py -> task_scheduler.py -> message_sender.py -> 企业微信API/微信
 ```
 
-### 7. 通知发送流程（数据库存储模式）
+### 8. 通知发送流程（数据库存储模式）
 ```
 SQLite数据库(performance_data表) -> notification_module.py -> task_manager.py -> task_scheduler.py -> message_sender.py -> 企业微信API/微信
 ```
 
-### 8. 任务调度流程
+### 9. 任务调度流程
 ```
 main.py -> jobs.py -> task_scheduler.py -> 各功能模块
 ```

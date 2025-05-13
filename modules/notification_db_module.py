@@ -7,7 +7,6 @@
 """
 
 import logging
-import time
 from modules.log_config import setup_logging
 from task_manager import create_task
 from modules.config import ENABLE_BADGE_MANAGEMENT, ELITE_HOUSEKEEPER, BADGE_NAME, ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB
@@ -36,7 +35,7 @@ def notify_awards_may_beijing_db(performance_data_list):
     group_name = notification_config.get('group_name')
     contact_name = notification_config.get('contact_name')
     awards_mapping = notification_config.get('awards_mapping', {})
-    delay_seconds = notification_config.get('delay_seconds', 3)
+
 
     # 筛选出需要发送通知的记录
     records_to_notify = []
@@ -77,7 +76,6 @@ def notify_awards_may_beijing_db(performance_data_list):
 '''
         # 发送主通知
         create_task('send_wecom_message', group_name, msg)
-        time.sleep(delay_seconds)
 
         # 如果有奖励，发送奖励通知
         if data.reward_status == 1:
@@ -125,7 +123,7 @@ def notify_awards_may_shanghai_db(performance_data_list):
     group_name = notification_config.get('group_name')
     contact_name = notification_config.get('contact_name')
     awards_mapping = notification_config.get('awards_mapping', {})
-    delay_seconds = notification_config.get('delay_seconds', 2)
+
 
     # 筛选出需要发送通知的记录
     records_to_notify = []
@@ -164,7 +162,6 @@ def notify_awards_may_shanghai_db(performance_data_list):
 '''
         # 发送主通知
         create_task('send_wecom_message', group_name, msg)
-        time.sleep(delay_seconds)
 
         # 如果有奖励，发送奖励通知
         if data.reward_status == 1:

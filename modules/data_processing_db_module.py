@@ -68,9 +68,8 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
 
     logging.info(f"Starting data processing with {len(existing_contract_ids)} existing contract IDs.")
 
-    # 初始化合同计数器，从1开始，与文件存储方式保持一致
-    # 修改：不再使用已存在的合同ID数量作为起始值，而是从1开始计数
-    contract_count_in_activity = 1
+    # 初始化合同计数器，从已存在的合同ID数量开始，与文件存储方式保持一致
+    contract_count_in_activity = len(existing_contract_ids) + 1
 
     # 初始化管家合同数据字典
     housekeeper_contracts = {}

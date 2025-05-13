@@ -6,7 +6,6 @@
 """
 
 import logging
-import time
 from modules.log_config import setup_logging
 from modules.config import *
 from modules.file_utils import get_all_records_from_csv, write_performance_data_to_csv
@@ -98,8 +97,6 @@ def notify_awards_may_beijing(performance_data_filename=None):
     group_name = notification_config.get('group_name')
     contact_name = notification_config.get('contact_name')
     awards_mapping = notification_config.get('awards_mapping', {})
-    delay_seconds = notification_config.get('delay_seconds', 3)
-
     for record in records:
         if record['是否发送通知'] == 'N':
             # 准备数据
@@ -131,7 +128,6 @@ def notify_awards_may_beijing(performance_data_filename=None):
 '''
             # 发送主通知
             create_task('send_wecom_message', group_name, msg)
-            time.sleep(delay_seconds)
 
             # 如果有奖励，发送奖励通知
             if record.get('激活奖励状态', '0') == '1':
@@ -167,8 +163,6 @@ def notify_awards_apr_beijing(performance_data_filename=None):
     group_name = notification_config.get('group_name')
     contact_name = notification_config.get('contact_name')
     awards_mapping = notification_config.get('awards_mapping', {})
-    delay_seconds = notification_config.get('delay_seconds', 3)
-
     for record in records:
         if record['是否发送通知'] == 'N':
             # 准备数据
@@ -199,7 +193,6 @@ def notify_awards_apr_beijing(performance_data_filename=None):
 '''
             # 发送主通知
             create_task('send_wecom_message', group_name, msg)
-            time.sleep(delay_seconds)
 
             # 如果有奖励，发送奖励通知
             if record.get('激活奖励状态', '0') == '1':
@@ -239,8 +232,6 @@ def notify_awards_shanghai_generate_message_march(performance_data_filename, sta
     group_name = notification_config.get('group_name')
     contact_name = notification_config.get('contact_name')
     awards_mapping = notification_config.get('awards_mapping', {})
-    delay_seconds = notification_config.get('delay_seconds', 2)
-
     for record in records:
         if record['是否发送通知'] == 'N':
             # 准备数据
@@ -282,7 +273,6 @@ def notify_awards_shanghai_generate_message_march(performance_data_filename, sta
                 jiangli_msg = generate_award_message(record, awards_mapping, "SH")
                 create_task('send_wechat_message', contact_name, jiangli_msg)
 
-            time.sleep(delay_seconds)
 
             # 更新状态
             record['是否发送通知'] = 'Y'
@@ -309,8 +299,6 @@ def notify_awards_may_shanghai(performance_data_filename=None):
     group_name = notification_config.get('group_name')
     contact_name = notification_config.get('contact_name')
     awards_mapping = notification_config.get('awards_mapping', {})
-    delay_seconds = notification_config.get('delay_seconds', 2)
-
     for record in records:
         if record['是否发送通知'] == 'N':
             # 准备数据
@@ -349,7 +337,7 @@ def notify_awards_may_shanghai(performance_data_filename=None):
                 jiangli_msg = generate_award_message(record, awards_mapping, "SH")
                 create_task('send_wechat_message', contact_name, jiangli_msg)
 
-            time.sleep(delay_seconds)
+
 
             # 更新状态
             record['是否发送通知'] = 'Y'

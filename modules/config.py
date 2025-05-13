@@ -196,7 +196,7 @@ CAMPAIGN_CONFIGS = {
                 "优秀奖": "400",
                 "精英奖": "600"
             },
-            "delay_seconds": 3
+
         },
         # 数据源配置
         "data_source": {
@@ -239,7 +239,7 @@ CAMPAIGN_CONFIGS = {
                 "优秀奖": "400",
                 "精英奖": "600"
             },
-            "delay_seconds": 3
+
         },
         # 数据源配置
         "data_source": {
@@ -285,7 +285,7 @@ CAMPAIGN_CONFIGS = {
                 "优秀奖": "400",
                 "精英奖": "800"
             },
-            "delay_seconds": 2
+
         },
         # 数据源配置
         "data_source": {
@@ -308,7 +308,7 @@ DEFAULT_NOTIFICATION_CONFIG = {
             '优秀奖': '400',
             '精英奖': '600'
         },
-        'delay_seconds': 3
+
     },
     'SH': {
         'group_name': WECOM_GROUP_NAME_SH_MAY,
@@ -321,7 +321,7 @@ DEFAULT_NOTIFICATION_CONFIG = {
             '优秀奖': '400',
             '精英奖': '800'
         },
-        'delay_seconds': 2
+
     }
 }
 
