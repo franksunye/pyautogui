@@ -3,7 +3,7 @@
 ## 文档信息
 **文档类型**: 业务规则
 **文档编号**: DOC-RULES-001
-**版本**: 1.1.0
+**版本**: 1.2.0
 **创建日期**: 2025-04-29
 **最后更新**: 2025-05-13
 **状态**: 已更新
@@ -11,9 +11,9 @@
 **团队成员**: Frank, 小智
 
 **相关文档**:
-- [北京和上海数据处理差异分析](./business_rules_comparison.md)
 - [业务对象设计](./02_business_objects_design.md)
 - [系统架构概览](./03_system_architecture.md)
+- [版本管理规范](./07_version_management.md)
 
 ## 1. 奖励计算规则
 
@@ -174,7 +174,138 @@
 3. **转化率显示**: 北京不显示转化率，上海显示
 4. **文本格式**: 北京更紧凑，上海更分散
 
-## 5. 当前业务重点
+## 5. 北京和上海数据处理差异详细分析
+
+### 5.1 概述
+
+北京和上海数据处理存在多项差异，包括合同金额最大上限规则、奖励计算规则差异和通知内容差异。这些差异对系统的设计和实现有重要影响，需要在代码中正确处理以确保系统的正确性和一致性。
+
+### 5.2 合同金额最大上限规则差异
+
+#### 5.2.1 业绩金额上限
+
+| 城市 | 单个合同计入业绩金额上限 | 是否启用业绩金额上限 |
+|------|--------------------------|----------------------|
+| 北京 | 100,000元                | 是                   |
+| 上海 | 40,000元                 | 否（配置为False）    |
+
+**代码实现**:
+```python
+# 北京配置
+PERFORMANCE_AMOUNT_CAP_BJ = 100000
+ENABLE_PERFORMANCE_AMOUNT_CAP_BJ = True
+
+# 上海配置
+PERFORMANCE_AMOUNT_CAP_SH = 40000
+ENABLE_PERFORMANCE_AMOUNT_CAP_SH = False
+```
+
+#### 5.2.2 工单金额上限
+
+| 城市 | 单个工单累计合同金额上限 | 说明                                 |
+|------|--------------------------|--------------------------------------|
+| 北京 | 100,000元                | 同一工单下多个合同的累计金额有上限   |
+| 上海 | 无上限                   | 同一工单下多个合同的累计金额没有上限 |
+
+**代码实现**:
+```python
+# 北京配置
+"performance_limits": {
+    "single_project_limit": 100000,  # 单个工单金额上限
+    "enable_cap": True,
+    "single_contract_cap": 100000    # 单个合同金额上限
+}
+
+# 上海配置
+"performance_limits": {
+    "single_project_limit": None,    # 上海没有工单金额上限
+    "enable_cap": ENABLE_PERFORMANCE_AMOUNT_CAP_SH,
+    "single_contract_cap": PERFORMANCE_AMOUNT_CAP_SH
+}
+```
+
+#### 5.2.3 业务影响
+
+1. **计入业绩金额计算**:
+   - 北京: 如果合同金额超过100,000元，只计入100,000元作为业绩金额
+   - 上海: 合同金额全额计入业绩金额（虽然配置了40,000元的上限，但未启用）
+
+2. **工单金额累计**:
+   - 北京: 同一工单下的合同金额累计超过100,000元时，超出部分不计入业绩
+   - 上海: 同一工单下的合同金额无上限限制，全额计入业绩
+
+### 5.3 精英管家特殊规则详细说明
+
+| 城市 | 精英管家徽章 | 奖励翻倍 | 说明 |
+|------|--------------|----------|------|
+| 北京 | 是           | 是，仅节节高奖励 | 精英管家名称前显示徽章，节节高奖励金额翻倍 |
+| 上海 | 否           | 否       | 上海技师不参与徽章和奖励翻倍 |
+
+**代码实现**:
+```python
+# 只有北京的精英管家才能获得奖励翻倍和显示徽章，上海的管家不参与奖励翻倍也不显示徽章
+if ENABLE_BADGE_MANAGEMENT and (service_housekeeper in ELITE_HOUSEKEEPER) and city == "BJ":
+    # 如果是北京的精英管家，添加徽章
+    service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
+
+    # 检查奖励类型，只有节节高奖励才翻倍
+    if reward_type == "节节高":
+        # 节节高奖励翻倍
+        award_info_double = str(int(award_info) * 2)
+        award_messages.append(f'达成 {award} 奖励条件，奖励金额 {award_info} 元，同时触发"精英连击双倍奖励"，奖励金额🚀直升至 {award_info_double} 元！🧧🧧🧧')
+```
+
+### 5.4 奖励通知差异详细说明
+
+#### 5.4.1 北京精英管家奖励通知（节节高奖励）
+```
+{housekeeper}签约合同{contract_number}
+
+达成 {award} 奖励条件，奖励金额 {award_info} 元，同时触发"精英连击双倍奖励"，奖励金额🚀直升至 {award_info_double} 元！🧧🧧🧧
+```
+
+#### 5.4.2 普通奖励通知
+```
+{housekeeper}签约合同{contract_number}
+
+达成{award}奖励条件，获得签约奖励{award_info}元 🧧🧧🧧
+```
+
+### 5.5 代码实现建议
+
+1. **使用统一配置结构**:
+   ```python
+   CAMPAIGN_CONFIGS = {
+       "BJ-2025-05": {
+           "reward": { ... },
+           "notification": { ... },
+           "data_source": { ... }
+       },
+       "SH-2025-05": {
+           "reward": { ... },
+           "notification": { ... },
+           "data_source": { ... }
+       }
+   }
+   ```
+
+2. **使用通用处理函数**:
+   ```python
+   def determine_rewards_generic(contract_number, housekeeper_data, current_contract_amount, config_key):
+       # 通用奖励计算逻辑
+       pass
+   ```
+
+3. **使用模板函数处理通知差异**:
+   ```python
+   def format_contract_signing_message(housekeeper, contract_doc_num, contract_amount,
+                                      conversion_rate, accumulated_amount, next_reward_msg,
+                                      city="BJ"):
+       # 根据城市选择不同的通知模板
+       pass
+   ```
+
+## 6. 当前业务重点
 
 当前重构工作中，需要特别关注:
 
@@ -191,3 +322,4 @@
 |------|------|--------|----------|
 | 1.0.0 | 2025-04-29 | 小智 | 初始版本 |
 | 1.1.0 | 2025-05-13 | Frank | 添加北京和上海差异详细分析，更新通知内容差异 |
+| 1.2.0 | 2025-05-13 | Frank | 合并北京和上海数据处理差异分析文档，添加详细代码实现示例和建议 |
