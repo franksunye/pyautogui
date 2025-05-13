@@ -54,12 +54,12 @@
 | CONFIG-005 | 精英管家列表 | modules/config.py | 196 | 低 | 保留为常量 ELITE_HOUSEKEEPER |
 | CONFIG-006 | 服务商映射 | modules/config.py | 200-220 | 低 | 保留为常量 SERVICE_PROVIDER_MAPPING |
 | CONFIG-007 | 奖励配置 | modules/config.py | 60-100 | 低 | 保留为常量 REWARD_CONFIGS |
-| CONFIG-008 | 业绩金额上限 | modules/config.py | 55 | 低 | 保留为常量 PERFORMANCE_AMOUNT_CAP |
-| CONFIG-009 | 是否启用业绩金额上限 | modules/config.py | 57 | 低 | 保留为常量 ENABLE_PERFORMANCE_AMOUNT_CAP |
+| CONFIG-008 | 业绩金额上限 | modules/config.py | 55 | 低 | 保留为常量 PERFORMANCE_AMOUNT_CAP_SH |
+| CONFIG-009 | 是否启用业绩金额上限 | modules/config.py | 57 | 低 | 保留为常量 ENABLE_PERFORMANCE_AMOUNT_CAP_SH |
 | CONFIG-010 | 奖金池计算比例 | modules/config.py | 150 | 低 | 保留为常量 BONUS_POOL_RATIO |
 | CONFIG-011 | 单个项目合同金额上限 | modules/config.py | 180 | 低 | 保留为常量 SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_FEB |
-| CONFIG-012 | 北京2月业绩金额上限 | modules/config.py | 182 | 低 | 保留为常量 PERFORMANCE_AMOUNT_CAP_BJ_FEB |
-| CONFIG-013 | 是否启用北京2月业绩金额上限 | modules/config.py | 184 | 低 | 保留为常量 ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB |
+| CONFIG-012 | 北京2月业绩金额上限 | modules/config.py | 182 | 低 | 保留为常量 PERFORMANCE_AMOUNT_CAP_BJ |
+| CONFIG-013 | 是否启用北京2月业绩金额上限 | modules/config.py | 184 | 低 | 保留为常量 ENABLE_PERFORMANCE_AMOUNT_CAP_BJ |
 | FILE-001 | 临时合同数据文件 | modules/config.py | 135 | 低 | 保留为常量 TEMP_CONTRACT_DATA_FILE_SH_APR |
 | FILE-002 | 业绩数据文件名 | modules/config.py | 136 | 低 | 保留为常量 PERFORMANCE_DATA_FILENAME_SH_APR |
 | FILE-003 | 状态文件名 | modules/config.py | 137 | 低 | 保留为常量 STATUS_FILENAME_SH_APR |

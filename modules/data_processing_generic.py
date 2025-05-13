@@ -134,11 +134,11 @@ def process_data_generic(
         # 计算计入业绩金额（根据业务规则，可能有上限）
         # 从配置中获取单个合同金额上限
         from modules.config import REWARD_CONFIGS
-        performance_amount_cap = REWARD_CONFIGS[config_key]['performance_limits']['single_contract_cap'] \
+        PERFORMANCE_AMOUNT_CAP_SH = REWARD_CONFIGS[config_key]['performance_limits']['single_contract_cap'] \
             if REWARD_CONFIGS[config_key]['performance_limits']['enable_cap'] else current_contract_amount
 
         # 计算计入业绩金额
-        performance_amount = min(current_contract_amount, performance_amount_cap)
+        performance_amount = min(current_contract_amount, PERFORMANCE_AMOUNT_CAP_SH)
 
         # 更新管家计入业绩金额
         housekeeper_contracts[unique_housekeeper_key]['performance_amount'] += performance_amount

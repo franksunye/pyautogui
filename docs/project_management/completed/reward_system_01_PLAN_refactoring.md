@@ -548,13 +548,13 @@ def process_data_generic(
 
     # 根据城市代码选择相应的配置
     if city_code == "BJ":
-        performance_cap = config.PERFORMANCE_AMOUNT_CAP_BJ_FEB
+        performance_cap = config.PERFORMANCE_AMOUNT_CAP_BJ
         project_limit = config.SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_FEB
-        enable_cap = config.ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB
+        enable_cap = config.ENABLE_PERFORMANCE_AMOUNT_CAP_BJ
     else:  # "SH"
-        performance_cap = config.PERFORMANCE_AMOUNT_CAP
+        performance_cap = config.PERFORMANCE_AMOUNT_CAP_SH
         project_limit = None  # 上海没有工单金额上限
-        enable_cap = config.ENABLE_PERFORMANCE_AMOUNT_CAP
+        enable_cap = config.ENABLE_PERFORMANCE_AMOUNT_CAP_SH
 
     # 初始化数据结构
     performance_data = []

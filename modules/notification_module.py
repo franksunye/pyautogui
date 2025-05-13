@@ -122,7 +122,7 @@ def notify_awards_may_beijing(performance_data_filename=None):
 
 \U0001F33B 本单为活动期间平台累计签约第 {record.get("活动期内第几个合同", "N/A")} 单，个人累计签约第 {record.get("管家累计单数", "N/A")} 单。
 
-\U0001F33B {housekeeper}累计签约 {processed_accumulated_amount} 元{f', 累计计入业绩 {processed_enter_performance_amount} 元' if ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB else ''}
+\U0001F33B {housekeeper}累计签约 {processed_accumulated_amount} 元{f', 累计计入业绩 {processed_enter_performance_amount} 元' if ENABLE_PERFORMANCE_AMOUNT_CAP_BJ else ''}
 
 \U0001F44A {next_msg}。
 '''
@@ -187,7 +187,7 @@ def notify_awards_apr_beijing(performance_data_filename=None):
 
 \U0001F33B 本单为活动期间平台累计签约第 {record.get("活动期内第几个合同", "N/A")} 单，个人累计签约第 {record.get("管家累计单数", "N/A")} 单。
 
-\U0001F33B {housekeeper}累计签约 {processed_accumulated_amount} 元{f', 累计计入业绩 {processed_enter_performance_amount} 元' if ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB else ''}
+\U0001F33B {housekeeper}累计签约 {processed_accumulated_amount} 元{f', 累计计入业绩 {processed_enter_performance_amount} 元' if ENABLE_PERFORMANCE_AMOUNT_CAP_BJ else ''}
 
 \U0001F44A {next_msg}。
 '''

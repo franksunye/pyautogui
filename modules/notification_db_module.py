@@ -9,7 +9,7 @@
 import logging
 from modules.log_config import setup_logging
 from task_manager import create_task
-from modules.config import ENABLE_BADGE_MANAGEMENT, ELITE_HOUSEKEEPER, BADGE_NAME, ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB
+from modules.config import ENABLE_BADGE_MANAGEMENT, ELITE_HOUSEKEEPER, BADGE_NAME, ENABLE_PERFORMANCE_AMOUNT_CAP_BJ
 from modules.notification_utils import get_campaign_config
 from modules.notification_templates import format_award_message
 from modules.notification_templates import preprocess_amount, preprocess_rate
@@ -70,7 +70,7 @@ def notify_awards_may_beijing_db(performance_data_list):
 
 \U0001F33B 本单为活动期间平台累计签约第 {data.contract_number_in_activity} 单，个人累计签约第 {data.housekeeper_contract_count} 单。
 
-\U0001F33B {housekeeper}累计签约 {processed_accumulated_amount} 元{f', 累计计入业绩 {processed_enter_performance_amount} 元' if ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB else ''}
+\U0001F33B {housekeeper}累计签约 {processed_accumulated_amount} 元{f', 累计计入业绩 {processed_enter_performance_amount} 元' if ENABLE_PERFORMANCE_AMOUNT_CAP_BJ else ''}
 
 \U0001F44A {next_msg}。
 '''

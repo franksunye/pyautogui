@@ -312,10 +312,10 @@ type logs\error.log | Select-Object -Last 50
 
 ### 性能上限配置
 
-- `PERFORMANCE_AMOUNT_CAP`: 上海单个合同计入业绩金额上限
-- `ENABLE_PERFORMANCE_AMOUNT_CAP`: 上海是否启用业绩金额上限
-- `PERFORMANCE_AMOUNT_CAP_BJ_FEB`: 北京单个合同计入业绩金额上限
-- `ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB`: 北京是否启用业绩金额上限
+- `PERFORMANCE_AMOUNT_CAP_SH`: 上海单个合同计入业绩金额上限
+- `ENABLE_PERFORMANCE_AMOUNT_CAP_SH`: 上海是否启用业绩金额上限
+- `PERFORMANCE_AMOUNT_CAP_BJ`: 北京单个合同计入业绩金额上限
+- `ENABLE_PERFORMANCE_AMOUNT_CAP_BJ`: 北京是否启用业绩金额上限
 
 ### 文件路径配置
 

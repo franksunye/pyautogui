@@ -128,15 +128,15 @@ def process_data_to_db(contract_data, campaign_id, province_code, existing_contr
 
         # 计算计入业绩金额（根据业务规则，可能有上限）
         # 北京和上海的业绩金额上限不同
-        from modules.config import PERFORMANCE_AMOUNT_CAP, PERFORMANCE_AMOUNT_CAP_BJ_FEB
+        from modules.config import PERFORMANCE_AMOUNT_CAP_SH, PERFORMANCE_AMOUNT_CAP_BJ
 
         # 根据活动ID选择合适的上限
         if campaign_id.startswith("BJ-"):
             # 北京使用10万上限
-            performance_cap = PERFORMANCE_AMOUNT_CAP_BJ_FEB
+            performance_cap = PERFORMANCE_AMOUNT_CAP_BJ
         else:
             # 上海使用4万上限
-            performance_cap = PERFORMANCE_AMOUNT_CAP
+            performance_cap = PERFORMANCE_AMOUNT_CAP_SH
 
         performance_amount = min(contract_amount, performance_cap)
         housekeeper_contracts[housekeeper]['performance_amount'] += performance_amount

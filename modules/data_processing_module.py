@@ -3,8 +3,8 @@ import logging
 from modules.log_config import setup_logging
 from datetime import date
 from modules.config import (
-    PERFORMANCE_AMOUNT_CAP,
-    ENABLE_PERFORMANCE_AMOUNT_CAP,
+    PERFORMANCE_AMOUNT_CAP_SH,
+    ENABLE_PERFORMANCE_AMOUNT_CAP_SH,
     BONUS_POOL_RATIO,  # Import the configurable bonus pool ratio
 )
 from modules import config  # Add config import to use config.x consistently
@@ -229,7 +229,7 @@ def process_data_may_beijing(contract_data, existing_contract_ids, housekeeper_a
         current_contract_amount = float(contract['合同金额(adjustRefundMoney)'])
 
         # 单项目合同金额上限
-        performance_amount = min(current_contract_amount, config.PERFORMANCE_AMOUNT_CAP_BJ_FEB)
+        performance_amount = min(current_contract_amount, config.PERFORMANCE_AMOUNT_CAP_BJ)
 
         # 获取工单编号(serviceAppointmentNum)
         service_appointment_num = contract['工单编号(serviceAppointmentNum)']
@@ -448,7 +448,7 @@ def process_data_may_shanghai(contract_data, existing_contract_ids, housekeeper_
         current_contract_amount = float(contract['合同金额(adjustRefundMoney)'])
 
         # 单项目合同金额上限
-        performance_amount = min(current_contract_amount, config.PERFORMANCE_AMOUNT_CAP)
+        performance_amount = min(current_contract_amount, config.PERFORMANCE_AMOUNT_CAP_SH)
 
         # 更新管家合同总金额与计入的金额
         housekeeper_contracts[unique_housekeeper_key]['total_amount'] += current_contract_amount
@@ -545,7 +545,7 @@ def determine_rewards_apr_beijing(contract_number, housekeeper_data, current_con
     # 节节高奖励逻辑（需要管家合同数量大于等于6）
     if housekeeper_data['count'] >= 6:
         # amount = housekeeper_data['total_amount']
-        amount = housekeeper_data['performance_amount'] if config.ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB else housekeeper_data['total_amount']
+        amount = housekeeper_data['performance_amount'] if config.ENABLE_PERFORMANCE_AMOUNT_CAP_BJ else housekeeper_data['total_amount']
         logging.info(f"amount: {amount}")
 
         next_reward = None
@@ -649,7 +649,7 @@ def process_data_apr_beijing(contract_data, existing_contract_ids, housekeeper_a
         current_contract_amount = float(contract['合同金额(adjustRefundMoney)'])
 
         # 单项目合同金额上限
-        performance_amount = min(current_contract_amount, config.PERFORMANCE_AMOUNT_CAP_BJ_FEB)
+        performance_amount = min(current_contract_amount, config.PERFORMANCE_AMOUNT_CAP_BJ)
 
         # 获取工单编号(serviceAppointmentNum)
         service_appointment_num = contract['工单编号(serviceAppointmentNum)']
@@ -794,7 +794,7 @@ def process_data_shanghai_apr(contract_data, existing_contract_ids, housekeeper_
             }
 
         contract_amount = float(contract['合同金额(adjustRefundMoney)'])
-        performance_amount = min(contract_amount, config.PERFORMANCE_AMOUNT_CAP)  # 使用配置的上限值
+        performance_amount = min(contract_amount, config.PERFORMANCE_AMOUNT_CAP_SH)  # 使用配置的上限值
 
         housekeeper_contracts[unique_housekeeper_key]['count'] += 1
         housekeeper_contracts[unique_housekeeper_key]['total_amount'] += contract_amount
@@ -877,7 +877,7 @@ def determine_rewards_shanghai_apr(contract_number, housekeeper_data, contract_a
     # 节节高奖励逻辑（需要管家合同数量大于等于5）
     if housekeeper_data['count'] >= JIEJIEGAO_CONTRACT_COUNT_THRESHOLD:
         # 计算下一级奖励所需金额差，如果启用了绩效金额，使用绩效金额，否则使用合同金额
-        amount = housekeeper_data['performance_amount'] if config.ENABLE_PERFORMANCE_AMOUNT_CAP else housekeeper_data['total_amount']
+        amount = housekeeper_data['performance_amount'] if config.ENABLE_PERFORMANCE_AMOUNT_CAP_SH else housekeeper_data['total_amount']
         next_reward = None
         if amount >= 120000 and '精英奖' not in housekeeper_data['awarded']:
             # 精英奖

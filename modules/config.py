@@ -121,9 +121,9 @@ BONUS_POOL_RATIO = 0.002  # 默认为0.2%,可根据需要调整
 
 # 上海的特殊配置选项
 # 业绩金额上限配置
-PERFORMANCE_AMOUNT_CAP = 40000  # 单个合同计入业绩金额上限
+PERFORMANCE_AMOUNT_CAP_SH = 40000  # 单个合同计入业绩金额上限
 # 是否启用业绩金额上限
-ENABLE_PERFORMANCE_AMOUNT_CAP = False
+ENABLE_PERFORMANCE_AMOUNT_CAP_SH = False
 
 ## 北京地区，2025年4月活动
 # 中敏感度信息，直接作为常量
@@ -156,9 +156,9 @@ BONUS_POOL_RATIO_BJ_FEB = 0.002  # 默认为0.2%,可根据需要调整
 # 单个项目合同金额上限
 SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_FEB = 1000000
 # 业绩金额上限配置
-PERFORMANCE_AMOUNT_CAP_BJ_FEB = 100000
+PERFORMANCE_AMOUNT_CAP_BJ = 100000
 # 是否启用业绩金额上限
-ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB = True
+ENABLE_PERFORMANCE_AMOUNT_CAP_BJ = True
 
 # 统一的活动配置
 CAMPAIGN_CONFIGS = {
@@ -260,8 +260,8 @@ CAMPAIGN_CONFIGS = {
             },
             "performance_limits": {
                 "single_project_limit": None,  # 上海没有工单金额上限
-                "enable_cap": ENABLE_PERFORMANCE_AMOUNT_CAP,
-                "single_contract_cap": PERFORMANCE_AMOUNT_CAP
+                "enable_cap": ENABLE_PERFORMANCE_AMOUNT_CAP_SH,
+                "single_contract_cap": PERFORMANCE_AMOUNT_CAP_SH
             },
             "tiered_rewards": {
                 "min_contracts": 5,  # 上海需要5个合同
