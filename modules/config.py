@@ -91,6 +91,27 @@ REWARD_CONFIGS = {
             ]
         }
     },
+    # 北京2025年6月活动配置
+    "BJ-2025-06": {
+        "lucky_number": "8",
+        "lucky_rewards": {
+            "base": {"name": "接好运", "threshold": 0},
+            "high": {"name": "接好运万元以上", "threshold": 10000}
+        },
+        "performance_limits": {
+            "single_project_limit": 500000,
+            "enable_cap": True,
+            "single_contract_cap": 500000
+        },
+        "tiered_rewards": {
+            "min_contracts": 6,
+            "tiers": [
+                {"name": "达标奖", "threshold": 80000},
+                {"name": "优秀奖", "threshold": 120000},
+                {"name": "精英奖", "threshold": 180000}
+            ]
+        }
+    },
     # 上海2025年4月活动配置
     "SH-2025-04": {
         "lucky_number": "6",
@@ -115,6 +136,28 @@ REWARD_CONFIGS = {
     },
     # 上海2025年5月活动配置
     "SH-2025-05": {
+        "lucky_number": "6",
+        "lucky_rewards": {
+            "base": {"name": "接好运", "threshold": 0},
+            "high": {"name": "接好运万元以上", "threshold": 10000}
+        },
+        "performance_limits": {
+            "single_project_limit": None,  # 上海没有工单金额上限
+            "enable_cap": ENABLE_PERFORMANCE_AMOUNT_CAP,
+            "single_contract_cap": PERFORMANCE_AMOUNT_CAP
+        },
+        "tiered_rewards": {
+            "min_contracts": 5,  # 上海需要5个合同
+            "tiers": [
+                {"name": "基础奖", "threshold": 40000},
+                {"name": "达标奖", "threshold": 60000},
+                {"name": "优秀奖", "threshold": 80000},
+                {"name": "精英奖", "threshold": 120000}
+            ]
+        }
+    },
+    # 上海2025年6月活动配置
+    "SH-2025-06": {
         "lucky_number": "6",
         "lucky_rewards": {
             "base": {"name": "接好运", "threshold": 0},
@@ -192,6 +235,18 @@ STATUS_FILENAME_SH_MAY = 'state/send_status_sh_may.json'
 WECOM_GROUP_NAME_SH_MAY = '（上海）运营群'
 CAMPAIGN_CONTACT_SH_MAY = '满浩浩'
 
+## 上海地区，2025年6月活动
+API_URL_SH_JUN = METABASE_URL + "/api/card/1694/query"
+
+# 销售激励活动 JOB signing_and_sales_incentive_jun_shanghai
+TEMP_CONTRACT_DATA_FILE_SH_JUN = 'state/ContractData-SH-Jun.csv'
+PERFORMANCE_DATA_FILENAME_SH_JUN = 'state/PerformanceData-SH-Jun.csv'
+STATUS_FILENAME_SH_JUN = 'state/send_status_sh_jun.json'
+
+# Pro
+WECOM_GROUP_NAME_SH_JUN = '（上海）运营群'
+CAMPAIGN_CONTACT_SH_JUN = '满浩浩'
+
 ## 上海的特殊配置选项
 # 销售激励活动 奖金池计算比例
 BONUS_POOL_RATIO = 0.002  # 默认为0.2%,可根据需要调整
@@ -222,14 +277,26 @@ STATUS_FILENAME_BJ_MAY = 'state/send_status_bj_may.json'
 WECOM_GROUP_NAME_BJ_MAY = '（北京）修链服务运营'
 CAMPAIGN_CONTACT_BJ_MAY = '王爽'
 
+## 北京地区，2025年6月活动
+API_URL_BJ_JUN = METABASE_URL + "/api/card/1693/query"
+
+# 北京销售激励活动 JOB signing_and_sales_incentive_jun_beijing
+TEMP_CONTRACT_DATA_FILE_BJ_JUN = 'state/ContractData-BJ-Jun.csv'
+PERFORMANCE_DATA_FILENAME_BJ_JUN = 'state/PerformanceData-BJ-Jun.csv'
+STATUS_FILENAME_BJ_JUN = 'state/send_status_bj_jun.json'
+
+# Pro
+WECOM_GROUP_NAME_BJ_JUN = '（北京）修链服务运营'
+CAMPAIGN_CONTACT_BJ_JUN = '王爽'
+
 ## 北京的特殊配置选项
 # 销售激励活动 奖金池计算比例
 BONUS_POOL_RATIO_BJ_FEB = 0.002  # 默认为0.2%,可根据需要调整
 
 # 单个项目合同金额上限
-SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_FEB = 1000000  # 单个项目合同金额上限
+SINGLE_PROJECT_CONTRACT_AMOUNT_LIMIT_BJ_FEB = 500000  # 单个项目合同金额上限
 # 业绩金额上限配置
-PERFORMANCE_AMOUNT_CAP_BJ_FEB = 100000  # 单个合同计入业绩金额上限
+PERFORMANCE_AMOUNT_CAP_BJ_FEB = 500000  # 单个合同计入业绩金额上限
 # 是否启用业绩金额上限
 ENABLE_PERFORMANCE_AMOUNT_CAP_BJ_FEB = True
 
@@ -277,8 +344,24 @@ SERVICE_PROVIDER_MAPPING = {
 ##------ 徽章功能 ------##
 # 是否启用徽章，2025年4月新增
 ENABLE_BADGE_MANAGEMENT = True
-BADGE_EMOJI = "\U0001F396"  # 奖章
-BADGE_NAME = f"【{BADGE_EMOJI}精英管家】"
 
+# 精英管家徽章配置
+ELITE_BADGE_EMOJI = "\U0001F396"  # 奖章
+ELITE_BADGE_NAME = f"【{ELITE_BADGE_EMOJI}精英管家】"
 # 精英管家列表，2025年4月份增加的逻辑，精英管家是技术工程师的一个头衔
 ELITE_HOUSEKEEPER = ["胡林波", "余金凤", "文刘飞", "李卓", "吕世军"]  # 可以根据需要添加更多管家
+
+# 新锐管家徽章配置，2025年5月新增
+RISING_STAR_BADGE_EMOJI = "\U0001F195"  # 新
+RISING_STAR_BADGE_NAME = f"【{RISING_STAR_BADGE_EMOJI}新锐管家】"
+RISING_STAR_HOUSEKEEPER = [
+    "陈信丞", "姜东博", "蒋永辉", "张立明", "赵禾泽", "马俊杰", "孔凡沛", "梁庆龙", 
+    "夏朋飞", "张争光", "吴光辉", "李震", "于邦亮", "乔文祥", "李英杰", "郑鑫", 
+    "李忠", "余豪帅", "李国旗", "张朋坡", "林旭东", "谷京虎", "熊华祥", "李洁", 
+    "刘国顺", "贺亮", "王帅", "李炜坤", "芦鹏飞", "王昊宇", "王勇", "李淑燕", 
+    "张凯旋", "石迎丰", "苏彦奇", "蔡宏程", "余丽红", "孙坤展", "崔梦岩", "高芊", 
+    "时森林", "赵芳德", "王菲", "龚晨凯", "王朝辉", "张广辉", "张立", "吴文全", 
+    "黄佳鑫", "秦博文", "翁庭峰", "刘文强", "平树伟", "王巍", "户郭红", "刘铭", 
+    "曹铁伟", "曹洪伟", "李高伟", "姜东升", "韩军华", "马保歌", "曹振锋", "李会强", 
+    "黄永辉", "薛敏娃"
+]

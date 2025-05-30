@@ -25,7 +25,7 @@ def generate_award_message(record, awards_mapping, city="BJ"):
     # 只有北京的精英管家才能获得奖励翻倍和显示徽章，上海的管家不参与奖励翻倍也不显示徽章
     if ENABLE_BADGE_MANAGEMENT and (service_housekeeper in ELITE_HOUSEKEEPER) and city == "BJ":
         # 如果是北京的精英管家，添加徽章
-        service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
+        service_housekeeper = f'{ELITE_BADGE_NAME}{service_housekeeper}'
 
         # 获取奖励类型和名称列表
         reward_types = record["奖励类型"].split(', ') if record["奖励类型"] else []
@@ -88,16 +88,16 @@ def preprocess_amount(amount):
         # 处理无效或空数据（例如，返回0或其他占位符）
         return "0"
 
-# 2025年5月，北京. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额10万封顶
-def notify_awards_may_beijing(performance_data_filename, status_filename):
+# 2025年6月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额5万封顶
+def notify_awards_jun_beijing(performance_data_filename, status_filename):
     """通知奖励并更新性能数据文件，同时跟踪发送状态"""
     records = get_all_records_from_csv(performance_data_filename)
     send_status = load_send_status(status_filename)
     updated = False
 
     awards_mapping = {
-        '接好运': '28',
-        '接好运万元以上': '58',
+        '接好运': '36',
+        '接好运万元以上': '66',
         '达标奖': '200',
         '优秀奖': '400',
         '精英奖': '600'
@@ -110,9 +110,12 @@ def notify_awards_may_beijing(performance_data_filename, status_filename):
         processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
         service_housekeeper = record["管家(serviceHousekeeper)"]
 
-        # 添加是否启用徽章管理的判断，如果启用则在北京的精英管家名称前添加徽章名称
-        if ENABLE_BADGE_MANAGEMENT and service_housekeeper in ELITE_HOUSEKEEPER:
-            service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
+        # 添加是否启用徽章管理的判断，如果启用则在管家名称前添加对应的徽章
+        if ENABLE_BADGE_MANAGEMENT:
+            if service_housekeeper in ELITE_HOUSEKEEPER:
+                service_housekeeper = f'{ELITE_BADGE_NAME}{service_housekeeper}'
+            elif service_housekeeper in RISING_STAR_HOUSEKEEPER:
+                service_housekeeper = f'{RISING_STAR_BADGE_NAME}{service_housekeeper}'
 
         if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
             next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
@@ -142,16 +145,16 @@ def notify_awards_may_beijing(performance_data_filename, status_filename):
         write_performance_data_to_csv(performance_data_filename, records, list(records[0].keys()))
         logging.info("PerformanceData.csv updated with notification status.")
 
-# 2025年4月，北京. 幸运数字8，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额10万封顶
-def notify_awards_apr_beijing(performance_data_filename, status_filename):
+# 2025年5月，北京. 幸运数字6，单合同金额1万以上和以下幸运奖励不同；节节高三档；合同累计考虑工单合同金额10万封顶
+def notify_awards_may_beijing(performance_data_filename, status_filename):
     """通知奖励并更新性能数据文件，同时跟踪发送状态"""
     records = get_all_records_from_csv(performance_data_filename)
     send_status = load_send_status(status_filename)
     updated = False
 
     awards_mapping = {
-        '接好运': '36',
-        '接好运万元以上': '66',
+        '接好运': '28',
+        '接好运万元以上': '58',
         '达标奖': '200',
         '优秀奖': '400',
         '精英奖': '600'
@@ -164,9 +167,9 @@ def notify_awards_apr_beijing(performance_data_filename, status_filename):
         processed_enter_performance_amount = preprocess_amount(record["计入业绩金额"])
         service_housekeeper = record["管家(serviceHousekeeper)"]
 
-        # 添加徽章 - 只有北京的精英管家才显示徽章
+        # 添加是否启用徽章管理的判断，如果启用则在北京的精英管家名称前添加徽章名称
         if ENABLE_BADGE_MANAGEMENT and service_housekeeper in ELITE_HOUSEKEEPER:
-            service_housekeeper = f'{BADGE_NAME}{service_housekeeper}'
+            service_housekeeper = f'{ELITE_BADGE_NAME}{service_housekeeper}'
 
         if record['是否发送通知'] == 'N' and send_status.get(contract_id) != '发送成功':
             next_msg = '恭喜已经达成所有奖励，祝愿再接再厉，再创佳绩 \U0001F389\U0001F389\U0001F389' if '无' in record["备注"] else f'{record["备注"]}'
@@ -179,18 +182,14 @@ def notify_awards_apr_beijing(performance_data_filename, status_filename):
 
 \U0001F44A {next_msg}。
 '''
-            # logging.info(f"Constructed message: {msg}")
-
-            # send_wecom_message(WECOM_GROUP_NAME_BJ_NOV, msg)
-            create_task('send_wecom_message', WECOM_GROUP_NAME_BJ_APR, msg)
-            time.sleep(3)  # 添加3秒的延迟
+            create_task('send_wecom_message', WECOM_GROUP_NAME_BJ_MAY, msg)
+            time.sleep(3)
 
             if record['激活奖励状态'] == '1':
                 jiangli_msg = generate_award_message(record, awards_mapping, "BJ")
-                create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_APR, jiangli_msg)
+                create_task('send_wechat_message', CAMPAIGN_CONTACT_BJ_MAY, jiangli_msg)
 
             update_send_status(status_filename, contract_id, '发送成功')
-            # time.sleep(2)  # 添加3秒的延迟
 
             record['是否发送通知'] = 'Y'
             updated = True
